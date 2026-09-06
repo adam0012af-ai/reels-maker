@@ -32,16 +32,39 @@
     style.textContent = `
       @media (max-width: 900px) {
         .mobile-sheet {
-          max-height: 56dvh !important;
+          max-height: 42dvh !important;
           border-radius: 20px 20px 0 0 !important;
+          transition: transform .22s ease, max-height .2s ease !important;
         }
         .mobile-sheet .panel {
-          max-height: calc(56dvh - 18px) !important;
+          max-height: calc(42dvh - 18px) !important;
           padding: 10px 14px 16px !important;
           overscroll-behavior: contain;
           scrollbar-width: thin;
         }
-        .sheet-handle { margin: 9px auto 1px !important; }
+        .sheet-handle {
+          width: 56px !important;
+          height: 6px !important;
+          margin: 8px auto 2px !important;
+          touch-action: none;
+          cursor: grab;
+        }
+        #mobileSheetCloseBtn {
+          position: absolute;
+          top: 7px;
+          right: 12px;
+          z-index: 4;
+          width: 34px;
+          height: 34px;
+          border: 1px solid rgba(255,255,255,.1);
+          border-radius: 50%;
+          background: rgba(255,255,255,.06);
+          color: #d8dbea;
+          font-size: 15px;
+          line-height: 1;
+          display: grid;
+          place-items: center;
+        }
         .mobile-sheet .panel-title h2 { font-size: 15px !important; }
         .mobile-sheet .panel-title p {
           font-size: 9px !important;
@@ -49,56 +72,143 @@
           line-height: 1.55 !important;
         }
         #panel-audio .upload {
-          min-height: 64px !important;
-          padding: 8px 10px !important;
+          min-height: 58px !important;
+          padding: 7px 10px !important;
           gap: 2px !important;
         }
         #panel-audio .upload > span {
-          width: 32px !important;
-          height: 32px !important;
+          width: 30px !important;
+          height: 30px !important;
         }
         #panel-audio .tts-box,
         #panel-audio .sfx-box {
-          padding: 10px !important;
-          margin-bottom: 9px !important;
+          padding: 9px !important;
+          margin-bottom: 8px !important;
           border-radius: 12px !important;
         }
         #panel-audio .tts-box textarea {
-          min-height: 82px !important;
-          max-height: 118px !important;
+          min-height: 76px !important;
+          max-height: 105px !important;
           margin-bottom: 7px !important;
         }
-        #panel-audio .field { margin-bottom: 9px !important; }
+        #panel-audio .field { margin-bottom: 8px !important; }
         #panel-audio .field > span { margin-bottom: 4px !important; }
-        #panel-audio select { min-height: 44px; }
+        #panel-audio select { min-height: 42px; }
         #panel-audio .inline { align-items: stretch !important; }
         #panel-audio .inline .btn { flex: 1 1 0; white-space: normal; }
         #geminiPreviewPlayer {
           width: 100%;
-          height: 42px;
-          margin-top: 8px;
+          height: 40px;
+          margin-top: 7px;
           border-radius: 10px;
         }
         html.keyboard-editing .mobile-tabs { display: none !important; }
         html.keyboard-editing .mobile-sheet {
           bottom: 0 !important;
-          max-height: 72dvh !important;
+          max-height: 68dvh !important;
         }
         html.keyboard-editing .mobile-sheet .panel {
-          max-height: calc(72dvh - 18px) !important;
+          max-height: calc(68dvh - 18px) !important;
         }
       }
       @media (max-width: 520px) {
-        .mobile-sheet { max-height: 54dvh !important; }
-        .mobile-sheet .panel { max-height: calc(54dvh - 18px) !important; }
+        .mobile-sheet { max-height: 40dvh !important; }
+        .mobile-sheet .panel { max-height: calc(40dvh - 18px) !important; }
         #panel-audio .panel-title p { display: none; }
         #panel-audio .upload small { display: none; }
-        #panel-audio .upload { min-height: 58px !important; }
-        html.keyboard-editing .mobile-sheet { max-height: 74dvh !important; }
-        html.keyboard-editing .mobile-sheet .panel { max-height: calc(74dvh - 18px) !important; }
+        #panel-audio .upload { min-height: 54px !important; }
+        html.keyboard-editing .mobile-sheet { max-height: 70dvh !important; }
+        html.keyboard-editing .mobile-sheet .panel { max-height: calc(70dvh - 18px) !important; }
       }
     `;
     document.head.appendChild(style);
+  }
+
+  function installMobileSheetControls() {
+    const sheet = document.getElementById("mobileSheet");
+    const handle = sheet?.querySelector(".sheet-handle");
+    if (!sheet || !handle || sheet.dataset.dismissReady === "1") return;
+    sheet.dataset.dismissReady = "1";
+
+    const closeSheet = ({ blur = true } = {}) => {
+      if (blur && isEditable(document.activeElement)) {
+        try { document.activeElement.blur(); } catch {}
+      }
+      sheet.classList.remove("open");
+      sheet.style.transform = "";
+      sheet.style.transition = "";
+      document.documentElement.classList.remove("keyboard-editing");
+      editing = false;
+    };
+
+    const closeBtn = document.createElement("button");
+    closeBtn.id = "mobileSheetCloseBtn";
+    closeBtn.type = "button";
+    closeBtn.setAttribute("aria-label", "إغلاق لوحة الأدوات");
+    closeBtn.textContent = "×";
+    closeBtn.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeSheet();
+    });
+    sheet.appendChild(closeBtn);
+
+    // Tap the currently selected bottom tab again to collapse its panel.
+    document.addEventListener("click", event => {
+      if (window.innerWidth > 900) return;
+      const tab = event.target.closest?.(".mobile-tabs .tab");
+      if (!tab) return;
+      if (tab.classList.contains("active") && sheet.classList.contains("open")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        closeSheet();
+      }
+    }, true);
+
+    // Tap anywhere above/outside the drawer to hide it, like a native bottom sheet.
+    document.addEventListener("pointerdown", event => {
+      if (window.innerWidth > 900 || !sheet.classList.contains("open")) return;
+      if (sheet.contains(event.target) || event.target.closest?.(".mobile-tabs")) return;
+      closeSheet({ blur: false });
+    }, true);
+
+    let startY = 0;
+    let dragY = 0;
+    let dragging = false;
+
+    handle.addEventListener("pointerdown", event => {
+      if (window.innerWidth > 900) return;
+      dragging = true;
+      startY = event.clientY;
+      dragY = 0;
+      sheet.style.transition = "none";
+      try { handle.setPointerCapture(event.pointerId); } catch {}
+      event.preventDefault();
+    });
+
+    handle.addEventListener("pointermove", event => {
+      if (!dragging) return;
+      dragY = Math.max(0, event.clientY - startY);
+      sheet.style.transform = `translateY(${Math.min(dragY, 220)}px)`;
+      event.preventDefault();
+    });
+
+    const finishDrag = event => {
+      if (!dragging) return;
+      dragging = false;
+      try { handle.releasePointerCapture(event.pointerId); } catch {}
+      const tap = dragY < 8;
+      const shouldClose = dragY > 55 || tap;
+      sheet.style.transition = "";
+      if (shouldClose) {
+        closeSheet();
+      } else {
+        sheet.style.transform = "";
+      }
+    };
+
+    handle.addEventListener("pointerup", finishDrag);
+    handle.addEventListener("pointercancel", finishDrag);
   }
 
   function selectedGeminiVoice() {
@@ -260,6 +370,7 @@
 
   window.addEventListener("DOMContentLoaded", () => {
     installMobileUiOverrides();
+    installMobileSheetControls();
 
     if (typeof window.syncResponsivePanels === "function") {
       const originalSync = window.syncResponsivePanels;
