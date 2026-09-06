@@ -1,15 +1,29 @@
 "use strict";
 
 (() => {
-  if (window.__REELS_PLATFORM_V9__) return;
-  window.__REELS_PLATFORM_V9__ = true;
+  if (window.__REELS_PLATFORM_V10__) return;
+  window.__REELS_PLATFORM_V10__ = true;
+  window.__REELS_MODERN_SHELL__ = true;
+  document.documentElement.classList.add("modern-platform");
 
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const ROUTES = new Set(["dashboard", "quran", "video", "stickers", "text", "audio", "layers", "settings"]);
   const EDITOR_ROUTES = new Set(["video", "stickers", "text", "audio", "layers", "settings"]);
+  const LABELS = {
+    dashboard:["الرئيسية", "لوحة صناعة المحتوى"],
+    quran:["استوديو ريلز القرآن", "السورة • الآيات • القارئ • التصميم • التصدير"],
+    video:["الفيديو والخلفيات", "Pexels • Pixabay • رفع من الجهاز"],
+    stickers:["الملصقات و GIF", "GIPHY • رفع ملصقات • تحريك فوق الفيديو"],
+    text:["النصوص والذكاء الاصطناعي", "نصوص • خطوط • ألوان • Gemini"],
+    audio:["الصوت و Gemini", "تعليق صوتي • موسيقى • مؤثرات"],
+    layers:["إدارة الطبقات", "ترتيب • حجم • دوران • ظهور"],
+    settings:["الإعدادات والتصدير", "الجودة • FPS • الأداء • التصدير"]
+  };
+
   let currentRoute = "dashboard";
   let legacyObserver = null;
+  let resizeQueued = false;
 
   function normalize(value) {
     value = String(value || "").replace(/^#/, "").split("?")[0].trim().toLowerCase();
@@ -17,40 +31,57 @@
     return ROUTES.has(value) ? value : "dashboard";
   }
 
-  function installRuntimeCss() {
-    if ($("#platformV9RuntimeCss")) return;
-    const style = document.createElement("style");
-    style.id = "platformV9RuntimeCss";
-    style.textContent = `
-      /* The fixed sidebar is the only section navigation on desktop. */
-      .topbar-end.actions{display:none!important}
-      #quranStudioLaunch{display:none!important}
-      #homeShell,.home-shell,.home-preview,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop{display:none!important;pointer-events:none!important}
-      .panel{scroll-margin-top:86px}
-      @media (max-width:900px){
-        .editor-layout{display:flex!important;flex-direction:column!important}
-        .editor-layout .tool-column{order:-1!important;width:100%!important}
-        .editor-layout .preview-card{order:0!important;width:100%!important}
-        .panel{scroll-margin-top:72px!important}
-        .tool-column{scroll-margin-top:72px!important}
-        .quran-page{scroll-margin-top:64px!important}
-      }
-    `;
-    document.head.appendChild(style);
+  function ensureV10Css() {
+    if ($("#platformV10Css")) return;
+    const link = document.createElement("link");
+    link.id = "platformV10Css";
+    link.rel = "stylesheet";
+    link.href = "platform-v10.css?v=10";
+    document.head.appendChild(link);
+  }
+
+  function ensureBootCover() {
+    if ($("#modernBootCover")) return;
+    const cover = document.createElement("div");
+    cover.id = "modernBootCover";
+    cover.innerHTML = '<div class="boot-mark">R</div>';
+    document.body.prepend(cover);
   }
 
   function killLegacy() {
-    $$("#homeShell,.home-shell,.home-preview,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop").forEach(el => el.remove());
-    ["homeV1Styles", "homePremiumV2Styles", "businessRefreshV3Styles", "premiumLayoutStyles", "premiumPlusStyles"].forEach(id => document.getElementById(id)?.remove());
+    $$("#homeShell,.home-shell,.home-preview,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop,#mobileSheetBackdrop").forEach(el => el.remove());
+    ["homeV1Styles", "homePremiumV2Styles", "businessRefreshV3Styles", "premiumLayoutStyles", "premiumPlusStyles", "mobileUiV3Styles"].forEach(id => document.getElementById(id)?.remove());
     document.body.classList.remove("home-mode", "v4-ready");
-    document.documentElement.classList.remove("nav-open");
+    document.documentElement.classList.remove("nav-open", "keyboard-editing");
+    $("#mobileSheet")?.classList.remove("open", "expanded");
   }
 
-  function movePanelsBack() {
+  function restorePanels() {
     const panels = $(".panels");
     const mobileHost = $("#mobilePanelHost");
     if (panels && mobileHost) $$(".panel", mobileHost).forEach(panel => panels.appendChild(panel));
-    $("#mobileSheet")?.classList.remove("open", "expanded");
+    const mobileSheet = $("#mobileSheet");
+    if (mobileSheet) {
+      mobileSheet.classList.remove("open", "expanded");
+      mobileSheet.style.removeProperty("transform");
+    }
+  }
+
+  function ensureSidebarProjectActions() {
+    if ($("#sideProjectBlock")) return;
+    const controls = $("#controlsPanel");
+    const foot = $(".sidebar-foot", controls || document);
+    if (!controls) return;
+
+    const block = document.createElement("div");
+    block.id = "sideProjectBlock";
+    block.className = "side-project-block";
+    block.innerHTML = `
+      <div class="nav-caption"><i></i>إدارة المشروع</div>
+      <button class="side-project-action" data-project-action="reset" type="button"><span class="nav-icon">＋</span><span>مشروع جديد</span></button>
+      <button class="side-project-action primary" data-project-action="export" type="button"><span class="nav-icon">⬇</span><span>تصدير وتحميل الريل</span></button>
+    `;
+    controls.insertBefore(block, foot || null);
   }
 
   function showPage(id) {
@@ -62,29 +93,27 @@
       page.classList.toggle("active-page", active);
       page.hidden = !active;
       page.style.display = active ? "block" : "none";
+      page.setAttribute("aria-hidden", active ? "false" : "true");
     });
   }
 
   function activateEditor(name) {
-    movePanelsBack();
+    restorePanels();
     $$(".panel").forEach(panel => {
       const active = panel.id === `panel-${name}`;
       panel.classList.toggle("active", active);
       panel.style.display = active ? "block" : "none";
+      panel.hidden = !active;
     });
     $$(".tab[data-tab]").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === name));
 
-    const labels = {
-      video:["الفيديو والخلفيات", "ابحث في Pexels وPixabay أو ارفع فيديو من جهازك."],
-      stickers:["الملصقات و GIF", "أضف ملصقات وGIF وحركها فوق الفيديو."],
-      text:["النصوص والذكاء الاصطناعي", "اكتب أو ولّد النص ثم عدّل الخط والحجم والألوان."],
-      audio:["الصوت و Gemini", "التعليق الصوتي والموسيقى والمؤثرات في صفحة واحدة."],
-      layers:["إدارة الطبقات", "رتّب العناصر وتحكم في الحجم والدوران والظهور."],
-      settings:["الإعدادات والتصدير", "الجودة وFPS والأداء ثم تصدير الريل النهائي."]
-    };
-    const info = labels[name] || labels.video;
+    const info = LABELS[name] || LABELS.video;
     if ($("#editorTitle")) $("#editorTitle").textContent = info[0];
     if ($("#editorSubtitle")) $("#editorSubtitle").textContent = info[1];
+    const toolHead = $(".tool-card-head b");
+    const toolSub = $(".tool-card-head span");
+    if (toolHead) toolHead.textContent = info[0];
+    if (toolSub) toolSub.textContent = "كل الأدوات الخاصة بهذا القسم هنا";
   }
 
   function mountQuran() {
@@ -97,6 +126,7 @@
     studio.style.removeProperty("position");
     studio.style.removeProperty("inset");
     studio.style.removeProperty("height");
+    studio.style.removeProperty("max-height");
     document.body.style.overflow = "";
     return true;
   }
@@ -106,14 +136,16 @@
     let tries = 0;
     const timer = setInterval(() => {
       tries += 1;
-      if (mountQuran() || tries >= 60) clearInterval(timer);
-    }, 100);
+      if (mountQuran() || tries >= 80) clearInterval(timer);
+    }, 75);
   }
 
   function markNav(name) {
     $$(".nav-link").forEach(btn => {
       const target = normalize(btn.dataset.route || btn.dataset.tool || btn.dataset.tab);
       btn.classList.toggle("active", target === name);
+      if (target === name) btn.setAttribute("aria-current", "page");
+      else btn.removeAttribute("aria-current");
     });
   }
 
@@ -130,31 +162,35 @@
     document.documentElement.classList.add("nav-open");
   }
 
-  function scrollToRoute(name) {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (name === "dashboard") {
-          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-          return;
-        }
-        if (name === "quran") {
-          const quranPage = $("#quranPage");
-          if (quranPage) quranPage.scrollIntoView({ block: "start", behavior: "auto" });
-          return;
-        }
-        if (EDITOR_ROUTES.has(name)) {
-          const panel = $(`#panel-${name}`);
-          const toolColumn = $(".tool-column");
-          const editorPage = $("#editorPage");
-          const target = window.innerWidth <= 900 ? (panel || toolColumn || editorPage) : (editorPage || panel);
-          if (target) target.scrollIntoView({ block: "start", behavior: "auto" });
-        }
-      });
-    });
+  function updateRouteIdentity(name) {
+    const info = LABELS[name] || LABELS.dashboard;
+    const title = $(".project b");
+    const subtitle = $(".project span");
+    if (title) title.textContent = info[0];
+    if (subtitle) subtitle.textContent = info[1];
+    document.title = `${info[0]} — Reels Maker AI`;
+  }
+
+  function animatePage() {
+    const workspace = $(".workspace");
+    if (!workspace) return;
+    workspace.classList.remove("route-enter");
+    void workspace.offsetWidth;
+    workspace.classList.add("route-enter");
+    setTimeout(() => workspace.classList.remove("route-enter"), 280);
+  }
+
+  function scrollTopHard() {
+    try { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); }
+    catch { window.scrollTo(0, 0); }
+    const workspace = $(".workspace");
+    if (workspace && workspace.scrollTop) workspace.scrollTop = 0;
+    document.scrollingElement && (document.scrollingElement.scrollTop = 0);
   }
 
   function apply(raw, shouldScroll = true) {
     killLegacy();
+    restorePanels();
     const next = normalize(raw);
     currentRoute = next;
     document.body.dataset.route = next;
@@ -171,14 +207,16 @@
     }
 
     markNav(next);
-    if (shouldScroll) scrollToRoute(next);
+    updateRouteIdentity(next);
+    if (shouldScroll) scrollTopHard();
+    animatePage();
   }
 
   function go(raw, replace = false) {
     const next = normalize(raw);
     const hash = `#${next}`;
-    if (replace) history.replaceState(null, "", `${location.pathname}${location.search}${hash}`);
-    else if (location.hash !== hash) history.pushState(null, "", hash);
+    if (replace) history.replaceState({ route: next }, "", `${location.pathname}${location.search}${hash}`);
+    else if (location.hash !== hash) history.pushState({ route: next }, "", hash);
     apply(next, true);
   }
 
@@ -186,6 +224,19 @@
     if (!el) return null;
     if (el.matches("[data-open-quran]")) return "quran";
     return normalize(el.dataset.route || el.dataset.tool || el.dataset.page || el.dataset.tab);
+  }
+
+  function projectAction(action) {
+    if (action === "reset") {
+      const btn = $("#resetBtn");
+      if (btn) btn.click();
+      scrollTopHard();
+      return;
+    }
+    if (action === "export") {
+      const btn = $("#exportBtn");
+      if (btn) btn.click();
+    }
   }
 
   function handleNavigationEvent(event) {
@@ -207,6 +258,14 @@
       return;
     }
 
+    const action = target.closest("[data-project-action]");
+    if (action) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      projectAction(action.dataset.projectAction);
+      return;
+    }
+
     const nav = target.closest("[data-route],[data-tool],[data-open-quran],[data-page]");
     if (!nav) return;
     const next = routeFromElement(nav);
@@ -218,24 +277,21 @@
   }
 
   function bindNavigation() {
-    if (document.documentElement.dataset.p9Nav === "1") return;
-    document.documentElement.dataset.p9Nav = "1";
-
+    if (document.documentElement.dataset.p10Nav === "1") return;
+    document.documentElement.dataset.p10Nav = "1";
     document.addEventListener("click", handleNavigationEvent, true);
     window.addEventListener("hashchange", () => apply(location.hash, true));
     window.addEventListener("popstate", () => apply(location.hash, true));
     document.addEventListener("keydown", event => { if (event.key === "Escape") closeSidebar(); });
-
-    $$("[data-route],[data-tool],[data-open-quran],[data-page],#menuBtn").forEach(el => {
-      el.style.touchAction = "manipulation";
-      el.style.webkitTapHighlightColor = "transparent";
-    });
   }
 
   function bindSearch() {
     const input = $("#globalSearch");
-    if (!input || input.dataset.p9 === "1") return;
-    input.dataset.p9 = "1";
+    if (!input || input.dataset.p10 === "1") return;
+    input.dataset.p10 = "1";
+    input.addEventListener("focus", () => {
+      if (currentRoute !== "dashboard") go("dashboard");
+    });
     input.addEventListener("input", () => {
       const q = input.value.trim().toLowerCase();
       $$(".service-card,.quick-card,.activity-row").forEach(card => {
@@ -254,42 +310,81 @@
   function keepLegacyDead() {
     if (legacyObserver || !window.MutationObserver) return;
     legacyObserver = new MutationObserver(records => {
-      let found = false;
+      let foundLegacy = false;
       for (const record of records) {
         for (const node of record.addedNodes) {
           if (!(node instanceof Element)) continue;
-          if (node.matches?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop") || node.querySelector?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop")) {
-            found = true;
+          if (node.matches?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop,#mobileSheetBackdrop") || node.querySelector?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop,#mobileSheetBackdrop")) {
+            foundLegacy = true;
             break;
           }
         }
-        if (found) break;
+        if (foundLegacy) break;
       }
-      if (found) killLegacy();
+      if (foundLegacy) killLegacy();
+      restorePanels();
       if (currentRoute === "quran") mountQuran();
     });
     legacyObserver.observe(document.body, { childList: true, subtree: true });
   }
 
+  function keepResponsiveStable() {
+    window.addEventListener("resize", () => {
+      if (resizeQueued) return;
+      resizeQueued = true;
+      requestAnimationFrame(() => {
+        resizeQueued = false;
+        restorePanels();
+        if (currentRoute === "quran") mountQuran();
+      });
+    }, { passive: true });
+    window.addEventListener("orientationchange", () => setTimeout(() => {
+      restorePanels();
+      scrollTopHard();
+      if (currentRoute === "quran") mountQuran();
+    }, 180), { passive: true });
+  }
+
+  function finalizeReady() {
+    document.documentElement.classList.add("platform-ready");
+    setTimeout(() => $("#modernBootCover")?.remove(), 260);
+  }
+
   function init() {
-    installRuntimeCss();
+    ensureV10Css();
+    ensureBootCover();
     killLegacy();
-    movePanelsBack();
+    restorePanels();
+    ensureSidebarProjectActions();
     bindNavigation();
     bindSearch();
     setupGreeting();
     keepLegacyDead();
+    keepResponsiveStable();
 
     let initial = normalize(location.hash);
     if (!location.hash || location.hash === "#home") {
       initial = "dashboard";
-      history.replaceState(null, "", `${location.pathname}${location.search}#dashboard`);
+      history.replaceState({ route: initial }, "", `${location.pathname}${location.search}#dashboard`);
     }
     apply(initial, false);
+    finalizeReady();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
-  else init();
+  function afterLegacyInit() {
+    killLegacy();
+    restorePanels();
+    if (currentRoute === "quran") waitForQuran();
+    apply(currentRoute, false);
+    finalizeReady();
+  }
 
-  window.ReelsPlatform = { go, apply, openSidebar, closeSidebar };
+  /* Run immediately because the entire application markup is already above this script. */
+  ensureV10Css();
+  ensureBootCover();
+  init();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", afterLegacyInit, { once: true });
+  else setTimeout(afterLegacyInit, 0);
+
+  window.ReelsPlatform = { go, apply, openSidebar, closeSidebar, restorePanels };
 })();
