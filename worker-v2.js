@@ -84,11 +84,14 @@ async function withQuranRuntime(response) {
   if (!type.includes("text/html")) return response;
 
   let html = await response.text();
-  html = html.replace(/quran-reciter-picker\.js\?v=\d+/g, "quran-reciter-picker.js?v=3");
+  html = html.replace(/quran-reciter-picker\.js\?v=\d+/g, "quran-reciter-picker.js?v=4");
+  html = html.replace(/quran-runtime-v3\.js\?v=\d+/g, "quran-runtime-v3.js?v=4");
+  html = html.replace(/quran-publish-tools\.js\?v=\d+/g, "quran-publish-tools.js?v=1");
 
   const scripts = [];
-  if (!html.includes("quran-reciter-picker.js")) scripts.push('<script src="quran-reciter-picker.js?v=3"></script>');
-  if (!html.includes("quran-runtime-v3.js")) scripts.push('<script src="quran-runtime-v3.js?v=3"></script>');
+  if (!html.includes("quran-reciter-picker.js")) scripts.push('<script src="quran-reciter-picker.js?v=4"></script>');
+  if (!html.includes("quran-runtime-v3.js")) scripts.push('<script src="quran-runtime-v3.js?v=4"></script>');
+  if (!html.includes("quran-publish-tools.js")) scripts.push('<script src="quran-publish-tools.js?v=1"></script>');
   if (scripts.length) html = html.replace("</body>", `${scripts.join("")} </body>`);
 
   const headers = new Headers(response.headers);
