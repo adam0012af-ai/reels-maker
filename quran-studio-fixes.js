@@ -28,6 +28,15 @@
     status.className = `qr-status ${type}`;
   }
 
+  function loadReciterPicker() {
+    if (document.querySelector('script[data-quran-reciter-picker="1"]')) return;
+    const script = document.createElement("script");
+    script.src = "quran-reciter-picker.js?v=1";
+    script.async = true;
+    script.dataset.quranReciterPicker = "1";
+    document.head.appendChild(script);
+  }
+
   function waitForStudio() {
     const studio = qid("quranStudio");
     if (!studio) return setTimeout(waitForStudio, 120);
@@ -284,8 +293,8 @@
   }
 
   function install(studio) {
-    if (studio.dataset.integrationFixes === "2") return;
-    studio.dataset.integrationFixes = "2";
+    if (studio.dataset.integrationFixes === "3") return;
+    studio.dataset.integrationFixes = "3";
 
     document.querySelectorAll(".qr-bg").forEach(btn => btn.addEventListener("click", () => {
       applyDemoBackground(btn.dataset.bg);
@@ -312,6 +321,7 @@
     qid("qrOpenEditor")?.addEventListener("click", hideEmptyPreview);
     installExportScaleGuard();
     installReciterRecovery();
+    loadReciterPicker();
     applyDemoBackground(document.querySelector(".qr-bg.active")?.dataset.bg || "emerald");
   }
 
