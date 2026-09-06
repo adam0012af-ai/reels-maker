@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="description" content="Reels Studio - Create vertical reels and shorts directly in your browser." />
+  <meta name="theme-color" content="#090b10" />
+  <title>Reels Studio — Reels & Shorts Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Bebas+Neue&family=Cairo:wght@300;400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">R</div>
+      <div><h1>Reels Studio</h1><p>Reels & Shorts Maker</p></div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="media"><span>🎬</span>الفيديو</button>
+      <button class="tab-btn" data-tab="text"><span>✦</span>النصوص</button>
+      <button class="tab-btn" data-tab="audio"><span>♫</span>الصوت</button>
+      <button class="tab-btn" data-tab="settings"><span>⚙</span>الإعدادات</button>
+    </div>
+    <div class="sidebar-content">
+      <section class="panel active" id="mediaPanel">
+        <div class="panel-header"><h2>مكتبة الفيديو</h2><p>ابحث في Pexels عن فيديوهات رأسية.</p></div>
+        <div class="search-box">
+          <input id="pexelsSearchInput" type="text" placeholder="مثال: Cairo, nature, luxury..." autocomplete="off" />
+          <button id="pexelsSearchBtn" class="icon-button accent-button" title="بحث">🔍</button>
+        </div>
+        <div class="quick-search">
+          <button data-query="cinematic">Cinematic</button><button data-query="nature">Nature</button><button data-query="city">City</button><button data-query="luxury">Luxury</button><button data-query="travel">Travel</button><button data-query="food">Food</button>
+        </div>
+        <div class="divider"></div>
+        <label class="upload-card">
+          <input id="localVideoInput" type="file" accept="video/*" hidden />
+          <div class="upload-icon">⬆</div>
+          <div><strong>رفع فيديو من الجهاز</strong><small>MP4 / WebM / MOV حسب دعم المتصفح</small></div>
+        </label>
+        <div class="status-line" id="videoStatus">لم يتم اختيار فيديو بعد</div>
+        <div id="pexelsResults" class="video-results"></div>
+      </section>
+      <section class="panel" id="textPanel">
+        <div class="panel-header"><h2>طبقات النص</h2><p>أضف عدة نصوص واسحبها داخل شاشة المعاينة.</p></div>
+        <button id="addTextBtn" class="primary-btn full-width">+ إضافة نص جديد</button>
+        <div id="textLayersList" class="layers-list"></div>
+        <div id="textEditor" class="text-editor hidden">
+          <div class="divider"></div>
+          <label class="field"><span>النص</span><textarea id="textContent" rows="3" placeholder="اكتب النص هنا..."></textarea></label>
+          <label class="field"><span>نوع الخط</span><select id="fontFamily"><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Amiri">Amiri</option><option value="Montserrat">Montserrat</option><option value="Bebas Neue">Bebas Neue</option><option value="Arial">Arial</option></select></label>
+          <div class="field"><div class="field-row"><span>حجم الخط</span><strong id="fontSizeValue">64</strong></div><input id="fontSize" type="range" min="20" max="180" value="64" /></div>
+          <div class="two-column">
+            <label class="field"><span>لون النص</span><input id="textColor" type="color" value="#ffffff" /></label>
+            <label class="field"><span>الخلفية</span><input id="backgroundColor" type="color" value="#000000" /></label>
+          </div>
+          <div class="two-column">
+            <label class="field"><span>لون الظل</span><input id="shadowColor" type="color" value="#000000" /></label>
+            <div class="field"><div class="field-row"><span>قوة الظل</span><strong id="shadowBlurValue">8</strong></div><input id="shadowBlur" type="range" min="0" max="40" value="8" /></div>
+          </div>
+          <div class="field"><div class="field-row"><span>شفافية الخلفية</span><strong id="backgroundOpacityValue">35%</strong></div><input id="backgroundOpacity" type="range" min="0" max="100" value="35" /></div>
+          <label class="field"><span>المحاذاة</span><select id="textAlign"><option value="center">وسط</option><option value="right">يمين</option><option value="left">يسار</option></select></label>
+          <div class="two-column"><button id="duplicateTextBtn" class="secondary-btn">نسخ الطبقة</button><button id="deleteTextBtn" class="danger-btn">حذف الطبقة</button></div>
+        </div>
+      </section>
+      <section class="panel" id="audioPanel">
+        <div class="panel-header"><h2>الصوتيات</h2><p>ارفع ملف MP3 أو WAV لدمجه مع الفيديو.</p></div>
+        <label class="upload-card large-upload"><input id="audioInput" type="file" accept="audio/*" hidden /><div class="upload-icon">♫</div><div><strong>اختر ملف صوت</strong><small>MP3 / WAV / M4A / OGG</small></div></label>
+        <div id="audioInfo" class="audio-file-info hidden"><div><strong id="audioFileName">Audio</strong><span id="audioDuration">00:00</span></div><button id="removeAudioBtn" class="mini-danger">إزالة</button></div>
+        <div class="field"><div class="field-row"><span>مستوى الموسيقى</span><strong id="audioVolumeValue">80%</strong></div><input id="audioVolume" type="range" min="0" max="100" value="80" /></div>
+        <div class="field"><div class="field-row"><span>صوت الفيديو الأصلي</span><strong id="videoVolumeValue">100%</strong></div><input id="videoVolume" type="range" min="0" max="100" value="100" /></div>
+      </section>
+      <section class="panel" id="settingsPanel">
+        <div class="panel-header"><h2>إعدادات المشروع</h2><p>تحكم في جودة الفيديو وطريقة العرض.</p></div>
+        <label class="field"><span>جودة التصدير</span><select id="exportQuality"><option value="720">HD — 720 × 1280</option><option value="1080" selected>Full HD — 1080 × 1920</option></select></label>
+        <label class="field"><span>طريقة ملء الفيديو</span><select id="videoFit"><option value="cover" selected>Cover</option><option value="contain">Contain</option></select></label>
+        <label class="field"><span>FPS</span><select id="exportFps"><option value="24">24 FPS</option><option value="30" selected>30 FPS</option><option value="60">60 FPS</option></select></label>
+        <div class="info-box"><strong>Zero Backend</strong><p>تتم معالجة المشروع والفيديو والصوت محليًا داخل جهازك دون رفع ملفاتك إلى سيرفر خاص بالتطبيق.</p></div>
+      </section>
+    </div>
+  </aside>
+  <main class="workspace">
+    <header class="topbar">
+      <div class="project-title"><span class="status-dot"></span><div><strong>Untitled Reel</strong><small>9:16 Vertical Project</small></div></div>
+      <div class="topbar-actions"><button id="resetBtn" class="ghost-btn">مشروع جديد</button><button id="exportBtn" class="export-btn"><span>⬇</span>Export Reel</button></div>
+    </header>
+    <section class="preview-section">
+      <div class="preview-area">
+        <div id="canvasStage" class="canvas-stage">
+          <canvas id="reelCanvas" width="1080" height="1920"></canvas>
+          <div id="emptyState" class="canvas-empty-state"><div class="empty-icon">▶</div><h3>ابدأ باختيار فيديو</h3><p>ابحث عبر Pexels أو ارفع فيديو من جهازك</p></div>
+        </div>
+      </div>
+      <div class="playback-panel"><button id="playPauseBtn" class="play-button">▶</button><span id="currentTime">00:00</span><input id="timeline" class="timeline" type="range" min="0" max="1000" value="0" /><span id="durationTime">00:00</span><button id="muteBtn" class="round-btn" title="Mute">🔊</button></div>
+    </section>
+  </main>
+</div>
+<div id="exportModal" class="modal hidden"><div class="modal-card"><div class="render-spinner"></div><h2>جاري تصدير الفيديو</h2><p>تتم المعالجة بالكامل داخل المتصفح.</p><div class="progress-track"><div id="exportProgress" class="progress-bar"></div></div><strong id="exportProgressText">0%</strong><button id="cancelExportBtn" class="danger-btn full-width">إلغاء التصدير</button></div></div>
+<div id="toastContainer" class="toast-container"></div>
+<video id="sourceVideo" crossorigin="anonymous" playsinline preload="metadata"></video>
+<audio id="sourceAudio" crossorigin="anonymous" preload="metadata"></audio>
+<script src="script.js"></script>
+</body>
+</html>
