@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080a0f">
-  <meta name="description" content="Reels Maker - محرر ريلز وشورتس يعمل داخل المتصفح بدون سيرفر خلفي.">
+  <meta name="description" content="Reels Maker - محرر ريلز وشورتس يعمل داخل المتصفح مع بحث Pexels آمن عبر Cloudflare.">
   <title>Reels Maker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,6 @@
     <div class="panels">
       <section class="panel active" id="panel-video">
         <div class="panel-title"><h2>الفيديو</h2><p>ابحث في Pexels أو ارفع فيديو من جهازك.</p></div>
-        <label class="field"><span>Pexels API Key</span><div class="inline"><input id="pexelsKey" type="password" placeholder="ألصق مفتاح Pexels هنا"><button id="saveKeyBtn" class="btn small">حفظ</button></div><small>يُحفظ محليًا في هذا المتصفح فقط.</small></label>
         <div class="inline search-row"><input id="pexelsSearch" type="search" placeholder="مثال: Cairo, travel, nature"><button id="searchBtn" class="btn primary">بحث</button></div>
         <div class="chips"><button data-q="cinematic">Cinematic</button><button data-q="city">City</button><button data-q="travel">Travel</button><button data-q="nature">Nature</button><button data-q="food">Food</button></div>
         <label class="upload"><input id="videoUpload" type="file" accept="video/*" hidden><span>⬆</span><b>رفع فيديو</b><small>MP4 / WebM / MOV حسب دعم المتصفح</small></label>
@@ -64,7 +63,7 @@
         <label class="field"><span>جودة التصدير</span><select id="quality"><option value="720">720 × 1280</option><option value="1080" selected>1080 × 1920</option></select></label>
         <label class="field"><span>FPS</span><select id="fps"><option value="24">24 FPS</option><option value="30" selected>30 FPS</option><option value="60">60 FPS</option></select></label>
         <label class="field"><span>ملء الفيديو</span><select id="fit"><option value="cover" selected>Cover</option><option value="contain">Contain</option></select></label>
-        <div class="notice"><b>Zero Backend</b><p>الفيديو والصوت ومعالجة التصدير تتم محليًا داخل جهازك.</p></div>
+        <div class="notice"><b>Cloudflare + Local Processing</b><p>بحث Pexels يمر عبر Cloudflare لحماية المفتاح، بينما الفيديو والصوت والتصدير تتم محليًا داخل جهازك.</p></div>
       </section>
     </div>
   </aside>
