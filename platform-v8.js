@@ -1,21 +1,43 @@
 "use strict";
 
 (() => {
-  if (window.__REELS_PLATFORM_V8__) return;
-  window.__REELS_PLATFORM_V8__ = true;
+  if (window.__REELS_PLATFORM_V9__) return;
+  window.__REELS_PLATFORM_V9__ = true;
 
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const ROUTES = new Set(["dashboard", "quran", "video", "stickers", "text", "audio", "layers", "settings"]);
-  const EDITOR = new Set(["video", "stickers", "text", "audio", "layers", "settings"]);
-  let route = "dashboard";
+  const EDITOR_ROUTES = new Set(["video", "stickers", "text", "audio", "layers", "settings"]);
+  let currentRoute = "dashboard";
   let legacyObserver = null;
 
-  const normalize = value => {
+  function normalize(value) {
     value = String(value || "").replace(/^#/, "").split("?")[0].trim().toLowerCase();
     if (!value || value === "home") return "dashboard";
     return ROUTES.has(value) ? value : "dashboard";
-  };
+  }
+
+  function installRuntimeCss() {
+    if ($("#platformV9RuntimeCss")) return;
+    const style = document.createElement("style");
+    style.id = "platformV9RuntimeCss";
+    style.textContent = `
+      /* The fixed sidebar is the only section navigation on desktop. */
+      .topbar-end.actions{display:none!important}
+      #quranStudioLaunch{display:none!important}
+      #homeShell,.home-shell,.home-preview,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop{display:none!important;pointer-events:none!important}
+      .panel{scroll-margin-top:86px}
+      @media (max-width:900px){
+        .editor-layout{display:flex!important;flex-direction:column!important}
+        .editor-layout .tool-column{order:-1!important;width:100%!important}
+        .editor-layout .preview-card{order:0!important;width:100%!important}
+        .panel{scroll-margin-top:72px!important}
+        .tool-column{scroll-margin-top:72px!important}
+        .quran-page{scroll-margin-top:64px!important}
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   function killLegacy() {
     $$("#homeShell,.home-shell,.home-preview,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop").forEach(el => el.remove());
@@ -35,20 +57,20 @@
     ["dashboardPage", "editorPage", "quranPage"].forEach(pageId => {
       const page = document.getElementById(pageId);
       if (!page) return;
-      const on = pageId === id;
-      page.classList.toggle("hidden", !on);
-      page.classList.toggle("active-page", on);
-      page.hidden = !on;
-      page.style.display = on ? "block" : "none";
+      const active = pageId === id;
+      page.classList.toggle("hidden", !active);
+      page.classList.toggle("active-page", active);
+      page.hidden = !active;
+      page.style.display = active ? "block" : "none";
     });
   }
 
   function activateEditor(name) {
     movePanelsBack();
     $$(".panel").forEach(panel => {
-      const on = panel.id === `panel-${name}`;
-      panel.classList.toggle("active", on);
-      panel.style.display = on ? "block" : "none";
+      const active = panel.id === `panel-${name}`;
+      panel.classList.toggle("active", active);
+      panel.style.display = active ? "block" : "none";
     });
     $$(".tab[data-tab]").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === name));
 
@@ -83,7 +105,7 @@
     if (mountQuran()) return;
     let tries = 0;
     const timer = setInterval(() => {
-      tries++;
+      tries += 1;
       if (mountQuran() || tries >= 60) clearInterval(timer);
     }, 100);
   }
@@ -108,23 +130,48 @@
     document.documentElement.classList.add("nav-open");
   }
 
-  function apply(raw) {
+  function scrollToRoute(name) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (name === "dashboard") {
+          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+          return;
+        }
+        if (name === "quran") {
+          const quranPage = $("#quranPage");
+          if (quranPage) quranPage.scrollIntoView({ block: "start", behavior: "auto" });
+          return;
+        }
+        if (EDITOR_ROUTES.has(name)) {
+          const panel = $(`#panel-${name}`);
+          const toolColumn = $(".tool-column");
+          const editorPage = $("#editorPage");
+          const target = window.innerWidth <= 900 ? (panel || toolColumn || editorPage) : (editorPage || panel);
+          if (target) target.scrollIntoView({ block: "start", behavior: "auto" });
+        }
+      });
+    });
+  }
+
+  function apply(raw, shouldScroll = true) {
     killLegacy();
-    route = normalize(raw);
-    document.body.dataset.route = route;
+    const next = normalize(raw);
+    currentRoute = next;
+    document.body.dataset.route = next;
     closeSidebar();
 
-    if (route === "dashboard") showPage("dashboardPage");
-    else if (route === "quran") {
+    if (next === "dashboard") {
+      showPage("dashboardPage");
+    } else if (next === "quran") {
       showPage("quranPage");
       waitForQuran();
     } else {
       showPage("editorPage");
-      activateEditor(route);
+      activateEditor(next);
     }
 
-    markNav(route);
-    try { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); } catch { window.scrollTo(0, 0); }
+    markNav(next);
+    if (shouldScroll) scrollToRoute(next);
   }
 
   function go(raw, replace = false) {
@@ -132,53 +179,63 @@
     const hash = `#${next}`;
     if (replace) history.replaceState(null, "", `${location.pathname}${location.search}${hash}`);
     else if (location.hash !== hash) history.pushState(null, "", hash);
-    apply(next);
+    apply(next, true);
   }
 
-  function targetRoute(el) {
+  function routeFromElement(el) {
     if (!el) return null;
     if (el.matches("[data-open-quran]")) return "quran";
     return normalize(el.dataset.route || el.dataset.tool || el.dataset.page || el.dataset.tab);
   }
 
-  function bindNavigation() {
-    if (document.documentElement.dataset.p8Nav === "1") return;
-    document.documentElement.dataset.p8Nav = "1";
+  function handleNavigationEvent(event) {
+    const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    if (!target) return;
 
-    document.addEventListener("click", event => {
-      const menu = event.target.closest?.("#menuBtn");
-      if (menu) {
-        event.preventDefault();
-        event.stopPropagation();
-        openSidebar();
-        return;
-      }
-
-      if (event.target.closest?.("#sidebarClose,#sidebarBackdrop")) {
-        event.preventDefault();
-        event.stopPropagation();
-        closeSidebar();
-        return;
-      }
-
-      const nav = event.target.closest?.("[data-route],[data-tool],[data-open-quran],[data-page]");
-      if (!nav) return;
-      const next = targetRoute(nav);
-      if (!next) return;
+    const menu = target.closest("#menuBtn");
+    if (menu) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      go(next);
-    }, true);
+      openSidebar();
+      return;
+    }
 
-    window.addEventListener("hashchange", () => apply(location.hash));
-    window.addEventListener("popstate", () => apply(location.hash));
+    if (target.closest("#sidebarClose,#sidebarBackdrop")) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeSidebar();
+      return;
+    }
+
+    const nav = target.closest("[data-route],[data-tool],[data-open-quran],[data-page]");
+    if (!nav) return;
+    const next = routeFromElement(nav);
+    if (!next) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    go(next);
+  }
+
+  function bindNavigation() {
+    if (document.documentElement.dataset.p9Nav === "1") return;
+    document.documentElement.dataset.p9Nav = "1";
+
+    document.addEventListener("click", handleNavigationEvent, true);
+    window.addEventListener("hashchange", () => apply(location.hash, true));
+    window.addEventListener("popstate", () => apply(location.hash, true));
     document.addEventListener("keydown", event => { if (event.key === "Escape") closeSidebar(); });
+
+    $$("[data-route],[data-tool],[data-open-quran],[data-page],#menuBtn").forEach(el => {
+      el.style.touchAction = "manipulation";
+      el.style.webkitTapHighlightColor = "transparent";
+    });
   }
 
   function bindSearch() {
     const input = $("#globalSearch");
-    if (!input || input.dataset.p8 === "1") return;
-    input.dataset.p8 = "1";
+    if (!input || input.dataset.p9 === "1") return;
+    input.dataset.p9 = "1";
     input.addEventListener("input", () => {
       const q = input.value.trim().toLowerCase();
       $$(".service-card,.quick-card,.activity-row").forEach(card => {
@@ -209,12 +266,13 @@
         if (found) break;
       }
       if (found) killLegacy();
-      if (route === "quran") mountQuran();
+      if (currentRoute === "quran") mountQuran();
     });
     legacyObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   function init() {
+    installRuntimeCss();
     killLegacy();
     movePanelsBack();
     bindNavigation();
@@ -227,7 +285,7 @@
       initial = "dashboard";
       history.replaceState(null, "", `${location.pathname}${location.search}#dashboard`);
     }
-    apply(initial);
+    apply(initial, false);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
