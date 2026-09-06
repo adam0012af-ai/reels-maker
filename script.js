@@ -1,7 +1,7 @@
 "use strict";
 
 const $ = id => document.getElementById(id);
-const PEXELS_ENDPOINT = "https://api.pexels.com/videos/search";
+const PEXELS_ENDPOINT = "/api/pexels";
 const canvas = $("canvas"), ctx = canvas.getContext("2d", {alpha:false});
 const stage = $("stage"), sourceVideo = $("sourceVideo"), sourceAudio = $("sourceAudio");
 const desktopPanels = document.querySelector(".panels"), mobileSheet = $("mobileSheet"), mobileHost = $("mobilePanelHost");
@@ -15,7 +15,7 @@ const state = {
 };
 
 const controls = {
-  pexelsKey:$("pexelsKey"), saveKeyBtn:$("saveKeyBtn"), pexelsSearch:$("pexelsSearch"), searchBtn:$("searchBtn"), results:$("results"), videoUpload:$("videoUpload"), videoStatus:$("videoStatus"),
+  pexelsSearch:$("pexelsSearch"), searchBtn:$("searchBtn"), results:$("results"), videoUpload:$("videoUpload"), videoStatus:$("videoStatus"),
   newText:$("newText"), addTextBtn:$("addTextBtn"), layers:$("layers"), textEditor:$("textEditor"), textContent:$("textContent"), fontFamily:$("fontFamily"), fontSize:$("fontSize"), fontSizeOut:$("fontSizeOut"), textColor:$("textColor"), bgColor:$("bgColor"), shadowColor:$("shadowColor"), bgOpacity:$("bgOpacity"), bgOpacityOut:$("bgOpacityOut"), shadowBlur:$("shadowBlur"), shadowBlurOut:$("shadowBlurOut"), duplicateTextBtn:$("duplicateTextBtn"), deleteTextBtn:$("deleteTextBtn"),
   audioUpload:$("audioUpload"), audioCard:$("audioCard"), audioName:$("audioName"), audioDuration:$("audioDuration"), removeAudioBtn:$("removeAudioBtn"), musicVolume:$("musicVolume"), musicVolumeOut:$("musicVolumeOut"), videoVolume:$("videoVolume"), videoVolumeOut:$("videoVolumeOut"),
   quality:$("quality"), fps:$("fps"), fit:$("fit"), playBtn:$("playBtn"), timeline:$("timeline"), currentTime:$("currentTime"), duration:$("duration"), muteBtn:$("muteBtn"), resetBtn:$("resetBtn"), exportBtn:$("exportBtn"), emptyState:$("emptyState"), exportModal:$("exportModal"), progressBar:$("progressBar"), progressText:$("progressText"), cancelExportBtn:$("cancelExportBtn"), toasts:$("toasts")
@@ -23,7 +23,6 @@ const controls = {
 
 window.addEventListener("DOMContentLoaded", init);
 function init(){
-  controls.pexelsKey.value = localStorage.getItem("reelsMakerPexelsKey") || "";
   bindTabs(); bindVideo(); bindText(); bindAudio(); bindTransport(); bindExport(); bindStage();
   window.addEventListener("resize", syncResponsivePanels);
   syncResponsivePanels(); requestAnimationFrame(renderLoop);
@@ -48,26 +47,20 @@ function syncResponsivePanels(){
 }
 
 function bindVideo(){
-  controls.saveKeyBtn.addEventListener("click",()=>{
-    const key=controls.pexelsKey.value.trim();
-    if(!key){localStorage.removeItem("reelsMakerPexelsKey");return toast("تم حذف مفتاح Pexels.");}
-    localStorage.setItem("reelsMakerPexelsKey",key); toast("تم حفظ مفتاح Pexels على هذا الجهاز.","ok");
-  });
   controls.searchBtn.addEventListener("click",()=>searchPexels(controls.pexelsSearch.value.trim()));
   controls.pexelsSearch.addEventListener("keydown",e=>{if(e.key==="Enter")searchPexels(controls.pexelsSearch.value.trim())});
   document.querySelectorAll(".chips button").forEach(b=>b.addEventListener("click",()=>{controls.pexelsSearch.value=b.dataset.q;searchPexels(b.dataset.q)}));
   controls.videoUpload.addEventListener("change",()=>{const file=controls.videoUpload.files?.[0];if(!file)return;if(!file.type.startsWith("video/"))return toast("اختر ملف فيديو صالحًا.","error");loadVideoBlob(file,file.name)});
 }
 async function searchPexels(query){
-  const key=controls.pexelsKey.value.trim()||localStorage.getItem("reelsMakerPexelsKey")||"";
   if(!query)return toast("اكتب كلمة للبحث أولاً.","error");
-  if(!key)return toast("أدخل مفتاح Pexels API ثم اضغط حفظ.","error");
   controls.results.innerHTML='<div class="results-msg">جاري البحث...</div>';
   try{
-    const url=`${PEXELS_ENDPOINT}?query=${encodeURIComponent(query)}&orientation=portrait&size=medium&per_page=18`;
-    const r=await fetch(url,{headers:{Authorization:key}}); if(!r.ok)throw new Error(`Pexels ${r.status}`);
-    const data=await r.json(); showResults(data.videos||[]);
-  }catch(err){console.error(err);controls.results.innerHTML='<div class="results-msg">تعذر تحميل النتائج. تحقق من المفتاح والاتصال.</div>';toast("فشل الاتصال بـ Pexels.","error")}
+    const url=`${PEXELS_ENDPOINT}?query=${encodeURIComponent(query)}&per_page=18`;
+    const r=await fetch(url); const data=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(data.error||`Pexels ${r.status}`);
+    showResults(data.videos||[]);
+  }catch(err){console.error(err);controls.results.innerHTML='<div class="results-msg">تعذر تحميل النتائج حاليًا.</div>';toast("تعذر الاتصال بـ Pexels. حاول مرة أخرى.","error")}
 }
 function showResults(videos){
   controls.results.innerHTML="";
