@@ -3,75 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f5f7fb">
-  <meta name="description" content="Reels Maker AI Studio - محرر ريلز احترافي مع استوديو القرآن، Gemini، فيديو، نصوص، ملصقات وصوت وتصدير حتى 4K.">
+  <meta name="theme-color" content="#f6f7fb">
+  <meta name="description" content="Reels Maker AI Studio - منصة منظمة لصناعة ريلز القرآن والفيديو والصوت والنصوص والملصقات والتصدير.">
   <title>Reels Maker AI Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Bebas+Neue&family=Cairo:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
-  <link rel="stylesheet" href="quran-studio.css?v=4">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Bebas+Neue&family=Cairo:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="quran-studio.css?v=6">
 </head>
-<body data-page="dashboard">
+<body data-route="dashboard">
 <div class="app">
   <aside class="controls" id="controlsPanel">
     <div class="brand">
       <div class="logo">R</div>
-      <div class="brand-copy"><b>Reels Maker AI</b><span>Premium Creator Studio</span></div>
-      <span class="badge">V4</span>
+      <div class="brand-copy"><b>Reels Maker AI</b><span>Creator Workspace</span></div>
+      <span class="badge">PRO</span>
       <button id="sidebarClose" class="sidebar-close" type="button" aria-label="إغلاق القائمة">×</button>
     </div>
-    <div class="nav-block" data-tone="blue"><div class="nav-caption"><i></i>الرئيسية</div><button class="nav-link active" data-page="dashboard" type="button"><span class="nav-icon">⌂</span><span>لوحة التحكم</span></button></div>
-    <div class="nav-block" data-tone="green"><div class="nav-caption"><i></i>صناعة القرآن</div><button class="nav-link" data-open-quran type="button"><span class="nav-icon">☪</span><span>استوديو ريلز القرآن</span></button></div>
-    <div class="nav-block" data-tone="pink"><div class="nav-caption"><i></i>صناعة المحتوى</div><button class="nav-link tab" data-tab="video" type="button"><span class="nav-icon">🎬</span><span>الفيديو والخلفيات</span></button><button class="nav-link tab" data-tab="text" type="button"><span class="nav-icon">T</span><span>النصوص و AI</span></button><button class="nav-link tab" data-tab="audio" type="button"><span class="nav-icon">♫</span><span>الصوت و Gemini</span></button></div>
-    <div class="nav-block" data-tone="violet"><div class="nav-caption"><i></i>أدوات التصميم</div><button class="nav-link tab" data-tab="stickers" type="button"><span class="nav-icon">✨</span><span>الملصقات و GIF</span></button><button class="nav-link tab" data-tab="layers" type="button"><span class="nav-icon">▱</span><span>إدارة الطبقات</span></button></div>
-    <div class="nav-block" data-tone="orange"><div class="nav-caption"><i></i>المشروع</div><button class="nav-link tab" data-tab="settings" type="button"><span class="nav-icon">⚙</span><span>الإعدادات والتصدير</span></button></div>
-    <div class="sidebar-foot"><div class="sidebar-foot-card"><b>كل أدواتك في مكان واحد</b><p>ريلز القرآن، Gemini، مكتبة فيديو، ملصقات، طبقات وتصدير احترافي بدون قوائم متداخلة.</p></div></div>
+
+    <div class="nav-block" data-tone="blue">
+      <div class="nav-caption"><i></i>القائمة الرئيسية</div>
+      <button class="nav-link active" data-route="dashboard" type="button"><span class="nav-icon">⌂</span><span>الرئيسية</span></button>
+    </div>
+
+    <div class="nav-block" data-tone="green">
+      <div class="nav-caption"><i></i>صناعة القرآن</div>
+      <button class="nav-link" data-route="quran" data-open-quran type="button"><span class="nav-icon">☪</span><span>استوديو ريلز القرآن</span></button>
+    </div>
+
+    <div class="nav-block" data-tone="pink">
+      <div class="nav-caption"><i></i>صناعة المحتوى</div>
+      <button class="nav-link tab" data-route="video" data-tab="video" type="button"><span class="nav-icon">🎬</span><span>الفيديو والخلفيات</span></button>
+      <button class="nav-link tab" data-route="text" data-tab="text" type="button"><span class="nav-icon">T</span><span>النصوص والذكاء الاصطناعي</span></button>
+      <button class="nav-link tab" data-route="audio" data-tab="audio" type="button"><span class="nav-icon">♫</span><span>الصوت و Gemini</span></button>
+    </div>
+
+    <div class="nav-block" data-tone="violet">
+      <div class="nav-caption"><i></i>أدوات التصميم</div>
+      <button class="nav-link tab" data-route="stickers" data-tab="stickers" type="button"><span class="nav-icon">✨</span><span>الملصقات و GIF</span></button>
+      <button class="nav-link tab" data-route="layers" data-tab="layers" type="button"><span class="nav-icon">▱</span><span>إدارة الطبقات</span></button>
+    </div>
+
+    <div class="nav-block" data-tone="orange">
+      <div class="nav-caption"><i></i>المشروع</div>
+      <button class="nav-link tab" data-route="settings" data-tab="settings" type="button"><span class="nav-icon">⚙</span><span>الإعدادات والتصدير</span></button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="sidebar-foot-card"><b>منصة واحدة بدل القوائم المتداخلة</b><p>كل أداة لها صفحة واضحة، مع بقاء المشروع والمعاينة متصلين ببعض.</p></div>
+    </div>
   </aside>
 
   <main class="workspace">
     <header class="topbar">
-      <div class="topbar-start"><button id="menuBtn" class="menu-btn" type="button" aria-label="فتح القائمة">☰</button><div class="project"><i></i><div><b>Reels Maker Studio</b><span>ONLINE • READY</span></div></div></div>
+      <div class="topbar-start">
+        <button id="menuBtn" class="menu-btn" type="button" aria-label="فتح القائمة">☰</button>
+        <div class="project"><i></i><div><b>Reels Maker AI</b><span>ONLINE • READY</span></div></div>
+      </div>
       <div class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="ابحث عن أداة أو خدمة..."></div>
-      <div class="topbar-end actions"><button id="resetBtn" class="btn ghost" type="button">مشروع جديد</button><button id="exportBtn" class="btn export" type="button">تصدير وتحميل الريل</button></div>
+      <div class="topbar-end actions"><button id="resetBtn" class="btn ghost" type="button">مشروع جديد</button><button id="exportBtn" class="btn export" type="button">تصدير الريل</button></div>
     </header>
 
-    <section id="dashboardPage" class="page">
-      <div class="dashboard-hero"><div class="hero-copy"><small>✦ استوديو صناعة محتوى متكامل</small><h1>اصنع ريل احترافي من الفكرة إلى الفيديو النهائي</h1><p>واجهة جديدة بالكامل: كل أداة في صفحة واضحة، بدون قوائم مزعجة. أنشئ ريلز القرآن، ابحث عن فيديو، أضف النصوص والملصقات، استخدم Gemini للصوت ثم صدّر المشروع.</p><div class="hero-actions"><button class="btn primary" data-open-quran type="button">☪ ابدأ ريل قرآن</button><button class="btn" data-tool="video" type="button">🎬 افتح محرر الفيديو</button></div></div><div class="hero-badge"><strong>9:16</strong><span>REELS STUDIO</span></div></div>
-      <div class="metric-grid"><div class="metric"><div class="metric-icon">☪</div><div><b>114</b><span>سورة متاحة</span></div></div><div class="metric"><div class="metric-icon">4K</div><div><b>4K</b><span>أقصى جودة تصدير</span></div></div><div class="metric"><div class="metric-icon">AI</div><div><b>30</b><span>صوت Gemini متاح</span></div></div><div class="metric"><div class="metric-icon">∞</div><div><b>6+</b><span>أدوات تحرير رئيسية</span></div></div></div>
-      <div class="section-head"><div><h2>الأدوات الرئيسية</h2><p>اختر الخدمة وسيتم فتح صفحة العمل الخاصة بها.</p></div></div>
+    <section id="dashboardPage" class="page active-page">
+      <div class="page-head">
+        <div class="welcome-line"><div class="welcome-avatar">R</div><div><strong id="welcomeText">مرحبًا</strong><p>اختر الأداة التي تريدها وابدأ من لوحة واحدة مرتبة.</p></div></div>
+      </div>
+
+      <div class="dashboard-banner">
+        <div class="banner-copy"><b>✨ مساحة صناعة المحتوى جاهزة</b><span>ريلز القرآن، الفيديو، النصوص، Gemini، الملصقات، الطبقات والتصدير في نفس المشروع.</span></div>
+        <div class="banner-icon">✦</div>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric"><small>جاهز</small><div class="metric-icon">☪</div><b>114</b><span>سورة متاحة في استوديو القرآن</span></div>
+        <div class="metric"><small>HD / 4K</small><div class="metric-icon">🎬</div><b>4K</b><span>جودة تصدير قصوى</span></div>
+        <div class="metric"><small>Gemini</small><div class="metric-icon">♫</div><b>30</b><span>صوتًا جاهزًا للتعليق الصوتي</span></div>
+        <div class="metric"><small>محلي</small><div class="metric-icon">▱</div><b id="statProjects">0</b><span>مشاريع محفوظة على هذا الجهاز</span></div>
+      </div>
+
+      <div class="section-head"><div><h2>أدوات صناعة المحتوى</h2><p>كل أداة تفتح كصفحة مستقلة بدل النوافذ والقوائم المزدحمة.</p></div></div>
       <div class="service-grid">
-        <button class="service-card" data-tone="green" data-open-quran type="button"><div class="service-top"><span class="service-icon">☪</span><span class="service-tag">QURAN</span></div><h3>ريلز القرآن الكريم</h3><p>اختر السورة والآيات والقارئ والخلفية والتصميم، ثم أنشئ فيديو بآيات متزامنة مع التلاوة.</p></button>
-        <button class="service-card" data-tone="blue" data-tool="video" type="button"><div class="service-top"><span class="service-icon">🎬</span><span class="service-tag">VIDEO</span></div><h3>الفيديو والخلفيات</h3><p>ابحث في Pexels وPixabay أو ارفع فيديو من جهازك واستخدمه كأساس للمشروع.</p></button>
-        <button class="service-card" data-tone="pink" data-tool="audio" type="button"><div class="service-top"><span class="service-icon">♫</span><span class="service-tag">GEMINI</span></div><h3>التعليق الصوتي AI</h3><p>أنشئ تعليقًا صوتيًا عربيًا عبر Gemini مع معاينة الأصوات وإضافتها مباشرة للمشروع.</p></button>
-        <button class="service-card" data-tone="violet" data-tool="text" type="button"><div class="service-top"><span class="service-icon">T</span><span class="service-tag">TEXT</span></div><h3>النصوص والذكاء الاصطناعي</h3><p>اكتب نصًا، ولّد كابشن بالذكاء الاصطناعي، وعدّل الخط والحجم واللون والظل.</p></button>
-        <button class="service-card" data-tone="orange" data-tool="stickers" type="button"><div class="service-top"><span class="service-icon">✨</span><span class="service-tag">GIPHY</span></div><h3>الملصقات و GIF</h3><p>ابحث عن ملصقات وGIF أو ارفع ملفك، ثم حرّكه وكبّره فوق الفيديو.</p></button>
-        <button class="service-card" data-tone="blue" data-tool="layers" type="button"><div class="service-top"><span class="service-icon">▱</span><span class="service-tag">LAYERS</span></div><h3>إدارة الطبقات</h3><p>تحكم في ترتيب النصوص والملصقات والحجم والدوران والظهور من شاشة منظمة.</p></button>
+        <button class="service-card" data-tone="green" data-route="quran" data-open-quran type="button"><div class="service-top"><span class="service-icon">☪</span><span class="service-tag">QURAN</span></div><h3>ريلز القرآن الكريم</h3><p>سورة وآيات وقارئ وخلفية وتصميم ومزامنة وتصدير من صفحة واضحة.</p></button>
+        <button class="service-card" data-tone="blue" data-tool="video" type="button"><div class="service-top"><span class="service-icon">🎬</span><span class="service-tag">VIDEO</span></div><h3>الفيديو والخلفيات</h3><p>ابحث عبر Pexels وPixabay أو ارفع فيديو من جهازك وابدأ المشروع.</p></button>
+        <button class="service-card" data-tone="pink" data-tool="audio" type="button"><div class="service-top"><span class="service-icon">♫</span><span class="service-tag">GEMINI</span></div><h3>التعليق الصوتي AI</h3><p>اختر صوت Gemini وأسلوب الإلقاء، اسمع المعاينة ثم أضفه للمشروع.</p></button>
+        <button class="service-card" data-tone="violet" data-tool="text" type="button"><div class="service-top"><span class="service-icon">T</span><span class="service-tag">TEXT</span></div><h3>النصوص والذكاء الاصطناعي</h3><p>أنشئ النصوص وعدّل الخط والحجم واللون والخلفية والظل.</p></button>
+        <button class="service-card" data-tone="orange" data-tool="stickers" type="button"><div class="service-top"><span class="service-icon">✨</span><span class="service-tag">GIPHY</span></div><h3>الملصقات و GIF</h3><p>ابحث عن ملصق أو GIF أو ارفع ملفًا ثم ضعه فوق الفيديو.</p></button>
+        <button class="service-card" data-tone="blue" data-tool="layers" type="button"><div class="service-top"><span class="service-icon">▱</span><span class="service-tag">LAYERS</span></div><h3>إدارة الطبقات</h3><p>رتب النصوص والملصقات وتحكم في الحجم والدوران والترتيب.</p></button>
+      </div>
+
+      <div class="dashboard-bottom">
+        <div class="dashboard-card">
+          <div class="dashboard-card-head"><b>مشاريعك ونشاطك</b><span>كل شيء في مكان واضح</span></div>
+          <div class="activity-list">
+            <div class="activity-row"><i>☪</i><div><b>استوديو ريلز القرآن</b><span>اختر قارئًا وآيات وخلفية وأنشئ الفيديو مع المزامنة.</span></div><button class="btn small" data-route="quran">فتح</button></div>
+            <div class="activity-row"><i>🎬</i><div><b>المحرر الكامل</b><span>فيديو + نص + صوت + ملصقات + طبقات + تصدير.</span></div><button class="btn small" data-tool="video">فتح</button></div>
+            <div class="activity-row"><i>♫</i><div><b>Gemini TTS</b><span>تعليق صوتي عربي مع أصوات متعددة وأساليب إلقاء.</span></div><button class="btn small" data-tool="audio">فتح</button></div>
+          </div>
+        </div>
+        <div class="dashboard-card">
+          <div class="dashboard-card-head"><b>الوصول السريع</b><span>اختصارات</span></div>
+          <div class="quick-stack">
+            <button class="quick-action quick-card" data-route="quran"><b>☪ إنشاء ريل قرآن</b><span>ابدأ من السورة والقارئ</span></button>
+            <button class="quick-action quick-card" data-tool="video"><b>🎬 رفع أو بحث فيديو</b><span>مصادر الفيديو والخلفيات</span></button>
+            <button class="quick-action quick-card" data-tool="audio"><b>♫ تعليق صوتي</b><span>Gemini والأصوات والمؤثرات</span></button>
+            <button class="quick-action quick-card" data-tool="settings"><b>⚙ إعدادات التصدير</b><span>الجودة و FPS والأداء</span></button>
+          </div>
+        </div>
       </div>
     </section>
 
     <section id="editorPage" class="editor-page hidden">
-      <div class="editor-head"><div><h1 id="editorTitle">مكتبة الفيديو</h1><p id="editorSubtitle">ابحث عن خلفيات وفيديوهات أو ارفع ملفك مباشرة</p></div><button class="btn" data-page="dashboard" type="button">← الرئيسية</button></div>
+      <div class="editor-head"><div><h1 id="editorTitle">الفيديو والخلفيات</h1><p id="editorSubtitle">ابحث في مكتبة الفيديو أو ارفع ملفًا وابدأ مشروعك.</p></div><button class="btn" data-route="dashboard" type="button">← الرئيسية</button></div>
       <div class="editor-layout">
-        <section class="tool-column"><div class="tool-card-head"><b>أدوات الصفحة</b><span>اختر من القائمة الجانبية للتبديل</span></div>
+        <section class="tool-column">
+          <div class="tool-card-head"><b>أدوات الصفحة</b><span>التغييرات تظهر مباشرة في المعاينة</span></div>
           <div class="panels">
-            <section class="panel active" id="panel-video"><div class="panel-title"><h2>مصادر الفيديو</h2><p>ابحث في Pexels أو Pixabay أو ارفع فيديو من جهازك.</p></div><div class="source-switch" id="videoSourceSwitch"><button class="active" data-source="pexels">Pexels</button><button data-source="pixabay">Pixabay</button></div><div class="inline search-row"><input id="videoSearch" type="search" placeholder="مثال: Cairo, travel, nature"><button id="videoSearchBtn" class="btn primary">بحث</button></div><div class="chips"><button data-video-q="cinematic">Cinematic</button><button data-video-q="city">City</button><button data-video-q="travel">Travel</button><button data-video-q="nature">Nature</button><button data-video-q="food">Food</button></div><label class="upload"><input id="videoUpload" type="file" accept="video/*" hidden><span>⬆</span><b>رفع فيديو</b><small>MP4 / WebM / MOV حسب دعم المتصفح</small></label><div id="videoStatus" class="status">لم يتم اختيار فيديو</div><div id="mediaNotice" class="mini-notice hidden"></div><div id="videoResults" class="results"></div></section>
-            <section class="panel" id="panel-stickers"><div class="panel-title"><h2>GIFs & Stickers</h2><p>ابحث عبر GIPHY أو ارفع ملصقًا من جهازك.</p></div><div class="source-switch" id="stickerTypeSwitch"><button class="active" data-sticker-type="stickers">Stickers</button><button data-sticker-type="gifs">GIFs</button></div><div class="inline search-row"><input id="stickerSearch" type="search" placeholder="مثال: heart, fire, sparkle"><button id="stickerSearchBtn" class="btn primary">بحث</button></div><label class="upload small-upload"><input id="stickerUpload" type="file" accept="image/png,image/webp,image/gif,image/jpeg" hidden><span>＋</span><b>رفع ملصق</b><small>PNG / WebP / GIF / JPG</small></label><div id="stickerNotice" class="mini-notice hidden"></div><div id="stickerResults" class="sticker-grid"></div><div class="powered">Powered by GIPHY</div></section>
-            <section class="panel" id="panel-text"><div class="panel-title"><h2>النصوص والذكاء الاصطناعي</h2><p>ولّد النص ثم صممه واسحبه فوق الفيديو.</p></div><div class="ai-box"><label class="field"><span>نوع النص</span><select id="aiCaptionType"><option value="wisdom">حكمة قصيرة</option><option value="dua">دعاء قصير</option><option value="quote">اقتباس تحفيزي</option><option value="travel">كابشن سفر</option><option value="business">كابشن أعمال</option><option value="custom">مخصص</option></select></label><div class="inline"><input id="aiCaptionPrompt" type="text" placeholder="اختياري: اكتب الموضوع"><button id="generateCaptionBtn" class="btn ai">✦ توليد</button></div><small id="aiStatus">Gemini عند توفر الخدمة، وإلا اقتراحات محلية.</small></div><div class="inline add-text"><input id="newText" type="text" placeholder="اكتب نصًا جديدًا"><button id="addTextBtn" class="btn primary">إضافة</button></div><div id="textEditor" class="editor hidden"><label class="field"><span>محتوى النص</span><textarea id="textContent" rows="3"></textarea></label><label class="field"><span>الخط</span><select id="fontFamily"><option>Cairo</option><option>Tajawal</option><option>Amiri</option><option>Montserrat</option><option>Bebas Neue</option></select></label><div class="grid2"><label class="field"><span>الحجم <b id="fontSizeOut">72</b></span><input id="fontSize" type="range" min="20" max="220" value="72"></label><label class="field"><span>الدوران <b id="textRotationOut">0°</b></span><input id="textRotation" type="range" min="-180" max="180" value="0"></label></div><div class="grid2"><label class="field"><span>لون النص</span><input id="textColor" type="color" value="#ffffff"></label><label class="field"><span>الخلفية</span><input id="bgColor" type="color" value="#000000"></label><label class="field"><span>الظل</span><input id="shadowColor" type="color" value="#000000"></label><label class="field"><span>شفافية الخلفية <b id="bgOpacityOut">35%</b></span><input id="bgOpacity" type="range" min="0" max="100" value="35"></label></div><label class="field"><span>قوة الظل <b id="shadowBlurOut">10</b></span><input id="shadowBlur" type="range" min="0" max="50" value="10"></label><div class="inline"><button id="duplicateTextBtn" class="btn">نسخ</button><button id="speakSelectedTextBtn" class="btn">🔊 نطق</button><button id="deleteTextBtn" class="btn danger">حذف</button></div></div></section>
-            <section class="panel" id="panel-audio"><div class="panel-title"><h2>الصوت والتعليق</h2><p>ارفع ملفًا صوتيًا أو استخدم Gemini TTS وأضف مؤثرات SFX.</p></div><label class="upload"><input id="audioUpload" type="file" accept="audio/*" hidden><span>♫</span><b>رفع ملف صوتي</b><small>MP3 / WAV / M4A / OGG</small></label><div id="audioCard" class="audio-card hidden"><div><b id="audioName">Audio</b><span id="audioDuration">00:00</span></div><button id="removeAudioBtn" class="btn danger small">إزالة</button></div><div class="tts-box"><b>Gemini AI Text-to-Speech</b><textarea id="ttsText" rows="3" placeholder="اكتب النص الذي تريد نطقه"></textarea><div class="inline"><button id="ttsPreviewBtn" class="btn">▶ معاينة</button><button id="ttsGenerateBtn" class="btn ai">✦ إنشاء تعليق</button></div><small id="ttsStatus">Gemini TTS يدعم العربية ويضيف الصوت مباشرة للمشروع.</small></div><div class="sfx-box"><b>مؤثرات SFX</b><div class="sfx-grid"><button data-sfx="pop">Pop</button><button data-sfx="ding">Ding</button><button data-sfx="whoosh">Whoosh</button><button data-sfx="click">Click</button></div><small>تُضاف عند موضع المؤشر الحالي.</small></div><label class="field"><span>مستوى الموسيقى <b id="musicVolumeOut">80%</b></span><input id="musicVolume" type="range" min="0" max="100" value="80"></label><label class="field"><span>صوت الفيديو الأصلي <b id="videoVolumeOut">100%</b></span><input id="videoVolume" type="range" min="0" max="100" value="100"></label><label class="field"><span>مستوى SFX <b id="sfxVolumeOut">85%</b></span><input id="sfxVolume" type="range" min="0" max="100" value="85"></label></section>
+            <section class="panel active" id="panel-video">
+              <div class="panel-title"><h2>مصادر الفيديو</h2><p>ابحث في Pexels أو Pixabay أو ارفع فيديو من جهازك.</p></div>
+              <div class="source-switch" id="videoSourceSwitch"><button class="active" data-source="pexels">Pexels</button><button data-source="pixabay">Pixabay</button></div>
+              <div class="inline search-row"><input id="videoSearch" type="search" placeholder="مثال: Cairo, travel, nature"><button id="videoSearchBtn" class="btn primary">بحث</button></div>
+              <div class="chips"><button data-video-q="cinematic">Cinematic</button><button data-video-q="city">City</button><button data-video-q="travel">Travel</button><button data-video-q="nature">Nature</button><button data-video-q="food">Food</button></div>
+              <label class="upload"><input id="videoUpload" type="file" accept="video/*" hidden><span>⬆</span><b>رفع فيديو</b><small>MP4 / WebM / MOV حسب دعم المتصفح</small></label>
+              <div id="videoStatus" class="status">لم يتم اختيار فيديو</div><div id="mediaNotice" class="mini-notice hidden"></div><div id="videoResults" class="results"></div>
+            </section>
+
+            <section class="panel" id="panel-stickers">
+              <div class="panel-title"><h2>GIFs & Stickers</h2><p>ابحث عبر GIPHY أو ارفع ملصقًا من جهازك.</p></div>
+              <div class="source-switch" id="stickerTypeSwitch"><button class="active" data-sticker-type="stickers">Stickers</button><button data-sticker-type="gifs">GIFs</button></div>
+              <div class="inline search-row"><input id="stickerSearch" type="search" placeholder="مثال: heart, fire, sparkle"><button id="stickerSearchBtn" class="btn primary">بحث</button></div>
+              <label class="upload small-upload"><input id="stickerUpload" type="file" accept="image/png,image/webp,image/gif,image/jpeg" hidden><span>＋</span><b>رفع ملصق</b><small>PNG / WebP / GIF / JPG</small></label>
+              <div id="stickerNotice" class="mini-notice hidden"></div><div id="stickerResults" class="sticker-grid"></div><div class="powered">Powered by GIPHY</div>
+            </section>
+
+            <section class="panel" id="panel-text">
+              <div class="panel-title"><h2>النصوص والذكاء الاصطناعي</h2><p>ولّد النص ثم صممه واسحبه فوق الفيديو.</p></div>
+              <div class="ai-box"><label class="field"><span>نوع النص</span><select id="aiCaptionType"><option value="wisdom">حكمة قصيرة</option><option value="dua">دعاء قصير</option><option value="quote">اقتباس تحفيزي</option><option value="travel">كابشن سفر</option><option value="business">كابشن أعمال</option><option value="custom">مخصص</option></select></label><div class="inline"><input id="aiCaptionPrompt" type="text" placeholder="اختياري: اكتب الموضوع"><button id="generateCaptionBtn" class="btn ai">✦ توليد</button></div><small id="aiStatus">Gemini عند توفر الخدمة، وإلا اقتراحات محلية.</small></div>
+              <div class="inline add-text"><input id="newText" type="text" placeholder="اكتب نصًا جديدًا"><button id="addTextBtn" class="btn primary">إضافة</button></div>
+              <div id="textEditor" class="editor hidden"><label class="field"><span>محتوى النص</span><textarea id="textContent" rows="3"></textarea></label><label class="field"><span>الخط</span><select id="fontFamily"><option>Cairo</option><option>Tajawal</option><option>Amiri</option><option>Montserrat</option><option>Bebas Neue</option></select></label><div class="grid2"><label class="field"><span>الحجم <b id="fontSizeOut">72</b></span><input id="fontSize" type="range" min="20" max="220" value="72"></label><label class="field"><span>الدوران <b id="textRotationOut">0°</b></span><input id="textRotation" type="range" min="-180" max="180" value="0"></label></div><div class="grid2"><label class="field"><span>لون النص</span><input id="textColor" type="color" value="#ffffff"></label><label class="field"><span>الخلفية</span><input id="bgColor" type="color" value="#000000"></label><label class="field"><span>الظل</span><input id="shadowColor" type="color" value="#000000"></label><label class="field"><span>شفافية الخلفية <b id="bgOpacityOut">35%</b></span><input id="bgOpacity" type="range" min="0" max="100" value="35"></label></div><label class="field"><span>قوة الظل <b id="shadowBlurOut">10</b></span><input id="shadowBlur" type="range" min="0" max="50" value="10"></label><div class="inline"><button id="duplicateTextBtn" class="btn">نسخ</button><button id="speakSelectedTextBtn" class="btn">🔊 نطق</button><button id="deleteTextBtn" class="btn danger">حذف</button></div></div>
+            </section>
+
+            <section class="panel" id="panel-audio">
+              <div class="panel-title"><h2>الصوت والتعليق</h2><p>ارفع ملفًا صوتيًا أو استخدم Gemini TTS وأضف مؤثرات SFX.</p></div>
+              <label class="upload"><input id="audioUpload" type="file" accept="audio/*" hidden><span>♫</span><b>رفع ملف صوتي</b><small>MP3 / WAV / M4A / OGG</small></label>
+              <div id="audioCard" class="audio-card hidden"><div><b id="audioName">Audio</b><span id="audioDuration">00:00</span></div><button id="removeAudioBtn" class="btn danger small">إزالة</button></div>
+              <div class="tts-box"><b>Gemini AI Text-to-Speech</b><textarea id="ttsText" rows="3" placeholder="اكتب النص الذي تريد نطقه"></textarea><div class="inline"><button id="ttsPreviewBtn" class="btn">▶ معاينة</button><button id="ttsGenerateBtn" class="btn ai">✦ إنشاء تعليق</button></div><small id="ttsStatus">Gemini TTS يدعم العربية ويضيف الصوت مباشرة للمشروع.</small></div>
+              <div class="sfx-box"><b>مؤثرات SFX</b><div class="sfx-grid"><button data-sfx="pop">Pop</button><button data-sfx="ding">Ding</button><button data-sfx="whoosh">Whoosh</button><button data-sfx="click">Click</button></div><small>تُضاف عند موضع المؤشر الحالي.</small></div>
+              <label class="field"><span>مستوى الموسيقى <b id="musicVolumeOut">80%</b></span><input id="musicVolume" type="range" min="0" max="100" value="80"></label><label class="field"><span>صوت الفيديو الأصلي <b id="videoVolumeOut">100%</b></span><input id="videoVolume" type="range" min="0" max="100" value="100"></label><label class="field"><span>مستوى SFX <b id="sfxVolumeOut">85%</b></span><input id="sfxVolume" type="range" min="0" max="100" value="85"></label>
+            </section>
+
             <section class="panel" id="panel-layers"><div class="panel-title"><h2>إدارة الطبقات</h2><p>رتّب العناصر للأمام والخلف وعدّل التحويلات.</p></div><div id="layers" class="layers"></div><div id="layerTools" class="editor hidden"><div class="grid2"><button id="bringForwardBtn" class="btn">↑ للأمام</button><button id="sendBackwardBtn" class="btn">↓ للخلف</button></div><div class="grid2"><button id="bringFrontBtn" class="btn">⇈ للأعلى</button><button id="sendBackBtn" class="btn">⇊ للأسفل</button></div><label class="field"><span>الحجم <b id="layerScaleOut">100%</b></span><input id="layerScale" type="range" min="20" max="300" value="100"></label><label class="field"><span>الدوران <b id="layerRotationOut">0°</b></span><input id="layerRotation" type="range" min="-180" max="180" value="0"></label><div class="inline"><button id="duplicateLayerBtn" class="btn">نسخ الطبقة</button><button id="deleteLayerBtn" class="btn danger">حذف</button></div></div></section>
+
             <section class="panel" id="panel-settings"><div class="panel-title"><h2>الإعدادات والتصدير</h2><p>اضبط الجودة والأداء حسب جهازك.</p></div><label class="field"><span>جودة التصدير</span><select id="quality"><option value="360">360 × 640 — سريع</option><option value="480">480 × 854 — متوسط</option><option value="540">540 × 960 — سريع للموبايل</option><option value="720">720 × 1280 — HD</option><option value="1080" selected>1080 × 1920 — Full HD</option><option value="2160">2160 × 3840 — 4K Ultra HD</option></select></label><label class="field"><span>FPS</span><select id="fps"><option value="24">24 FPS</option><option value="30" selected>30 FPS</option><option value="60">60 FPS</option></select></label><label class="field"><span>ملء الفيديو</span><select id="fit"><option value="cover" selected>Cover</option><option value="contain">Contain</option></select></label><label class="field"><span>وضع الأداء</span><select id="performanceMode"><option value="auto" selected>Auto</option><option value="quality">أفضل جودة</option><option value="mobile">موفر للموبايل</option></select></label><div class="notice"><b>جاهز للعمل</b><p>يمكنك استخدام Pexels وPixabay وGemini وGIPHY، أو رفع ملفات من جهازك، ثم تصدير المشروع.</p></div></section>
           </div>
           <div id="mobileToolSlot"><div id="mobileSheet" class="mobile-sheet"><div class="sheet-handle"></div><div id="mobilePanelHost"></div></div></div>
         </section>
-        <section class="preview-card"><div class="preview-head"><b>معاينة المشروع</b><span>9:16 • LIVE CANVAS</span></div><div class="stage-wrap"><div id="stage" class="stage"><canvas id="canvas" width="1080" height="1920"></canvas><div id="transformHud" class="transform-hud hidden">↔ اسحب • ◉ كبّر/دوّر</div><div id="emptyState" class="empty"><div>▶</div><h3>ابدأ مشروعك</h3><p>اختر فيديو أو افتح استوديو ريلز القرآن</p></div></div></div><div class="transport"><button id="playBtn" class="round">▶</button><span id="currentTime">00:00</span><input id="timeline" type="range" min="0" max="1000" value="0"><span id="duration">00:00</span><button id="muteBtn" class="round">🔊</button></div></section>
+
+        <section class="preview-card"><div class="preview-head"><b>معاينة المشروع</b><span>9:16 • LIVE</span></div><div class="stage-wrap"><div id="stage" class="stage"><canvas id="canvas" width="1080" height="1920"></canvas><div id="transformHud" class="transform-hud hidden">↔ اسحب • ◉ كبّر/دوّر</div><div id="emptyState" class="empty"><div>▶</div><h3>ابدأ مشروعك</h3><p>اختر فيديو أو افتح استوديو ريلز القرآن</p></div></div></div><div class="transport"><button id="playBtn" class="round">▶</button><span id="currentTime">00:00</span><input id="timeline" type="range" min="0" max="1000" value="0"><span id="duration">00:00</span><button id="muteBtn" class="round">🔊</button></div></section>
       </div>
+    </section>
+
+    <section id="quranPage" class="quran-page hidden">
+      <div class="quran-page-head"><div><h1>استوديو ريلز القرآن</h1><p>السورة والآيات والقارئ والخلفية والتصميم والتصدير في صفحة واحدة منظمة.</p></div><div class="quran-breadcrumb"><span>الرئيسية</span><span>ريلز القرآن</span></div></div>
+      <div id="quranHost"></div>
     </section>
   </main>
 </div>
+
 <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 <div id="exportModal" class="modal hidden"><div class="modal-card"><div class="spinner"></div><h2>جاري تصدير الريل</h2><p>يتم دمج الفيديو والنصوص والملصقات والصوت محليًا. اترك الصفحة مفتوحة.</p><div class="progress"><i id="progressBar"></i></div><b id="progressText">0%</b><button id="cancelExportBtn" class="btn danger full">إلغاء</button></div></div>
-<div id="toasts" class="toasts"></div><video id="sourceVideo" playsinline preload="metadata"></video><audio id="sourceAudio" preload="metadata"></audio>
-<script src="ui-v4.js?v=4"></script><script src="script.js"></script><script src="keyboard-fix.js?v=4"></script><script src="quran-studio.js?v=1"></script><script src="quran-studio-fixes.js?v=2"></script>
+<div id="toasts" class="toasts"></div>
+<video id="sourceVideo" playsinline preload="metadata"></video><audio id="sourceAudio" preload="metadata"></audio>
+
+<script src="script.js?v=6"></script>
+<script src="quran-studio.js?v=6"></script>
+<script src="quran-studio-fixes.js?v=6"></script>
+<script src="platform-v6.js?v=6"></script>
 </body>
 </html>
