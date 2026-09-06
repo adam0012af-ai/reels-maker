@@ -67,9 +67,11 @@ async function injectEditorRuntime(response) {
   if (!type.includes("text/html")) return response;
   let html = await response.text();
   html = html.replace(/editor-pro-v2\.js\?v=\d+/g, "editor-pro-v2.js?v=1");
-  if (!html.includes("editor-pro-v2.js")) {
-    html = html.replace("</body>", '<script src="editor-pro-v2.js?v=1"></script></body>');
-  }
+  html = html.replace(/quran-editor-proxy\.js\?v=\d+/g, "quran-editor-proxy.js?v=1");
+  const scripts = [];
+  if (!html.includes("editor-pro-v2.js")) scripts.push('<script src="editor-pro-v2.js?v=1"></script>');
+  if (!html.includes("quran-editor-proxy.js")) scripts.push('<script src="quran-editor-proxy.js?v=1"></script>');
+  if (scripts.length) html = html.replace("</body>", `${scripts.join("")}</body>`);
   const headers = new Headers(response.headers);
   headers.delete("content-length");
   headers.set("cache-control", "no-store");
