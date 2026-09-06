@@ -1,12 +1,11 @@
 const PEXELS_API = "https://api.pexels.com/videos/search";
 
-function json(data, status = 200, extraHeaders = {}) {
+function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
-      ...extraHeaders,
     },
   });
 }
@@ -51,48 +50,6 @@ async function handlePexels(request, env) {
   }
 }
 
-function injectCloudflareBridge(html) {
-  const bridge = `
-<script>
-(() => {
-  window.searchPexels = async function(query) {
-    query = (query || "").trim();
-    if (!query) return toast("اكتب كلمة للبحث أولاً.", "error");
-
-    controls.results.innerHTML = '<div class="results-msg">جاري البحث...</div>';
-    try {
-      const r = await fetch('/api/pexels?query=' + encodeURIComponent(query) + '&per_page=18');
-      const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || ('Pexels ' + r.status));
-      showResults(data.videos || []);
-    } catch (err) {
-      console.error(err);
-      controls.results.innerHTML = '<div class="results-msg">تعذر تحميل النتائج حاليًا.</div>';
-      toast("تعذر الاتصال بـ Pexels. تحقق من إعداد Cloudflare.", "error");
-    }
-  };
-
-  const hideKeyField = () => {
-    const key = document.getElementById('pexelsKey');
-    const save = document.getElementById('saveKeyBtn');
-    const field = key && key.closest('.field');
-    if (field) field.style.display = 'none';
-    if (key) key.value = '';
-    if (save) save.style.display = 'none';
-    try { localStorage.removeItem('reelsMakerPexelsKey'); } catch (_) {}
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', hideKeyField, { once: true });
-  } else {
-    hideKeyField();
-  }
-})();
-</script>`;
-
-  return html.includes("</body>") ? html.replace("</body>", `${bridge}\n</body>`) : html + bridge;
-}
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -101,20 +58,6 @@ export default {
       return handlePexels(request, env);
     }
 
-    const assetResponse = await env.ASSETS.fetch(request);
-    const type = assetResponse.headers.get("content-type") || "";
-
-    if (!type.includes("text/html")) return assetResponse;
-
-    const html = await assetResponse.text();
-    const headers = new Headers(assetResponse.headers);
-    headers.set("content-type", "text/html; charset=utf-8");
-    headers.set("cache-control", "no-cache");
-
-    return new Response(injectCloudflareBridge(html), {
-      status: assetResponse.status,
-      statusText: assetResponse.statusText,
-      headers,
-    });
+    return env.ASSETS.fetch(request);
   },
 };
