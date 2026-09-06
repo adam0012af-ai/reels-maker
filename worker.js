@@ -147,8 +147,7 @@ function findAudioContent(data) {
 }
 
 function decodeBase64(data) {
-  const clean = String(data || "").replace(/\s/g, "");
-  const binary = atob(clean);
+  const binary = atob(String(data || "").replace(/\s/g, ""));
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
@@ -189,10 +188,7 @@ async function handleTts(request, env) {
   try {
     const upstream = await fetch(GEMINI_INTERACTIONS, {
       method: "POST",
-      headers: {
-        "x-goog-api-key": env.GEMINI_API_KEY,
-        "content-type": "application/json"
-      },
+      headers: { "x-goog-api-key": env.GEMINI_API_KEY, "content-type": "application/json" },
       body: JSON.stringify({
         model,
         input,
@@ -201,14 +197,12 @@ async function handleTts(request, env) {
       })
     });
     const data = await upstream.json().catch(() => ({}));
-    if (!upstream.ok) {
-      return json({ error: data?.error?.message || data?.message || `Gemini TTS request failed (${upstream.status}).` }, upstream.status);
-    }
+    if (!upstream.ok) return json({ error: data?.error?.message || data?.message || `Gemini TTS request failed (${upstream.status}).` }, upstream.status);
     const audio = findAudioContent(data);
     if (!audio?.data) return json({ error: "Gemini TTS returned no audio data." }, 502);
     let bytes = decodeBase64(audio.data);
     let mime = audio.mime_type || "audio/wav";
-    if (mime === "audio/l16" || mime === "audio/pcm" || mime.includes("L16")) {
+    if (mime === "audio/l16" || mime === "audio/pcm" || mime.toLowerCase().includes("l16")) {
       bytes = pcm16ToWav(bytes, Number(audio.sample_rate) || 24000, Number(audio.channels) || 1);
       mime = "audio/wav";
     }
@@ -258,33 +252,35 @@ const GEMINI_TTS_UI = `<script>
     const status = document.getElementById('ttsStatus');
     if (!box || !btn) return;
 
-    document.getElementById('elevenVoice')?.closest('.field')?.remove();
-    document.getElementById('geminiTtsControls')?.remove();
+    const old = document.getElementById('elevenVoice');
+    if (old && old.closest('.field')) old.closest('.field').remove();
+    const prior = document.getElementById('geminiTtsControls');
+    if (prior) prior.remove();
 
     const title = box.querySelector(':scope > b');
     if (title) title.textContent = 'Gemini AI Text-to-Speech';
-    if (status) status.textContent = 'Gemini 2.5 Flash TTS — يدعم العربية، واختيار 30 صوتًا، ويدخل الصوت في التصدير.';
+    if (status) status.textContent = 'Gemini 2.5 Flash TTS — يدعم العربية، 30 صوتًا، والصوت الناتج يدخل في التصدير.';
 
     const panel = document.createElement('div');
     panel.id = 'geminiTtsControls';
-    panel.innerHTML = `
-      <label class="field"><span>صوت Gemini</span><select id="geminiVoice"></select><small id="geminiVoiceMeta">30 صوتًا جاهزًا من Gemini.</small></label>
-      <label class="field"><span>أسلوب الإلقاء</span><select id="geminiStyle">
-        <option value="egyptian">مصري طبيعي ودافئ</option>
-        <option value="fusha">عربي فصحى واضح</option>
-        <option value="natural">طبيعي</option>
-        <option value="calm">هادئ وناعم</option>
-        <option value="energetic">حماسي</option>
-        <option value="story">راوي قصصي سينمائي</option>
-        <option value="ad">إعلاني احترافي</option>
-      </select></label>`;
+    panel.innerHTML =
+      '<label class="field"><span>صوت Gemini</span><select id="geminiVoice"></select><small id="geminiVoiceMeta">30 صوتًا جاهزًا من Gemini.</small></label>' +
+      '<label class="field"><span>أسلوب الإلقاء</span><select id="geminiStyle">' +
+      '<option value="egyptian">مصري طبيعي ودافئ</option>' +
+      '<option value="fusha">عربي فصحى واضح</option>' +
+      '<option value="natural">طبيعي</option>' +
+      '<option value="calm">هادئ وناعم</option>' +
+      '<option value="energetic">حماسي</option>' +
+      '<option value="story">راوي قصصي سينمائي</option>' +
+      '<option value="ad">إعلاني احترافي</option>' +
+      '</select></label>';
     box.insertBefore(panel, btn.parentElement);
 
     const select = panel.querySelector('#geminiVoice');
-    voices.forEach(([name, tone]) => {
+    voices.forEach(pair => {
       const o = document.createElement('option');
-      o.value = name;
-      o.textContent = name + ' • ' + tone;
+      o.value = pair[0];
+      o.textContent = pair[0] + ' • ' + pair[1];
       select.appendChild(o);
     });
     select.value = 'Kore';
@@ -293,21 +289,23 @@ const GEMINI_TTS_UI = `<script>
       e.stopImmediatePropagation();
       e.preventDefault();
       const textBox = document.getElementById('ttsText');
-      let text = (textBox?.value || '').trim();
-      if (!text) text = (document.getElementById('textContent')?.value || '').trim();
+      let text = (textBox && textBox.value ? textBox.value : '').trim();
+      const selectedText = document.getElementById('textContent');
+      if (!text && selectedText) text = (selectedText.value || '').trim();
       if (!text) {
         if (status) status.textContent = 'اكتب نص التعليق الصوتي أولًا.';
         return;
       }
       const voice = select.value || 'Kore';
-      const style = panel.querySelector('#geminiStyle')?.value || 'egyptian';
+      const styleSelect = panel.querySelector('#geminiStyle');
+      const style = styleSelect ? styleSelect.value : 'egyptian';
       btn.disabled = true;
       if (status) status.textContent = 'جاري إنشاء التعليق الصوتي عبر Gemini...';
       try {
         const r = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ text, voice, style })
+          body: JSON.stringify({ text: text, voice: voice, style: style })
         });
         if (!r.ok) {
           const data = await r.json().catch(() => ({}));
