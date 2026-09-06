@@ -2,21 +2,33 @@
 
 (() => {
   const qid = id => document.getElementById(id);
-  const state = { tartil: true, tajwid: true, observer: null };
+  const state = {
+    tartil: true,
+    tajwid: true,
+    observer: null,
+    catalog: [],
+    catalogReady: false,
+    catalogLoading: false,
+    applying: false,
+    lastError: ""
+  };
 
   const ARABIC_NAMES = new Map([
     ["ar.alafasy", "مشاري راشد العفاسي"],
     ["ar.husary", "محمود خليل الحصري"],
+    ["ar.abdulbasitmurattal", "عبد الباسط عبد الصمد"],
+    ["ar.abdurrahmaansudais", "عبد الرحمن السديس"],
     ["ar.minshawi", "محمد صديق المنشاوي"],
     ["ar.minshawimujawwad", "محمد صديق المنشاوي"],
-    ["ar.sudais", "عبدالرحمن السديس"],
-    ["ar.shuraim", "سعود الشريم"],
-    ["ar.abdulbasit", "عبد الباسط عبد الصمد"],
     ["ar.abdulbasitmujawwad", "عبد الباسط عبد الصمد"],
-    ["ar.ajamy", "أحمد بن علي العجمي"],
-    ["ar.muhammadayoub", "محمد أيوب"],
     ["ar.hudhaify", "علي الحذيفي"],
-    ["ar.muhammadjibreel", "محمد جبريل"]
+    ["ar.shuraym", "سعود الشريم"],
+    ["ar.muhammadjibreel", "محمد جبريل"],
+    ["ar.muhammadayyoub", "محمد أيوب"],
+    ["ar.mahermuaiqly", "ماهر المعيقلي"],
+    ["ar.saadalghamdi", "سعد الغامدي"],
+    ["ar.ahmedajamy", "أحمد بن علي العجمي"],
+    ["ar.basfar", "عبد الله بصفر"]
   ]);
 
   function waitForStudio() {
@@ -31,6 +43,7 @@
     style.id = "qrReciterInlineStyles";
     style.textContent = `
       #qrReciterSearch{display:none!important}
+      #qrReciterPreview{display:none!important}
       .qr-reciter-native-field{display:none!important}
       .qr-reciter-inline{position:relative;margin-bottom:8px}
       .qr-reciter-main{
@@ -38,7 +51,9 @@
         background:#121823;color:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;
         font:700 12px Cairo,sans-serif;-webkit-tap-highlight-color:transparent
       }
+      .qr-reciter-main:disabled{opacity:.7;cursor:wait}
       .qr-reciter-main-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .qr-reciter-main-state{font-size:8px;color:#8390a5;white-space:nowrap}
       .qr-reciter-main-arrow{font-size:18px;color:#9eabc1;transition:.18s transform}
       .qr-reciter-inline.open .qr-reciter-main-arrow{transform:rotate(180deg)}
       .qr-reciter-dropdown{
@@ -46,12 +61,16 @@
         border-radius:15px;background:#0d121a;box-shadow:0 18px 55px rgba(0,0,0,.5);overflow:hidden
       }
       .qr-reciter-inline.open .qr-reciter-dropdown{display:block}
+      .qr-reciter-verified-note{padding:8px 10px 0;color:#7f8b9f;font-size:8px;line-height:1.6}
       .qr-reciter-filters{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px;border-bottom:1px solid rgba(255,255,255,.07)}
       .qr-reciter-filter{
         min-height:40px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:#151c28;color:#9da8ba;
         font:700 11px Cairo,sans-serif;cursor:pointer
       }
       .qr-reciter-filter.on{color:#fff;border-color:rgba(56,211,159,.45);background:rgba(56,211,159,.12)}
+      .qr-reciter-refresh-wrap{padding:0 9px 8px;border-bottom:1px solid rgba(255,255,255,.07)}
+      .qr-reciter-refresh{width:100%;min-height:34px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:#111722;color:#9eabba;font:600 9px Cairo,sans-serif;cursor:pointer}
+      .qr-reciter-refresh:disabled{opacity:.55;cursor:wait}
       .qr-reciter-list{max-height:310px;overflow:auto;padding:7px;-webkit-overflow-scrolling:touch}
       .qr-reciter-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
       .qr-reciter-choose{
@@ -63,40 +82,33 @@
         width:43px;height:43px;flex:0 0 43px;border:1px solid rgba(56,211,159,.22);border-radius:10px;
         background:rgba(56,211,159,.09);color:#8ee3c5;cursor:pointer;font-size:14px
       }
-      .qr-reciter-empty{padding:24px 10px;text-align:center;color:#8f9aab;font-size:10px}
-      @media(max-width:700px){.qr-reciter-list{max-height:260px}.qr-reciter-main{min-height:50px}}
+      .qr-reciter-preview.loading{opacity:.6;cursor:wait}
+      .qr-reciter-empty{padding:24px 10px;text-align:center;color:#8f9aab;font-size:10px;line-height:1.8}
+      @media(max-width:700px){.qr-reciter-list{max-height:260px}.qr-reciter-main{min-height:50px}.qr-reciter-main-state{display:none}}
     `;
     document.head.appendChild(style);
   }
 
   function modeFor(option) {
-    const hay = `${option.value || ""} ${option.textContent || ""}`.toLowerCase();
+    if (option?.dataset?.mode === "tajwid") return "tajwid";
+    if (option?.dataset?.mode === "tartil") return "tartil";
+    const hay = `${option?.value || ""} ${option?.textContent || ""}`.toLowerCase();
     return /(mujawwad|mujawad|tajw|مجود|تجويد)/i.test(hay) ? "tajwid" : "tartil";
   }
 
   function cleanName(option) {
+    if (!option) return "اختر القارئ";
     const mapped = ARABIC_NAMES.get(option.value);
     if (mapped) return mapped;
-    let text = String(option.textContent || option.value || "قارئ").trim();
+    let text = String(option.dataset?.name || option.textContent || option.value || "قارئ").trim();
     text = text.replace(/\s*[—–-]\s*ar\.[a-z0-9._-]+\s*$/i, "").trim();
     text = text.replace(/\s*[—–-]\s*(مجود|مرتل|تجويد|ترتيل|معلم)\s*$/i, "").trim();
     return text || option.value || "قارئ";
   }
 
   function actualOptions(select) {
-    const all = [...select.options].filter(option => {
-      const value = String(option.value || "").trim();
-      const text = String(option.textContent || "");
-      return value && !/جاري|تحميل|غير متاح/i.test(text);
-    });
-    const native = all.filter(option => option.dataset.verifiedFallback !== "1");
-    const pool = native.length ? native : all;
-    const seen = new Set();
-    return pool.filter(option => {
-      if (seen.has(option.value)) return false;
-      seen.add(option.value);
-      return true;
-    });
+    if (!state.catalogReady) return [];
+    return [...select.options].filter(option => option.value && option.dataset.quranVerified === "1");
   }
 
   function visibleOptions(select) {
@@ -106,17 +118,37 @@
     });
   }
 
+  function updateFilterLabels() {
+    const select = qid("qrReciter");
+    if (!select) return;
+    const all = actualOptions(select);
+    const tartil = all.filter(o => modeFor(o) === "tartil").length;
+    const tajwid = all.filter(o => modeFor(o) === "tajwid").length;
+    const a = qid("qrReciterFilterTartil"), b = qid("qrReciterFilterTajwid");
+    if (a) a.textContent = `${state.tartil ? "✓" : "○"} ترتيل (${tartil})`;
+    if (b) b.textContent = `${state.tajwid ? "✓" : "○"} تجويد (${tajwid})`;
+  }
+
   function updateCount() {
-    const select = qid("qrReciter"), count = qid("qrReciterCount");
-    if (!select || !count) return;
-    count.textContent = `${actualOptions(select).length} قارئ متاح`;
+    const select = qid("qrReciter"), count = qid("qrReciterCount"), mainState = qid("qrReciterMainState");
+    if (!select) return;
+    let text;
+    if (state.catalogLoading) text = "جاري فحص الأصوات فعليًا...";
+    else if (!state.catalogReady) text = state.lastError || "لم يكتمل فحص الأصوات";
+    else text = `${actualOptions(select).length} قارئ تم التحقق من صوته`;
+    if (count) count.textContent = text;
+    if (mainState) mainState.textContent = state.catalogReady ? `${actualOptions(select).length} شغال` : "فحص...";
+    updateFilterLabels();
   }
 
   function updateMainButton() {
     const select = qid("qrReciter"), button = qid("qrReciterPickerBtn");
     if (!select || !button) return;
     const selected = select.selectedOptions?.[0] || actualOptions(select)[0];
-    button.querySelector(".qr-reciter-main-name").textContent = selected ? cleanName(selected) : "اختر القارئ";
+    button.querySelector(".qr-reciter-main-name").textContent = state.catalogLoading
+      ? "جاري التحقق من أصوات القراء..."
+      : selected ? cleanName(selected) : "لا توجد أصوات مؤكدة الآن";
+    button.disabled = state.catalogLoading && !state.catalogReady;
     updateCount();
   }
 
@@ -124,15 +156,96 @@
     qid("qrReciterInline")?.classList.remove("open");
   }
 
+  function applyCatalogToSelect(select, preferredValue = "") {
+    if (!select || state.applying) return;
+    state.applying = true;
+    const previous = preferredValue || select.value;
+    const fragment = document.createDocumentFragment();
+    state.catalog.forEach(reciter => {
+      const option = document.createElement("option");
+      option.value = reciter.identifier;
+      option.textContent = reciter.name || reciter.englishName || reciter.identifier;
+      option.dataset.name = reciter.name || "";
+      option.dataset.mode = reciter.mode === "tajwid" ? "tajwid" : "tartil";
+      option.dataset.quranVerified = "1";
+      fragment.appendChild(option);
+    });
+    select.replaceChildren(fragment);
+    if (previous && [...select.options].some(o => o.value === previous)) select.value = previous;
+    else if (select.options.length) select.selectedIndex = 0;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    queueMicrotask(() => { state.applying = false; });
+  }
+
+  async function loadVerifiedCatalog(force = false) {
+    if (state.catalogLoading) return;
+    const select = qid("qrReciter");
+    if (!select) return;
+    const preferred = select.value;
+    state.catalogLoading = true;
+    state.lastError = "";
+    updateMainButton();
+    renderList();
+    const refresh = qid("qrReciterRefresh");
+    if (refresh) refresh.disabled = true;
+
+    try {
+      const response = await fetch(`/api/quran-reciter-catalog${force ? "?refresh=1" : ""}`, { cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+      const reciters = Array.isArray(data.reciters) ? data.reciters : [];
+      state.catalog = reciters.filter(r => r?.identifier && r?.name).map(r => ({
+        identifier: String(r.identifier),
+        name: String(r.name),
+        englishName: String(r.englishName || ""),
+        mode: r.mode === "tajwid" ? "tajwid" : "tartil"
+      }));
+      state.catalogReady = true;
+      applyCatalogToSelect(select, preferred);
+      if (!state.catalog.length) state.lastError = "لم ينجح أي قارئ في اختبار الصوت الآن";
+    } catch (error) {
+      state.catalogReady = false;
+      state.catalog = [];
+      state.lastError = `تعذر فحص القراء: ${error?.message || error}`;
+      state.applying = true;
+      select.replaceChildren();
+      queueMicrotask(() => { state.applying = false; });
+    } finally {
+      state.catalogLoading = false;
+      if (refresh) refresh.disabled = false;
+      updateMainButton();
+      renderList();
+    }
+  }
+
+  function removeFailedReciter(identifier) {
+    state.catalog = state.catalog.filter(item => item.identifier !== identifier);
+    const select = qid("qrReciter");
+    if (select) applyCatalogToSelect(select);
+    updateMainButton();
+    renderList();
+  }
+
   function renderList() {
     const select = qid("qrReciter"), list = qid("qrReciterInlineList");
     if (!select || !list) return;
-    const items = visibleOptions(select);
     list.innerHTML = "";
-    if (!items.length) {
-      list.innerHTML = '<div class="qr-reciter-empty">لا توجد أصوات في الاختيار الحالي.</div>';
+
+    if (state.catalogLoading && !state.catalogReady) {
+      list.innerHTML = '<div class="qr-reciter-empty">⏳ بنفحص كل قارئ بصوت حقيقي قبل ما يظهر لك.<br>مش هنظهر أي قارئ غير لما ملف الصوت يشتغل.</div>';
       return;
     }
+    if (!state.catalogReady) {
+      list.innerHTML = `<div class="qr-reciter-empty">${state.lastError || "تعذر تحميل الأصوات المؤكدة."}<br>اضغط «إعادة فحص الأصوات».</div>`;
+      return;
+    }
+
+    const items = visibleOptions(select);
+    if (!items.length) {
+      list.innerHTML = '<div class="qr-reciter-empty">لا توجد أصوات شغالة في الاختيار الحالي.</div>';
+      return;
+    }
+
     items.forEach(option => {
       const row = document.createElement("div");
       row.className = "qr-reciter-row";
@@ -161,7 +274,15 @@
         select.dispatchEvent(new Event("change", { bubbles: true }));
         updateMainButton();
         renderList();
-        await previewSelectedReciter();
+        preview.classList.add("loading");
+        preview.textContent = "…";
+        try {
+          await previewSelectedReciter();
+          preview.textContent = "❚❚";
+        } finally {
+          preview.classList.remove("loading");
+          setTimeout(() => { if (preview.isConnected) preview.textContent = "▶"; }, 1200);
+        }
       });
 
       row.append(choose, preview);
@@ -172,18 +293,21 @@
   async function previewSelectedReciter() {
     const select = qid("qrReciter"), audio = qid("qrMiniAudio"), status = qid("qrStatus");
     if (!select || !audio || !select.value) return;
+    const identifier = select.value;
     const surah = Number(qid("qrSurah")?.value || 1);
     const from = Number(qid("qrFrom")?.value || 1);
     const name = cleanName(select.selectedOptions?.[0]);
 
     try {
+      audio.pause();
       if (status) {
         status.textContent = `جاري تشغيل ${name}...`;
         status.className = "qr-status";
       }
-      const response = await fetch(`https://api.alquran.cloud/v1/surah/${surah}/${encodeURIComponent(select.value)}`, { cache: "no-store" });
+      const apiUrl = `https://api.alquran.cloud/v1/surah/${surah}/${encodeURIComponent(identifier)}`;
+      const response = await fetch(`/api/quran-json?url=${encodeURIComponent(apiUrl)}`, { cache: "no-store" });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.code && payload.code !== 200) throw new Error(payload.status || `HTTP ${response.status}`);
+      if (!response.ok || (payload.code && payload.code !== 200)) throw new Error(payload.status || payload.error || `HTTP ${response.status}`);
       const data = payload.data ?? payload;
       const ayah = data.ayahs?.find(item => item.numberInSurah === from) || data.ayahs?.[0];
       if (!ayah?.audio) throw new Error("لا يوجد صوت لهذه الآية");
@@ -201,24 +325,13 @@
         status.className = "qr-status ok";
       }
     } catch (error) {
+      removeFailedReciter(identifier);
       if (status) {
-        status.textContent = `تعذر تشغيل ${name}: ${error?.message || error}`;
+        status.textContent = `تم استبعاد ${name} لأنه لم يعمل الآن. اضغط إعادة الفحص لاحقًا لإرجاعه إذا عاد المصدر.`;
         status.className = "qr-status err";
       }
+      throw error;
     }
-  }
-
-  function installPreviewButton() {
-    const old = qid("qrReciterPreview");
-    if (!old || old.dataset.inlinePicker === "1") return;
-    const fresh = old.cloneNode(true);
-    fresh.dataset.inlinePicker = "1";
-    old.replaceWith(fresh);
-    fresh.addEventListener("click", event => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      previewSelectedReciter();
-    });
   }
 
   function injectPicker(select) {
@@ -232,14 +345,17 @@
     block.className = "qr-reciter-inline";
     block.innerHTML = `
       <button id="qrReciterPickerBtn" class="qr-reciter-main" type="button">
-        <span class="qr-reciter-main-name">اختر القارئ</span>
+        <span class="qr-reciter-main-name">جاري فحص أصوات القراء...</span>
+        <span id="qrReciterMainState" class="qr-reciter-main-state">فحص...</span>
         <span class="qr-reciter-main-arrow">⌄</span>
       </button>
       <div class="qr-reciter-dropdown">
+        <div class="qr-reciter-verified-note">✓ لا يظهر في هذه القائمة إلا القارئ الذي اجتاز اختبار تشغيل صوت فعلي.</div>
         <div class="qr-reciter-filters">
-          <button class="qr-reciter-filter on" data-filter="tartil" type="button">✓ ترتيل</button>
-          <button class="qr-reciter-filter on" data-filter="tajwid" type="button">✓ تجويد</button>
+          <button id="qrReciterFilterTartil" class="qr-reciter-filter on" data-filter="tartil" type="button">✓ ترتيل</button>
+          <button id="qrReciterFilterTajwid" class="qr-reciter-filter on" data-filter="tajwid" type="button">✓ تجويد</button>
         </div>
+        <div class="qr-reciter-refresh-wrap"><button id="qrReciterRefresh" class="qr-reciter-refresh" type="button">↻ إعادة فحص الأصوات وإضافة المتاح</button></div>
         <div id="qrReciterInlineList" class="qr-reciter-list"></div>
       </div>`;
 
@@ -260,9 +376,15 @@
         if (!next && ((key === "tartil" && !state.tajwid) || (key === "tajwid" && !state.tartil))) return;
         state[key] = next;
         button.classList.toggle("on", next);
-        button.textContent = `${next ? "✓" : "○"} ${key === "tartil" ? "ترتيل" : "تجويد"}`;
+        updateFilterLabels();
         renderList();
       });
+    });
+
+    qid("qrReciterRefresh")?.addEventListener("click", async event => {
+      event.preventDefault();
+      event.stopPropagation();
+      await loadVerifiedCatalog(true);
     });
 
     document.addEventListener("pointerdown", event => {
@@ -273,6 +395,15 @@
   function watchOptions(select) {
     state.observer?.disconnect();
     state.observer = new MutationObserver(() => {
+      if (state.applying) return;
+      if (state.catalogReady) {
+        const hasUnverified = [...select.options].some(option => option.value && option.dataset.quranVerified !== "1");
+        const verifiedCount = [...select.options].filter(option => option.dataset.quranVerified === "1").length;
+        if (hasUnverified || verifiedCount !== state.catalog.length) {
+          applyCatalogToSelect(select);
+          return;
+        }
+      }
       updateMainButton();
       if (qid("qrReciterInline")?.classList.contains("open")) renderList();
     });
@@ -280,17 +411,13 @@
   }
 
   function install(studio, select) {
-    if (studio.dataset.reciterInlinePicker === "1") return;
-    studio.dataset.reciterInlinePicker = "1";
+    if (studio.dataset.reciterInlinePicker === "2") return;
+    studio.dataset.reciterInlinePicker = "2";
     injectStyles();
     injectPicker(select);
-    installPreviewButton();
     watchOptions(select);
     select.addEventListener("change", updateMainButton);
-    [100, 600, 1500, 3200, 6000].forEach(ms => setTimeout(() => {
-      updateMainButton();
-      if (qid("qrReciterInline")?.classList.contains("open")) renderList();
-    }, ms));
+    loadVerifiedCatalog(false);
   }
 
   if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", waitForStudio);
