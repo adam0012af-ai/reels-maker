@@ -85,9 +85,11 @@ async function withQuranRuntime(response) {
 
   let html = await response.text();
   html = html.replace(/quran-reciter-picker\.js\?v=\d+/g, "quran-reciter-picker.js?v=3");
-  if (!html.includes("quran-runtime-v3.js")) {
-    html = html.replace("</body>", '<script src="quran-runtime-v3.js?v=3"></script></body>');
-  }
+
+  const scripts = [];
+  if (!html.includes("quran-reciter-picker.js")) scripts.push('<script src="quran-reciter-picker.js?v=3"></script>');
+  if (!html.includes("quran-runtime-v3.js")) scripts.push('<script src="quran-runtime-v3.js?v=3"></script>');
+  if (scripts.length) html = html.replace("</body>", `${scripts.join("")} </body>`);
 
   const headers = new Headers(response.headers);
   headers.delete("content-length");
