@@ -79,11 +79,28 @@ async function proxyQuranAudio(request) {
   }
 }
 
+async function withQuranRuntime(response) {
+  const type = response.headers.get("content-type") || "";
+  if (!type.includes("text/html")) return response;
+
+  let html = await response.text();
+  html = html.replace(/quran-reciter-picker\.js\?v=\d+/g, "quran-reciter-picker.js?v=3");
+  if (!html.includes("quran-runtime-v3.js")) {
+    html = html.replace("</body>", '<script src="quran-runtime-v3.js?v=3"></script></body>');
+  }
+
+  const headers = new Headers(response.headers);
+  headers.delete("content-length");
+  headers.set("cache-control", "no-store");
+  return new Response(html, { status: response.status, statusText: response.statusText, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === "/api/quran-json" && request.method === "GET") return proxyQuranJson(request);
     if (url.pathname === "/api/quran-media" && request.method === "GET") return proxyQuranAudio(request);
-    return baseWorker.fetch(request, env, ctx);
+    const response = await baseWorker.fetch(request, env, ctx);
+    return withQuranRuntime(response);
   }
 };
