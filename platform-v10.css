@@ -1,0 +1,91 @@
+/* Reels Maker Platform V10 — route-first UI, no floating/legacy navigation */
+:root{--v10-side:286px;--v10-bg:#f5f7fb;--v10-card:#fff;--v10-ink:#263246;--v10-muted:#8792a4;--v10-line:#e5e9f0;--v10-blue:#4f8bd8;--v10-green:#2aa77e;--v10-pink:#d45d91;--v10-violet:#7964c8;--v10-orange:#c98239;--v10-shadow:0 8px 30px rgba(42,55,86,.065)}
+html.modern-platform,html.modern-platform body{background:var(--v10-bg)!important}
+html.modern-platform body{overflow-x:hidden!important}
+html.modern-platform .workspace{min-height:100dvh!important}
+html.modern-platform .topbar-end.actions,#quranStudioLaunch,.mobile-tabs,.mobile-sheet,#mobileSheetBackdrop{display:none!important}
+
+/* The right sidebar is the single navigation source. */
+html.modern-platform .controls{overscroll-behavior:contain!important}
+html.modern-platform .nav-link,html.modern-platform .side-project-action{cursor:pointer!important;transition:background .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease!important}
+html.modern-platform .nav-link:active,html.modern-platform .side-project-action:active{transform:scale(.985)!important}
+html.modern-platform .nav-link.active{position:relative!important;background:#edf5ff!important;color:#3e70aa!important;box-shadow:inset 0 0 0 1px #d9e9fb!important}
+html.modern-platform .nav-link.active:after{content:"";position:absolute;right:-7px;top:8px;bottom:8px;width:3px;border-radius:5px;background:#58a0e8}
+html.modern-platform .side-project-block{border:1px solid #eadfd0!important;background:#fff!important;border-radius:15px!important;padding:7px!important;margin-bottom:10px!important;box-shadow:0 3px 12px rgba(60,70,95,.02)!important}
+html.modern-platform .side-project-block .nav-caption{background:#fff4e8!important;color:#b47635!important}
+html.modern-platform .side-project-action{width:100%;min-height:40px;border:0;border-radius:10px;background:transparent;color:#687487;display:flex;align-items:center;gap:9px;padding:8px 10px;font:700 9.5px Cairo,sans-serif;text-align:right}
+html.modern-platform .side-project-action:hover{background:#f8f9fb;color:#28354a}
+html.modern-platform .side-project-action.primary{margin-top:4px;background:linear-gradient(135deg,#4f8bd8,#7964c8)!important;color:#fff!important;box-shadow:0 7px 18px rgba(79,139,216,.15)!important}
+html.modern-platform .side-project-action .nav-icon{width:24px;display:grid;place-items:center;font-size:13px}
+
+/* Route identity: entering a section must feel like a real page. */
+html.modern-platform .workspace.route-enter .active-page,html.modern-platform .workspace.route-enter #editorPage:not(.hidden),html.modern-platform .workspace.route-enter #quranPage:not(.hidden){animation:v10PageIn .22s cubic-bezier(.2,.72,.2,1) both}
+@keyframes v10PageIn{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}
+html.modern-platform #dashboardPage,html.modern-platform #editorPage,html.modern-platform #quranPage{min-height:calc(100dvh - 72px)!important}
+html.modern-platform .page-head,html.modern-platform .editor-head,html.modern-platform .quran-page-head{position:relative!important}
+html.modern-platform .editor-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;margin-bottom:14px!important;padding:16px 18px!important;border:1px solid var(--v10-line)!important;border-radius:17px!important;background:#fff!important;box-shadow:var(--v10-shadow)!important}
+html.modern-platform .editor-head:before{content:"";position:absolute;right:0;top:14px;bottom:14px;width:4px;border-radius:4px;background:var(--route-color,#4f8bd8)}
+html.modern-platform .editor-head h1{margin:0!important;font-size:19px!important;color:var(--v10-ink)!important}
+html.modern-platform .editor-head p{margin:5px 0 0!important;color:var(--v10-muted)!important;font-size:9px!important}
+html.modern-platform .editor-head>.btn{display:none!important}
+html.modern-platform body[data-route=video]{--route-color:var(--v10-blue)}
+html.modern-platform body[data-route=text]{--route-color:var(--v10-violet)}
+html.modern-platform body[data-route=audio]{--route-color:var(--v10-pink)}
+html.modern-platform body[data-route=stickers]{--route-color:var(--v10-orange)}
+html.modern-platform body[data-route=layers]{--route-color:#6b78a6}
+html.modern-platform body[data-route=settings]{--route-color:var(--v10-green)}
+
+html.modern-platform .editor-layout{align-items:start!important}
+html.modern-platform .tool-column,html.modern-platform .preview-card{border:1px solid var(--v10-line)!important;border-radius:18px!important;background:#fff!important;box-shadow:var(--v10-shadow)!important}
+html.modern-platform .tool-card-head,html.modern-platform .preview-head{min-height:54px!important;padding:12px 15px!important;border-bottom:1px solid #edf0f4!important;background:linear-gradient(180deg,#fff,#fbfcfd)!important}
+html.modern-platform .tool-card-head b,html.modern-platform .preview-head b{font-size:11px!important;color:#2d394c!important}
+html.modern-platform .tool-card-head span,html.modern-platform .preview-head span{font-size:8px!important;color:#929cac!important}
+html.modern-platform .panel{padding:16px!important}
+html.modern-platform .panel-title h2{font-size:15px!important;color:#293649!important;margin-bottom:4px!important}
+html.modern-platform .panel-title p{color:#8a95a7!important;font-size:9px!important;line-height:1.7!important}
+
+/* Quran is embedded as a genuine page, never a popup. */
+html.modern-platform body[data-route=quran] #quranPage{display:block!important}
+html.modern-platform .platform-quran-embedded{display:block!important;position:relative!important;inset:auto!important;height:auto!important;min-height:0!important;overflow:visible!important;background:transparent!important;z-index:auto!important}
+html.modern-platform .platform-quran-embedded .qr-head,html.modern-platform .platform-quran-embedded #qrClose{display:none!important}
+html.modern-platform .quran-page-head{padding:16px 18px!important;border:1px solid var(--v10-line)!important;border-radius:17px!important;background:#fff!important;box-shadow:var(--v10-shadow)!important}
+html.modern-platform .quran-page-head:before{content:"";position:absolute;right:0;top:14px;bottom:14px;width:4px;border-radius:5px;background:var(--v10-green)}
+html.modern-platform .quran-page-head h1{font-size:19px!important}.quran-page-head p{font-size:9px!important}
+
+/* Clear hit feedback so the interface does not feel like a screenshot. */
+html.modern-platform button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+html.modern-platform .service-card,html.modern-platform .quick-card,html.modern-platform .activity-row .btn{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease!important}
+html.modern-platform .service-card:hover{transform:translateY(-2px)!important;box-shadow:0 13px 30px rgba(42,55,86,.09)!important}
+html.modern-platform .service-card:active,html.modern-platform .quick-card:active,html.modern-platform .activity-row .btn:active{transform:scale(.985)!important}
+
+/* Route loading cover prevents a legacy flash during refresh. */
+#modernBootCover{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#f5f7fb;opacity:1;visibility:visible;transition:opacity .14s ease,visibility .14s ease}
+#modernBootCover .boot-mark{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(135deg,#5caee1,#7964c8);color:#fff;font:900 20px Cairo,sans-serif;box-shadow:0 14px 34px rgba(75,104,170,.16)}
+html.platform-ready #modernBootCover{opacity:0;visibility:hidden;pointer-events:none}
+
+@media(max-width:900px){
+  html.modern-platform #dashboardPage,html.modern-platform #editorPage,html.modern-platform #quranPage{min-height:calc(100dvh - 62px)!important}
+  html.modern-platform .editor-page,html.modern-platform .quran-page,html.modern-platform .page{padding:12px 10px 34px!important}
+  html.modern-platform .editor-head,html.modern-platform .quran-page-head{margin:0 0 10px!important;padding:13px 14px!important;border-radius:14px!important}
+  html.modern-platform .editor-head h1,html.modern-platform .quran-page-head h1{font-size:16px!important}
+  html.modern-platform .editor-head p,html.modern-platform .quran-page-head p{font-size:8.5px!important}
+  html.modern-platform .editor-layout{display:flex!important;flex-direction:column!important;gap:10px!important}
+  html.modern-platform .tool-column{order:-1!important;width:100%!important}
+  html.modern-platform .preview-card{order:0!important;width:100%!important}
+  html.modern-platform .tool-column,html.modern-platform .preview-card{border-radius:15px!important}
+  html.modern-platform .panel{padding:13px!important}
+  html.modern-platform .preview-card{margin-bottom:12px!important}
+  html.modern-platform .stage-wrap{padding:10px!important}
+  html.modern-platform .stage{max-height:58dvh!important}
+  html.modern-platform .controls{z-index:1000!important}
+  html.modern-platform .sidebar-backdrop{z-index:990!important}
+  html.modern-platform .side-project-action{min-height:44px!important;font-size:10.5px!important}
+  html.modern-platform .nav-link{min-height:44px!important;font-size:10.5px!important}
+}
+@media(max-width:560px){
+  html.modern-platform .editor-layout{display:block!important}
+  html.modern-platform .tool-column{margin-bottom:10px!important}
+  html.modern-platform .preview-card{margin-top:10px!important}
+  html.modern-platform .panel input[type=text],html.modern-platform .panel input[type=search],html.modern-platform .panel select,html.modern-platform .panel textarea{font-size:16px!important}
+  html.modern-platform .quran-page-head .quran-breadcrumb{display:none!important}
+}
