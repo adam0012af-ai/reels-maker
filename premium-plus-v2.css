@@ -1,0 +1,24 @@
+:root{
+  --rmx-bg:#03060a;--rmx-bg2:#07101a;--rmx-panel:#0a121c;--rmx-panel2:#0f1a28;
+  --rmx-line:rgba(161,184,214,.13);--rmx-line2:rgba(161,184,214,.25);--rmx-text:#f7faff;--rmx-muted:#8394aa;
+  --rmx-blue:#7490ff;--rmx-cyan:#4bd2e8;--rmx-green:#42d3a6;--rmx-amber:#efb65c;--rmx-red:#ff6f75;
+}
+html,body{background:var(--rmx-bg)!important}
+#homeShell.rmplus-home{background:
+ radial-gradient(circle at 76% 0%,rgba(69,104,184,.16),transparent 31%),
+ radial-gradient(circle at 4% 64%,rgba(33,126,112,.10),transparent 27%),
+ linear-gradient(180deg,#060b12,#03070c 60%,#030509)!important}
+.rmplus-header{height:74px!important;background:rgba(3,7,12,.86)!important;border-bottom:1px solid rgba(161,184,214,.09)!important;box-shadow:0 16px 55px rgba(0,0,0,.22)!important}
+.rmplus-logo{border-radius:14px!important;background:linear-gradient(145deg,#101b2a,#0b2826)!important;box-shadow:0 12px 35px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.06)!important}
+.rmplus-menu{background:linear-gradient(180deg,#121d2a,#0c151f)!important;border-color:rgba(161,184,214,.18)!important;box-shadow:0 12px 30px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.035)!important}
+.rmplus-copy h1{font-weight:900!important;letter-spacing:-3px!important}.rmplus-copy p{color:#a0afc0!important}.rmplus-mission{border-color:rgba(255,111,117,.18)!important;background:linear-gradient(90deg,rgba(255,111,117,.06),rgba(255,111,117,.01))!important}
+.rmplus-device{border-radius:44px!important;background:linear-gradient(145deg,#222d3a,#05080d 58%,#16202b)!important;box-shadow:0 60px 150px rgba(0,0,0,.66),inset 0 0 0 1px rgba(255,255,255,.14),0 0 0 1px #000!important}
+.rmplus-screen{border-radius:36px!important}.rmplus-media:after{background:linear-gradient(180deg,rgba(2,5,8,.02) 18%,rgba(2,5,8,.16) 48%,rgba(2,5,8,.94) 92%)!important}
+.rmplus-slide-ui{bottom:22px!important}.rmplus-slide-ui h3{font-size:11.5px!important}.rmplus-slide-ui p{color:#b6c3d2!important}
+.rmplus-tool{background:linear-gradient(180deg,#0d1723,#07101a)!important;border-color:rgba(161,184,214,.11)!important;box-shadow:inset 0 1px rgba(255,255,255,.025),0 20px 55px rgba(0,0,0,.12)!important}.rmplus-tool:before{background:linear-gradient(90deg,transparent,rgba(116,144,255,.5),rgba(66,211,166,.34),transparent)!important}.rmplus-step{background:linear-gradient(180deg,#09131d,#060d14)!important;border-color:rgba(161,184,214,.10)!important}
+.creator-drawer{background:linear-gradient(180deg,#08101a,#050a10)!important;border-left:1px solid rgba(161,184,214,.12)!important;box-shadow:-45px 0 120px rgba(0,0,0,.58)!important}
+#rmPlusNav{display:none!important}.creator-drawer>[data-home-drawer],.creator-drawer>[data-rm-projects],.creator-drawer>.creator-nav-btn{display:none!important}
+#rmPlusNavV2{display:flex;flex-direction:column;padding:8px 0;gap:5px}.rmx-nav-btn{display:flex!important;align-items:center;gap:10px;width:100%;min-height:50px;padding:0 13px;border:1px solid rgba(161,184,214,.11);border-radius:12px;background:linear-gradient(180deg,#0d1722,#09121b);color:#dfe7f1;font:800 10px Cairo,sans-serif;text-align:right;cursor:pointer}.rmx-nav-btn:hover{border-color:rgba(116,144,255,.32);background:#101b28}.rmx-nav-btn.active{border-color:rgba(66,211,166,.34);background:linear-gradient(135deg,rgba(66,211,166,.10),rgba(116,144,255,.09));box-shadow:inset 3px 0 0 #42d3a6}.rmx-nav-icon{width:28px;height:28px;border-radius:9px;border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;background:#101b28;color:#cbd8e8;font-size:12px}.rmx-nav-copy{flex:1}.rmx-nav-copy b{display:block;font-size:9.5px}.rmx-nav-copy span{display:block;color:#66788e;font-size:6.5px;margin-top:2px;font-weight:600}.rmx-nav-new{font:800 6px Montserrat,Cairo;background:rgba(66,211,166,.10);border:1px solid rgba(66,211,166,.22);color:#7fe3c2;border-radius:999px;padding:3px 5px}
+#rmProjectsHomeBtn,#ssHomeReturn{display:none!important}.story-studio .ss-head-actions{display:flex;align-items:center;gap:7px}.story-studio .ss-head{box-shadow:0 12px 40px rgba(0,0,0,.14)}
+.rmx-dev-credit{display:inline-flex;align-items:center;gap:6px;color:#65788e;font-size:7px}.rmx-dev-credit i{width:5px;height:5px;border-radius:50%;background:var(--rmx-green)}
+@media(max-width:760px){.rmplus-copy h1{letter-spacing:-1.7px!important}.rmplus-device{border-radius:37px!important}.rmplus-screen{border-radius:30px!important}.rmx-nav-btn{min-height:48px}.rmx-nav-copy span{display:none}}
