@@ -1,5 +1,5 @@
 name = "reels-maker"
-main = "worker-v6.js"
+main = "worker-v7.js"
 compatibility_date = "2026-09-06"
 
 [ai]
