@@ -2,9 +2,10 @@
 
 (() => {
   const nativeFetch = window.fetch.bind(window);
+  const qid = id => document.getElementById(id);
 
-  // Quran API/audio are routed through the same Cloudflare Worker so browsers never
-  // depend on third-party CORS behavior.
+  // Route Quran JSON/audio through the same Cloudflare Worker so Chrome/mobile
+  // never depend on third-party CORS or hotlink behaviour.
   window.fetch = function quranSafeFetch(input, init) {
     const raw = typeof input === "string" ? input : input?.url;
     if (raw) {
@@ -21,10 +22,13 @@
     return nativeFetch(input, init);
   };
 
-  const qid = id => document.getElementById(id);
   let mirror = null;
   let mirrorCtx = null;
   let livePreview = false;
+
+  function mainCanvas() {
+    return qid("canvas");
+  }
 
   function isQuranReady() {
     try {
@@ -34,27 +38,44 @@
     }
   }
 
+  function hasVisualProject() {
+    try {
+      return !!state?.videoLoaded || !!state?.layers?.some(layer => layer.quranTimed || layer.quranMeta || layer.quranLogo || String(layer.id || "").startsWith("qbg-"));
+    } catch {
+      return false;
+    }
+  }
+
   function injectMirrorStyles() {
-    if (qid("qrRuntimeV3Styles")) return;
+    if (qid("qrRuntimeV4Styles")) return;
     const style = document.createElement("style");
-    style.id = "qrRuntimeV3Styles";
+    style.id = "qrRuntimeV4Styles";
     style.textContent = `
-      #qrPhoneStage { position:relative; overflow:hidden; }
-      #qrPhoneMirror {
-        position:absolute; inset:0; width:100%; height:100%; display:none;
-        z-index:3; background:#000; pointer-events:none;
+      #qrPhoneStage{position:relative!important;overflow:hidden!important}
+      #qrPhoneMirror{
+        position:absolute;inset:0;width:100%;height:100%;display:none;z-index:6;
+        background:#000;pointer-events:none;border-radius:inherit
       }
-      #qrPhoneStage.qr-live #qrPhoneMirror { display:block; }
+      #qrPhoneStage.qr-live #qrPhoneMirror{display:block}
       #qrPhoneStage.qr-live .qr-demo-bg,
       #qrPhoneStage.qr-live .qr-demo-text,
-      #qrPhoneStage.qr-live .qr-demo-meta { opacity:0!important; }
+      #qrPhoneStage.qr-live .qr-demo-meta{opacity:0!important}
+      @media(min-width:901px){
+        .qr-preview-col{justify-content:flex-start!important;padding-top:12px!important;overflow:auto!important}
+        .qr-phone{height:min(58dvh,560px)!important;width:auto!important;max-width:94%!important;flex:0 0 auto!important}
+        .qr-preview-tools{flex:0 0 auto!important}
+        .qr-ready-note,.qr-share{flex:0 0 auto!important}
+      }
+      @media(max-width:900px){
+        .qr-phone{width:min(78vw,330px)!important;height:auto!important;flex:0 0 auto!important}
+      }
     `;
     document.head.appendChild(style);
   }
 
   function ensureMirror() {
     const stage = qid("qrPhoneStage");
-    if (!stage) return;
+    if (!stage) return false;
     injectMirrorStyles();
     mirror = qid("qrPhoneMirror");
     if (!mirror) {
@@ -65,27 +86,40 @@
       stage.appendChild(mirror);
     }
     mirrorCtx = mirror.getContext("2d", { alpha: false });
+    return !!mirrorCtx;
   }
 
   function setLivePreview(on = true) {
     livePreview = !!on;
     qid("qrPhoneStage")?.classList.toggle("qr-live", livePreview);
+    if (livePreview) {
+      try { controls?.emptyState?.classList.add("hidden"); } catch {}
+    }
   }
 
   function drawMirror() {
     const studioOpen = qid("quranStudio")?.classList.contains("open");
-    if (!studioOpen || !livePreview || !mirror || !mirrorCtx || !window.canvas) return;
+    const canvasEl = mainCanvas();
+    if (!studioOpen || !livePreview || !mirror || !mirrorCtx || !canvasEl) return;
     try {
-      // Render a clean frame without editor selection handles, then copy it into the phone.
       const oldExporting = state.exporting;
       state.exporting = true;
       if (typeof renderCanvas === "function") renderCanvas();
-      mirrorCtx.drawImage(canvas, 0, 0, mirror.width, mirror.height);
+      mirrorCtx.clearRect(0, 0, mirror.width, mirror.height);
+      mirrorCtx.drawImage(canvasEl, 0, 0, mirror.width, mirror.height);
       state.exporting = oldExporting;
     } catch {}
   }
 
-  function waitForBuild(timeoutMs = 90000) {
+  function revealCurrentVisual() {
+    if (!qid("quranStudio")?.classList.contains("open")) return;
+    if (!hasVisualProject()) return;
+    setLivePreview(true);
+    try { if (typeof renderCanvas === "function") renderCanvas(); } catch {}
+    drawMirror();
+  }
+
+  function waitForBuild(timeoutMs = 120000) {
     return new Promise(resolve => {
       const status = qid("qrStatus");
       if (!status) return resolve(false);
@@ -114,15 +148,15 @@
   }
 
   async function ensurePrepared() {
-    if (isQuranReady()) return true;
+    if (isQuranReady()) {
+      setLivePreview(true);
+      return true;
+    }
     const prepare = qid("qrPrepare");
     if (!prepare) return false;
     if (!prepare.disabled) prepare.click();
     const ok = await waitForBuild();
-    if (ok) {
-      setLivePreview(true);
-      try { controls?.emptyState?.classList.add("hidden"); } catch {}
-    }
+    if (ok) revealCurrentVisual();
     return ok;
   }
 
@@ -131,7 +165,9 @@
     setLivePreview(true);
     try {
       if (typeof setupAudioGraph === "function") await setupAudioGraph();
-      if (!sourceAudio.paused && !sourceAudio.ended) {
+      const playingAudio = !sourceAudio.paused && !sourceAudio.ended;
+      const playingVideo = state.videoLoaded && !sourceVideo.paused && !sourceVideo.ended;
+      if (playingAudio || playingVideo) {
         sourceAudio.pause();
         if (state.videoLoaded) sourceVideo.pause();
         button.textContent = "▶ معاينة مباشرة";
@@ -141,11 +177,13 @@
       if (sourceAudio.ended || sourceAudio.currentTime >= (sourceAudio.duration || Infinity) - .05) sourceAudio.currentTime = 0;
       if (state.videoLoaded) {
         sourceVideo.loop = true;
-        sourceVideo.currentTime = Math.min(sourceAudio.currentTime || 0, Math.max(0, (sourceVideo.duration || 0) - .05));
+        const videoDur = Number.isFinite(sourceVideo.duration) ? sourceVideo.duration : 0;
+        sourceVideo.currentTime = videoDur > 0 ? Math.min(sourceAudio.currentTime || 0, Math.max(0, videoDur - .05)) : 0;
         await sourceVideo.play().catch(() => {});
       }
       await sourceAudio.play();
       button.textContent = "❚❚ إيقاف المعاينة";
+      revealCurrentVisual();
     } catch (error) {
       const status = qid("qrStatus");
       if (status) {
@@ -176,9 +214,9 @@
 
   function replaceActionButton(id, handler) {
     const old = qid(id);
-    if (!old || old.dataset.runtimeV3 === "1") return old;
+    if (!old || old.dataset.runtimeV4 === "1") return old;
     const fresh = old.cloneNode(true);
-    fresh.dataset.runtimeV3 = "1";
+    fresh.dataset.runtimeV4 = "1";
     old.replaceWith(fresh);
     fresh.addEventListener("click", event => {
       event.preventDefault();
@@ -195,10 +233,7 @@
     const status = qid("qrStatus");
     if (status) {
       const observer = new MutationObserver(() => {
-        if (/تم تجهيز|جاهز للمراجعة/.test(status.textContent || "")) {
-          setLivePreview(true);
-          try { controls?.emptyState?.classList.add("hidden"); } catch {}
-        }
+        if (/تم تجهيز|جاهز للمراجعة/.test(status.textContent || "")) revealCurrentVisual();
       });
       observer.observe(status, { childList: true, subtree: true, characterData: true });
     }
@@ -208,6 +243,39 @@
       if (btn) btn.textContent = "▶ معاينة مباشرة";
       if (state.videoLoaded) sourceVideo.pause();
     });
+  }
+
+  function installVisualHooks() {
+    ["loadedmetadata", "loadeddata", "canplay", "seeked"].forEach(type => {
+      sourceVideo?.addEventListener(type, () => {
+        if (qid("quranStudio")?.classList.contains("open")) revealCurrentVisual();
+      });
+    });
+
+    document.addEventListener("click", event => {
+      if (event.target.closest?.(".qr-stock-item,.qr-bg")) {
+        [80, 350, 900, 1800].forEach(ms => setTimeout(revealCurrentVisual, ms));
+      }
+    }, true);
+
+    document.addEventListener("change", event => {
+      if (["qrBgImage", "qrBgVideo"].includes(event.target?.id)) {
+        [120, 500, 1200].forEach(ms => setTimeout(revealCurrentVisual, ms));
+      }
+    }, true);
+
+    const studio = qid("quranStudio");
+    if (studio) {
+      const observer = new MutationObserver(() => {
+        if (studio.classList.contains("open")) {
+          ensureMirror();
+          setTimeout(() => {
+            if (hasVisualProject()) revealCurrentVisual();
+          }, 80);
+        }
+      });
+      observer.observe(studio, { attributes: true, attributeFilter: ["class"] });
+    }
   }
 
   function installAudioOnlyEditorTransport() {
@@ -243,24 +311,28 @@
         controls.timeline.value = Math.round((sourceAudio.currentTime / sourceAudio.duration) * 1000) || 0;
         controls.currentTime.textContent = typeof fmt === "function" ? fmt(sourceAudio.currentTime) : `${Math.floor(sourceAudio.currentTime)}s`;
         controls.duration.textContent = typeof fmt === "function" ? fmt(sourceAudio.duration) : `${Math.floor(sourceAudio.duration)}s`;
-        if (sourceAudio.paused && qid("quranStudio")?.classList.contains("open")) {
-          const btn = qid("qrPlay");
-          if (btn && btn.textContent.includes("إيقاف")) btn.textContent = "▶ معاينة مباشرة";
-        }
+      }
+      if (sourceAudio?.paused && qid("quranStudio")?.classList.contains("open")) {
+        const btn = qid("qrPlay");
+        if (btn && btn.textContent.includes("إيقاف")) btn.textContent = "▶ معاينة مباشرة";
       }
     } catch {}
     requestAnimationFrame(raf);
   }
 
   function install() {
-    ensureMirror();
+    if (!ensureMirror()) return setTimeout(install, 120);
     installStudioActions();
+    installVisualHooks();
     installAudioOnlyEditorTransport();
     requestAnimationFrame(raf);
+    if (hasVisualProject()) revealCurrentVisual();
   }
 
   function waitForStudio() {
-    if (!qid("quranStudio") || !qid("qrPlay") || !window.canvas) return setTimeout(waitForStudio, 100);
+    // A top-level `const canvas` from script.js is not a window.canvas property.
+    // Use the actual DOM canvas so this runtime always installs.
+    if (!qid("quranStudio") || !qid("qrPlay") || !mainCanvas()) return setTimeout(waitForStudio, 100);
     install();
   }
 
