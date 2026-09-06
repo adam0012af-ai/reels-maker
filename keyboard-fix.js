@@ -11,17 +11,13 @@
   let lastOrientation = screen.orientation?.type || (window.innerWidth > window.innerHeight ? "landscape" : "portrait");
   let previewObjectUrl = null;
 
-  function activeIsEditable() {
-    return isEditable(document.activeElement);
-  }
+  const activeIsEditable = () => isEditable(document.activeElement);
 
   function keepFocusedFieldVisible(el) {
     if (!isEditable(el)) return;
     setTimeout(() => {
       if (document.activeElement !== el) return;
-      try {
-        el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
-      } catch {}
+      try { el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" }); } catch {}
     }, 220);
   }
 
@@ -32,54 +28,64 @@
     style.textContent = `
       @media (max-width: 900px) {
         .mobile-sheet {
-          max-height: 42dvh !important;
+          max-height: 38dvh !important;
           border-radius: 20px 20px 0 0 !important;
-          transition: transform .22s ease, max-height .2s ease !important;
+          transition: transform .22s ease, max-height .22s ease !important;
+          will-change: transform, max-height;
         }
+        .mobile-sheet.expanded { max-height: 68dvh !important; }
         .mobile-sheet .panel {
-          max-height: calc(42dvh - 18px) !important;
-          padding: 10px 14px 16px !important;
+          max-height: calc(38dvh - 18px) !important;
+          padding: 10px 14px calc(16px + env(safe-area-inset-bottom)) !important;
           overscroll-behavior: contain;
           scrollbar-width: thin;
+          -webkit-overflow-scrolling: touch;
         }
+        .mobile-sheet.expanded .panel { max-height: calc(68dvh - 18px) !important; }
         .sheet-handle {
-          width: 56px !important;
+          width: 58px !important;
           height: 6px !important;
           margin: 8px auto 2px !important;
           touch-action: none;
           cursor: grab;
+          position: relative;
+          z-index: 5;
+        }
+        .sheet-handle:after {
+          content: '';
+          position: absolute;
+          inset: -10px -26px;
         }
         #mobileSheetCloseBtn {
           position: absolute;
           top: 7px;
           right: 12px;
-          z-index: 4;
+          z-index: 6;
           width: 34px;
           height: 34px;
           border: 1px solid rgba(255,255,255,.1);
           border-radius: 50%;
-          background: rgba(255,255,255,.06);
-          color: #d8dbea;
-          font-size: 15px;
+          background: rgba(255,255,255,.07);
+          color: #e5e7ef;
+          font-size: 18px;
           line-height: 1;
           display: grid;
           place-items: center;
+          -webkit-tap-highlight-color: transparent;
         }
-        .mobile-sheet .panel-title h2 { font-size: 15px !important; }
+        #mobileSheetCloseBtn:active { transform: scale(.94); }
+        .mobile-sheet .panel-title h2 { font-size: 15px !important; padding-inline-end: 38px; }
         .mobile-sheet .panel-title p {
           font-size: 9px !important;
           margin: 2px 0 9px !important;
           line-height: 1.55 !important;
         }
         #panel-audio .upload {
-          min-height: 58px !important;
+          min-height: 54px !important;
           padding: 7px 10px !important;
           gap: 2px !important;
         }
-        #panel-audio .upload > span {
-          width: 30px !important;
-          height: 30px !important;
-        }
+        #panel-audio .upload > span { width: 30px !important; height: 30px !important; }
         #panel-audio .tts-box,
         #panel-audio .sfx-box {
           padding: 9px !important;
@@ -87,8 +93,8 @@
           border-radius: 12px !important;
         }
         #panel-audio .tts-box textarea {
-          min-height: 76px !important;
-          max-height: 105px !important;
+          min-height: 72px !important;
+          max-height: 96px !important;
           margin-bottom: 7px !important;
         }
         #panel-audio .field { margin-bottom: 8px !important; }
@@ -103,22 +109,28 @@
           border-radius: 10px;
         }
         html.keyboard-editing .mobile-tabs { display: none !important; }
-        html.keyboard-editing .mobile-sheet {
+        html.keyboard-editing .mobile-sheet,
+        html.keyboard-editing .mobile-sheet.expanded {
           bottom: 0 !important;
-          max-height: 68dvh !important;
+          max-height: 72dvh !important;
         }
-        html.keyboard-editing .mobile-sheet .panel {
-          max-height: calc(68dvh - 18px) !important;
+        html.keyboard-editing .mobile-sheet .panel,
+        html.keyboard-editing .mobile-sheet.expanded .panel {
+          max-height: calc(72dvh - 18px) !important;
         }
       }
       @media (max-width: 520px) {
-        .mobile-sheet { max-height: 40dvh !important; }
-        .mobile-sheet .panel { max-height: calc(40dvh - 18px) !important; }
+        .mobile-sheet { max-height: 36dvh !important; }
+        .mobile-sheet.expanded { max-height: 66dvh !important; }
+        .mobile-sheet .panel { max-height: calc(36dvh - 18px) !important; }
+        .mobile-sheet.expanded .panel { max-height: calc(66dvh - 18px) !important; }
         #panel-audio .panel-title p { display: none; }
         #panel-audio .upload small { display: none; }
-        #panel-audio .upload { min-height: 54px !important; }
-        html.keyboard-editing .mobile-sheet { max-height: 70dvh !important; }
-        html.keyboard-editing .mobile-sheet .panel { max-height: calc(70dvh - 18px) !important; }
+        #panel-audio .upload { min-height: 50px !important; }
+        html.keyboard-editing .mobile-sheet,
+        html.keyboard-editing .mobile-sheet.expanded { max-height: 74dvh !important; }
+        html.keyboard-editing .mobile-sheet .panel,
+        html.keyboard-editing .mobile-sheet.expanded .panel { max-height: calc(74dvh - 18px) !important; }
       }
     `;
     document.head.appendChild(style);
@@ -127,45 +139,56 @@
   function installMobileSheetControls() {
     const sheet = document.getElementById("mobileSheet");
     const handle = sheet?.querySelector(".sheet-handle");
-    if (!sheet || !handle || sheet.dataset.dismissReady === "1") return;
-    sheet.dataset.dismissReady = "1";
+    if (!sheet || !handle || sheet.dataset.dismissReady === "2") return;
+    sheet.dataset.dismissReady = "2";
+
+    const setExpanded = expanded => {
+      sheet.classList.toggle("expanded", !!expanded);
+      handle.setAttribute("aria-expanded", expanded ? "true" : "false");
+    };
 
     const closeSheet = ({ blur = true } = {}) => {
       if (blur && isEditable(document.activeElement)) {
         try { document.activeElement.blur(); } catch {}
       }
-      sheet.classList.remove("open");
+      sheet.classList.remove("open", "expanded");
       sheet.style.transform = "";
       sheet.style.transition = "";
       document.documentElement.classList.remove("keyboard-editing");
       editing = false;
+      handle.setAttribute("aria-expanded", "false");
     };
 
-    const closeBtn = document.createElement("button");
+    const closeBtn = document.getElementById("mobileSheetCloseBtn") || document.createElement("button");
     closeBtn.id = "mobileSheetCloseBtn";
     closeBtn.type = "button";
     closeBtn.setAttribute("aria-label", "إغلاق لوحة الأدوات");
     closeBtn.textContent = "×";
+    if (!closeBtn.parentElement) sheet.appendChild(closeBtn);
     closeBtn.addEventListener("click", event => {
       event.preventDefault();
       event.stopPropagation();
       closeSheet();
     });
-    sheet.appendChild(closeBtn);
 
-    // Tap the currently selected bottom tab again to collapse its panel.
+    handle.setAttribute("role", "button");
+    handle.setAttribute("aria-label", "اسحب لتكبير أو إغلاق لوحة الأدوات");
+    handle.setAttribute("aria-expanded", "false");
+
     document.addEventListener("click", event => {
       if (window.innerWidth > 900) return;
       const tab = event.target.closest?.(".mobile-tabs .tab");
       if (!tab) return;
-      if (tab.classList.contains("active") && sheet.classList.contains("open")) {
+      const sameTab = tab.classList.contains("active");
+      if (sameTab && sheet.classList.contains("open")) {
         event.preventDefault();
         event.stopImmediatePropagation();
         closeSheet();
+      } else {
+        setExpanded(false);
       }
     }, true);
 
-    // Tap anywhere above/outside the drawer to hide it, like a native bottom sheet.
     document.addEventListener("pointerdown", event => {
       if (window.innerWidth > 900 || !sheet.classList.contains("open")) return;
       if (sheet.contains(event.target) || event.target.closest?.(".mobile-tabs")) return;
@@ -188,8 +211,8 @@
 
     handle.addEventListener("pointermove", event => {
       if (!dragging) return;
-      dragY = Math.max(0, event.clientY - startY);
-      sheet.style.transform = `translateY(${Math.min(dragY, 220)}px)`;
+      dragY = event.clientY - startY;
+      if (dragY > 0) sheet.style.transform = `translateY(${Math.min(dragY, 220)}px)`;
       event.preventDefault();
     });
 
@@ -197,27 +220,31 @@
       if (!dragging) return;
       dragging = false;
       try { handle.releasePointerCapture(event.pointerId); } catch {}
-      const tap = dragY < 8;
-      const shouldClose = dragY > 55 || tap;
       sheet.style.transition = "";
-      if (shouldClose) {
+
+      if (dragY > 55) {
         closeSheet();
-      } else {
-        sheet.style.transform = "";
+        return;
       }
+      if (dragY < -35) {
+        sheet.style.transform = "";
+        setExpanded(true);
+        return;
+      }
+      if (Math.abs(dragY) < 8) {
+        sheet.style.transform = "";
+        setExpanded(!sheet.classList.contains("expanded"));
+        return;
+      }
+      sheet.style.transform = "";
     };
 
     handle.addEventListener("pointerup", finishDrag);
     handle.addEventListener("pointercancel", finishDrag);
   }
 
-  function selectedGeminiVoice() {
-    return document.getElementById("geminiVoice")?.value || "Kore";
-  }
-
-  function selectedGeminiStyle() {
-    return document.getElementById("geminiStyle")?.value || "egyptian";
-  }
+  const selectedGeminiVoice = () => document.getElementById("geminiVoice")?.value || "Kore";
+  const selectedGeminiStyle = () => document.getElementById("geminiStyle")?.value || "egyptian";
 
   function ttsText() {
     const direct = document.getElementById("ttsText")?.value?.trim();
@@ -234,6 +261,7 @@
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "content-type": "application/json" },
+      cache: "no-store",
       body: JSON.stringify({ text, voice, style, voiceId: voice })
     });
     if (!response.ok) {
@@ -264,9 +292,8 @@
     const oldGenerate = document.getElementById("ttsGenerateBtn");
     const oldPreview = document.getElementById("ttsPreviewBtn");
     if (!box || !select || !styleSelect || !oldGenerate || !oldPreview) return false;
-    if (box.dataset.geminiVoiceFixed === "1") return true;
-
-    box.dataset.geminiVoiceFixed = "1";
+    if (box.dataset.geminiVoiceFixed === "2") return true;
+    box.dataset.geminiVoiceFixed = "2";
 
     const savedVoice = localStorage.getItem("reels-gemini-voice");
     if (savedVoice && Array.from(select.options).some(o => o.value === savedVoice)) select.value = savedVoice;
@@ -277,13 +304,23 @@
     const previewBtn = oldPreview.cloneNode(true);
     oldGenerate.replaceWith(generateBtn);
     oldPreview.replaceWith(previewBtn);
-
     previewBtn.textContent = "▶ معاينة الصوت المختار";
     generateBtn.textContent = "✦ إضافة الصوت للمشروع";
 
     const player = ensurePreviewPlayer(box);
 
+    const clearPreview = () => {
+      try { player.pause(); } catch {}
+      player.removeAttribute("src");
+      player.hidden = true;
+      if (previewObjectUrl) {
+        URL.revokeObjectURL(previewObjectUrl);
+        previewObjectUrl = null;
+      }
+    };
+
     const announceVoice = () => {
+      clearPreview();
       localStorage.setItem("reels-gemini-voice", select.value);
       const label = select.options[select.selectedIndex]?.textContent || select.value;
       setTtsStatus(`الصوت المختار الآن: ${label}`);
@@ -291,15 +328,17 @@
 
     select.addEventListener("change", announceVoice);
     styleSelect.addEventListener("change", () => {
+      clearPreview();
       localStorage.setItem("reels-gemini-style", styleSelect.value);
-      const voiceLabel = select.options[select.selectedIndex]?.textContent || select.value;
-      setTtsStatus(`الصوت: ${voiceLabel} — تم تغيير أسلوب الإلقاء.`);
+      const label = select.options[select.selectedIndex]?.textContent || select.value;
+      setTtsStatus(`الصوت: ${label} — تم تغيير أسلوب الإلقاء.`);
     });
 
     previewBtn.addEventListener("click", async event => {
       event.preventDefault();
-      const text = ttsText();
-      if (!text) return setTtsStatus("اكتب نص التعليق الصوتي أولًا.");
+      const fullText = ttsText();
+      if (!fullText) return setTtsStatus("اكتب نص التعليق الصوتي أولًا.");
+      const text = fullText.slice(0, 220);
       const voice = selectedGeminiVoice();
       const style = selectedGeminiStyle();
       const label = select.options[select.selectedIndex]?.textContent || voice;
@@ -308,7 +347,7 @@
       setTtsStatus(`جاري إنشاء معاينة بصوت ${label}...`);
       try {
         const blob = await fetchGeminiVoice(text, voice, style);
-        if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+        clearPreview();
         previewObjectUrl = URL.createObjectURL(blob);
         player.src = previewObjectUrl;
         player.hidden = false;
@@ -335,11 +374,8 @@
       setTtsStatus(`جاري إنشاء التعليق بصوت ${label}...`);
       try {
         const blob = await fetchGeminiVoice(text, voice, style);
-        if (typeof window.loadAudioBlob === "function") {
-          window.loadAudioBlob(blob, `Gemini ${voice}.wav`);
-        } else if (typeof loadAudioBlob === "function") {
-          loadAudioBlob(blob, `Gemini ${voice}.wav`);
-        }
+        if (typeof window.loadAudioBlob === "function") window.loadAudioBlob(blob, `Gemini ${voice}.wav`);
+        else if (typeof loadAudioBlob === "function") loadAudioBlob(blob, `Gemini ${voice}.wav`);
         setTtsStatus(`تم إنشاء الصوت ${label} ✅ وإضافته للمشروع.`);
       } catch (error) {
         setTtsStatus(`Gemini TTS: ${String(error.message || error).slice(0, 420)}`);
@@ -409,5 +445,9 @@
       if (enhanceGeminiTts()) observer.disconnect();
     });
     observer.observe(document.body, { childList: true, subtree: true });
+  });
+
+  window.addEventListener("beforeunload", () => {
+    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
   });
 })();
