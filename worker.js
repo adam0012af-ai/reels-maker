@@ -3,7 +3,6 @@ const PIXABAY_API = "https://pixabay.com/api/videos/";
 const GIPHY_GIFS_API = "https://api.giphy.com/v1/gifs/search";
 const GIPHY_STICKERS_API = "https://api.giphy.com/v1/stickers/search";
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const GEMINI_INTERACTIONS = "https://generativelanguage.googleapis.com/v1beta/interactions";
 
 const GEMINI_TTS_VOICES = [
   ["Zephyr", "Bright"], ["Puck", "Upbeat"], ["Charon", "Informative"], ["Kore", "Firm"],
@@ -26,6 +25,7 @@ function json(data, status = 200, headers = {}) {
 function readQuery(request) { return new URL(request.url).searchParams; }
 function cleanQuery(value, max = 100) { return String(value || "").trim().slice(0, max); }
 async function safeJson(request) { try { return await request.json(); } catch { return {}; } }
+
 async function proxyJson(url, options = {}, cacheSeconds = 0) {
   const init = { ...options };
   if (cacheSeconds > 0) init.cf = { cacheTtl: cacheSeconds, cacheEverything: true };
@@ -80,7 +80,9 @@ async function handleGiphy(request, env) {
     const data = await upstream.json().catch(() => ({}));
     if (!upstream.ok) return json({ error: data?.meta?.msg || "GIPHY request failed." }, upstream.status);
     const items = (data.data || []).map(item => {
-      const images = item.images || {}, original = images.original || {}, preview = images.fixed_width_small || images.fixed_width || images.preview_gif || original;
+      const images = item.images || {};
+      const original = images.original || {};
+      const preview = images.fixed_width_small || images.fixed_width || images.preview_gif || original;
       const urlValue = original.url || original.webp || original.mp4;
       return { id: item.id, title: item.title || "GIPHY", preview: preview.url || preview.webp || urlValue, url: urlValue };
     }).filter(item => item.preview && item.url);
@@ -103,12 +105,14 @@ function aiPrompt(type, topic) {
 async function handleAiCaption(request, env) {
   if (!env.GEMINI_API_KEY) return json({ error: "GEMINI_API_KEY is not configured." }, 503);
   const body = await safeJson(request);
-  const type = cleanQuery(body.type, 30), topic = cleanQuery(body.prompt, 200), model = env.GEMINI_MODEL || "gemini-2.5-flash";
-  const url = `${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
+  const type = cleanQuery(body.type, 30);
+  const topic = cleanQuery(body.prompt, 200);
+  const model = env.GEMINI_MODEL || "gemini-2.5-flash";
+  const url = `${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent`;
   try {
     const upstream = await fetch(url, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "x-goog-api-key": env.GEMINI_API_KEY, "content-type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: aiPrompt(type, topic) }] }],
         generationConfig: { temperature: 0.8, maxOutputTokens: 120 }
@@ -133,17 +137,6 @@ function ttsDirection(style, text) {
     natural: hasArabic ? "Speak naturally in Arabic with clear pronunciation and human-like pacing." : "Speak naturally with clear pronunciation and human-like pacing."
   };
   return styles[style] || styles.natural;
-}
-
-function findAudioContent(data) {
-  if (data?.output_audio?.data) return data.output_audio;
-  const steps = Array.isArray(data?.steps) ? [...data.steps].reverse() : [];
-  for (const step of steps) {
-    const content = Array.isArray(step?.content) ? [...step.content].reverse() : [];
-    const audio = content.find(item => item?.type === "audio" && item?.data);
-    if (audio) return audio;
-  }
-  return null;
 }
 
 function decodeBase64(data) {
@@ -181,44 +174,48 @@ async function handleTts(request, env) {
   const body = await safeJson(request);
   const text = cleanQuery(body.text, 4000);
   if (!text) return json({ error: "Missing text." }, 400);
+
   const requestedVoice = cleanQuery(body.voice || body.voiceId, 40);
   const voice = GEMINI_VOICE_NAMES.has(requestedVoice) ? requestedVoice : "Kore";
   const style = cleanQuery(body.style, 30) || "egyptian";
   const model = env.GEMINI_TTS_MODEL || "gemini-2.5-flash-preview-tts";
-  const input = `${ttsDirection(style, text)}\n\nTranscript — read only the transcript below, without announcing the instructions:\n${text}`;
+  const url = `${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent`;
+  const prompt = `${ttsDirection(style, text)}\n\nRead only this transcript:\n${text}`;
+
   try {
-    const upstream = await fetch(GEMINI_INTERACTIONS, {
+    const upstream = await fetch(url, {
       method: "POST",
-      headers: {
-        "x-goog-api-key": env.GEMINI_API_KEY,
-        "content-type": "application/json"
-      },
+      headers: { "x-goog-api-key": env.GEMINI_API_KEY, "content-type": "application/json" },
       body: JSON.stringify({
-        model,
-        input,
-        response_format: { type: "audio", mime_type: "audio/wav", delivery: "inline" },
-        generation_config: { speech_config: [{ voice }] }
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            languageCode: /[\u0600-\u06ff]/.test(text) ? "ar-XA" : "en-US",
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } }
+          }
+        }
       })
     });
+
     const data = await upstream.json().catch(() => ({}));
-    if (!upstream.ok) {
-      return json({ error: data?.error?.message || data?.message || `Gemini TTS request failed (${upstream.status}).` }, upstream.status);
-    }
-    const audio = findAudioContent(data);
-    if (!audio?.data) return json({ error: "Gemini TTS returned no audio data." }, 502);
-    let bytes = decodeBase64(audio.data);
-    let mime = audio.mime_type || "audio/wav";
-    if (mime === "audio/l16" || mime === "audio/pcm" || mime.includes("L16")) {
-      bytes = pcm16ToWav(bytes, Number(audio.sample_rate) || 24000, Number(audio.channels) || 1);
+    if (!upstream.ok) return json({ error: data?.error?.message || `Gemini TTS request failed (${upstream.status}).` }, upstream.status);
+
+    const part = data?.candidates?.[0]?.content?.parts?.find(p => p?.inlineData?.data);
+    if (!part?.inlineData?.data) return json({ error: "Gemini TTS returned no audio data." }, 502);
+
+    const raw = decodeBase64(part.inlineData.data);
+    const mimeType = String(part.inlineData.mimeType || "audio/L16;codec=pcm;rate=24000");
+    let bytes = raw;
+    let mime = mimeType;
+    if (!mimeType.toLowerCase().includes("wav")) {
+      bytes = pcm16ToWav(raw, 24000, 1);
       mime = "audio/wav";
     }
+
     return new Response(bytes, {
       status: 200,
-      headers: {
-        "content-type": mime,
-        "cache-control": "no-store",
-        "content-disposition": `inline; filename="gemini-${voice}.wav"`
-      }
+      headers: { "content-type": mime, "cache-control": "no-store", "content-disposition": `inline; filename="gemini-${voice}.wav"` }
     });
   } catch (e) {
     return json({ error: `Unable to reach Gemini TTS: ${String(e?.message || e).slice(0, 300)}` }, 502);
@@ -229,6 +226,7 @@ function allowedMediaHost(hostname) {
   const h = hostname.toLowerCase();
   return h === "pexels.com" || h.endsWith(".pexels.com") || h === "pixabay.com" || h.endsWith(".pixabay.com") || h === "giphy.com" || h.endsWith(".giphy.com");
 }
+
 async function handleMedia(request) {
   const raw = readQuery(request).get("url");
   if (!raw) return json({ error: "Missing media URL." }, 400);
@@ -236,7 +234,8 @@ async function handleMedia(request) {
   try { target = new URL(raw); } catch { return json({ error: "Invalid media URL." }, 400); }
   if (target.protocol !== "https:" || !allowedMediaHost(target.hostname)) return json({ error: "Media host is not allowed." }, 403);
   try {
-    const headers = new Headers(), range = request.headers.get("range");
+    const headers = new Headers();
+    const range = request.headers.get("range");
     if (range) headers.set("range", range);
     const upstream = await fetch(target, { headers, cf: { cacheTtl: 3600, cacheEverything: true } });
     if (!upstream.ok && upstream.status !== 206) return json({ error: `Media upstream ${upstream.status}` }, upstream.status);
@@ -252,29 +251,7 @@ async function handleMedia(request) {
 const GEMINI_TTS_UI = `<script>
 (() => {
   const voices = ${JSON.stringify(GEMINI_TTS_VOICES)};
-
-  const stabilizeMobileKeyboard = () => {
-    if (typeof window.syncResponsivePanels !== 'function') return;
-    const originalSync = window.syncResponsivePanels;
-    window.removeEventListener('resize', originalSync);
-    let wasWide = window.innerWidth > 900;
-    let lastWidth = window.innerWidth;
-    window.addEventListener('resize', () => {
-      const nowWide = window.innerWidth > 900;
-      const widthChanged = Math.abs(window.innerWidth - lastWidth) > 80;
-      const active = document.activeElement;
-      const editing = active && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName);
-      lastWidth = window.innerWidth;
-      if (editing && nowWide === wasWide && !widthChanged) return;
-      if (nowWide !== wasWide || widthChanged) {
-        wasWide = nowWide;
-        originalSync();
-      }
-    }, { passive: true });
-  };
-
   const boot = () => {
-    stabilizeMobileKeyboard();
     const box = document.querySelector('.tts-box');
     const btn = document.getElementById('ttsGenerateBtn');
     const status = document.getElementById('ttsStatus');
@@ -285,37 +262,35 @@ const GEMINI_TTS_UI = `<script>
 
     const title = box.querySelector(':scope > b');
     if (title) title.textContent = 'Gemini AI Text-to-Speech';
-    if (status) status.textContent = 'Gemini 2.5 Flash TTS — يدعم العربية، واختيار 30 صوتًا، ويدخل الصوت في التصدير.';
+    if (status) status.textContent = 'Gemini TTS — يدعم العربية، 30 صوتًا، والصوت يدخل في التصدير.';
 
     const panel = document.createElement('div');
     panel.id = 'geminiTtsControls';
-    panel.innerHTML = `
-      <label class="field"><span>صوت Gemini</span><select id="geminiVoice"></select><small id="geminiVoiceMeta">30 صوتًا جاهزًا من Gemini.</small></label>
-      <label class="field"><span>أسلوب الإلقاء</span><select id="geminiStyle">
-        <option value="egyptian">مصري طبيعي ودافئ</option>
-        <option value="fusha">عربي فصحى واضح</option>
-        <option value="natural">طبيعي</option>
-        <option value="calm">هادئ وناعم</option>
-        <option value="energetic">حماسي</option>
-        <option value="story">راوي قصصي سينمائي</option>
-        <option value="ad">إعلاني احترافي</option>
-      </select></label>`;
+    panel.innerHTML = '<label class="field"><span>صوت Gemini</span><select id="geminiVoice"></select><small>30 صوتًا جاهزًا من Gemini.</small></label>' +
+      '<label class="field"><span>أسلوب الإلقاء</span><select id="geminiStyle">' +
+      '<option value="egyptian">مصري طبيعي ودافئ</option>' +
+      '<option value="fusha">عربي فصحى واضح</option>' +
+      '<option value="natural">طبيعي</option>' +
+      '<option value="calm">هادئ وناعم</option>' +
+      '<option value="energetic">حماسي</option>' +
+      '<option value="story">راوي قصصي سينمائي</option>' +
+      '<option value="ad">إعلاني احترافي</option>' +
+      '</select></label>';
     box.insertBefore(panel, btn.parentElement);
 
     const select = panel.querySelector('#geminiVoice');
     voices.forEach(([name, tone]) => {
-      const o = document.createElement('option');
-      o.value = name;
-      o.textContent = name + ' • ' + tone;
-      select.appendChild(o);
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name + ' • ' + tone;
+      select.appendChild(option);
     });
     select.value = 'Kore';
 
-    btn.addEventListener('click', async e => {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      const textBox = document.getElementById('ttsText');
-      let text = (textBox?.value || '').trim();
+    btn.addEventListener('click', async event => {
+      event.stopImmediatePropagation();
+      event.preventDefault();
+      let text = (document.getElementById('ttsText')?.value || '').trim();
       if (!text) text = (document.getElementById('textContent')?.value || '').trim();
       if (!text) {
         if (status) status.textContent = 'اكتب نص التعليق الصوتي أولًا.';
@@ -326,20 +301,20 @@ const GEMINI_TTS_UI = `<script>
       btn.disabled = true;
       if (status) status.textContent = 'جاري إنشاء التعليق الصوتي عبر Gemini...';
       try {
-        const r = await fetch('/api/tts', {
+        const response = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ text, voice, style })
         });
-        if (!r.ok) {
-          const data = await r.json().catch(() => ({}));
-          throw new Error(data.error || ('HTTP ' + r.status));
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || ('HTTP ' + response.status));
         }
-        const blob = await r.blob();
+        const blob = await response.blob();
         if (typeof loadAudioBlob === 'function') loadAudioBlob(blob, 'Gemini ' + voice + '.wav');
         if (status) status.textContent = 'تم إنشاء صوت Gemini ✅ وإضافته للمشروع والتصدير.';
-      } catch (err) {
-        if (status) status.textContent = 'Gemini TTS: ' + String(err.message || err).slice(0, 450);
+      } catch (error) {
+        if (status) status.textContent = 'Gemini TTS: ' + String(error.message || error).slice(0, 450);
       } finally {
         btn.disabled = false;
       }
@@ -368,9 +343,7 @@ export default {
     if (url.pathname === "/api/giphy" && request.method === "GET") return handleGiphy(request, env);
     if (url.pathname === "/api/ai-caption" && request.method === "POST") return handleAiCaption(request, env);
     if (url.pathname === "/api/tts" && request.method === "POST") return handleTts(request, env);
-    if (url.pathname === "/api/gemini-voices" && request.method === "GET") {
-      return json({ voices: GEMINI_TTS_VOICES.map(([name, tone]) => ({ name, tone })) }, 200, { "cache-control": "public, max-age=86400" });
-    }
+    if (url.pathname === "/api/gemini-voices" && request.method === "GET") return json({ voices: GEMINI_TTS_VOICES.map(([name, tone]) => ({ name, tone })) }, 200, { "cache-control": "public, max-age=86400" });
     if (url.pathname === "/api/media" && request.method === "GET") return handleMedia(request);
     if (url.pathname.startsWith("/api/")) return json({ error: "API endpoint not found." }, 404);
     return serveAsset(request, env);
