@@ -67,20 +67,23 @@ async function injectPremiumSystem(response) {
 
   html = html.replace(/premium-design-system-v1\.css\?v=\d+/g, "premium-design-system-v1.css?v=3");
   html = html.replace(/premium-layout-v1\.js\?v=\d+/g, "premium-layout-v1.js?v=3");
-  html = html.replace(/business-refresh-v3\.css\?v=\d+/g, "business-refresh-v3.css?v=1");
-  html = html.replace(/business-refresh-v3\.js\?v=\d+/g, "business-refresh-v3.js?v=1");
+  html = html.replace(/premium-plus-v1\.css\?v=\d+/g, "premium-plus-v1.css?v=1");
+  html = html.replace(/premium-plus-v1\.js\?v=\d+/g, "premium-plus-v1.js?v=1");
+
+  const boot = `<style id="rmRouteBootStyle">html.rm-route-booting body{visibility:hidden!important;background:#05080d!important}</style><script id="rmRouteBoot">document.documentElement.classList.add('rm-route-booting');setTimeout(function(){document.documentElement.classList.remove('rm-route-booting')},1800);</script>`;
+  if (!html.includes('id="rmRouteBoot"')) html = html.replace("<head>", `<head>${boot}`);
 
   if (!html.includes("premium-design-system-v1.css")) {
     html = html.replace("</head>", '<link rel="stylesheet" href="premium-design-system-v1.css?v=3"></head>');
   }
-  if (!html.includes("business-refresh-v3.css")) {
-    html = html.replace("</head>", '<link rel="stylesheet" href="business-refresh-v3.css?v=1"></head>');
+  if (!html.includes("premium-plus-v1.css")) {
+    html = html.replace("</head>", '<link rel="stylesheet" href="premium-plus-v1.css?v=1"></head>');
   }
   if (!html.includes("premium-layout-v1.js")) {
     html = html.replace("</body>", '<script src="premium-layout-v1.js?v=3"></script></body>');
   }
-  if (!html.includes("business-refresh-v3.js")) {
-    html = html.replace("</body>", '<script src="business-refresh-v3.js?v=1"></script></body>');
+  if (!html.includes("premium-plus-v1.js")) {
+    html = html.replace("</body>", '<script src="premium-plus-v1.js?v=1"></script></body>');
   }
 
   const headers = new Headers(response.headers);
