@@ -4,6 +4,30 @@
   let metaLayerId = null;
   const qid = id => document.getElementById(id);
 
+  const VERIFIED_RECITERS = [
+    { id: "ar.alafasy", name: "مشاري راشد العفاسي", bitrate: 128 },
+    { id: "ar.husary", name: "محمود خليل الحصري", bitrate: 128 },
+    { id: "ar.minshawi", name: "محمد صديق المنشاوي", bitrate: 128 },
+    { id: "ar.minshawimujawwad", name: "محمد صديق المنشاوي — مجود", bitrate: 64 },
+    { id: "ar.sudais", name: "عبدالرحمن السديس", bitrate: 192 },
+    { id: "ar.shuraim", name: "سعود الشريم", bitrate: 128 },
+    { id: "ar.abdulbasit", name: "عبد الباسط عبد الصمد — مرتل", bitrate: 192 },
+    { id: "ar.abdulbasitmujawwad", name: "عبد الباسط عبد الصمد — مجود", bitrate: 192 },
+    { id: "ar.ajamy", name: "أحمد بن علي العجمي", bitrate: 128 },
+    { id: "ar.muhammadayoub", name: "محمد أيوب", bitrate: 128 },
+    { id: "ar.hudhaify", name: "علي الحذيفي", bitrate: 128 },
+    { id: "ar.muhammadjibreel", name: "محمد جبريل", bitrate: 128 },
+    { id: "ar.parhizgar", name: "محمود خليل الحصري — معلم", bitrate: 64 }
+  ];
+  const RECITER_MAP = new Map(VERIFIED_RECITERS.map(r => [r.id, r]));
+
+  function setQuranStatus(text, type = "") {
+    const status = qid("qrStatus");
+    if (!status) return;
+    status.textContent = text;
+    status.className = `qr-status ${type}`;
+  }
+
   function waitForStudio() {
     const studio = qid("quranStudio");
     if (!studio) return setTimeout(waitForStudio, 120);
@@ -89,9 +113,179 @@
     }, true);
   }
 
+  function mergeVerifiedReciters() {
+    const select = qid("qrReciter");
+    if (!select) return;
+
+    const currentValue = select.value;
+    const placeholders = [...select.options].filter(o => /جاري|تحميل|غير متاح/.test(o.textContent || ""));
+    placeholders.forEach(o => { if (select.options.length > 1 || !o.value) o.remove(); });
+
+    const existing = new Set([...select.options].map(o => o.value));
+    VERIFIED_RECITERS.forEach(reciter => {
+      if (existing.has(reciter.id)) {
+        const option = [...select.options].find(o => o.value === reciter.id);
+        if (option) option.dataset.bitrate = String(reciter.bitrate);
+        return;
+      }
+      const option = document.createElement("option");
+      option.value = reciter.id;
+      option.textContent = `${reciter.name} — ${reciter.id}`;
+      option.dataset.bitrate = String(reciter.bitrate);
+      option.dataset.verifiedFallback = "1";
+      select.appendChild(option);
+    });
+
+    if (currentValue && [...select.options].some(o => o.value === currentValue)) select.value = currentValue;
+    else if (!select.value && select.options.length) select.selectedIndex = 0;
+
+    const count = qid("qrReciterCount");
+    if (count) count.textContent = `${select.options.length} قارئًا متاحًا`;
+  }
+
+  function filterVerifiedReciters(query) {
+    const select = qid("qrReciter");
+    if (!select) return;
+    const q = String(query || "").trim().toLowerCase();
+    mergeVerifiedReciters();
+    [...select.options].forEach(option => {
+      const hay = `${option.textContent || ""} ${option.value || ""}`.toLowerCase();
+      option.hidden = !!q && !hay.includes(q);
+    });
+    const visible = [...select.options].filter(o => !o.hidden);
+    if (visible.length && select.selectedOptions[0]?.hidden) select.value = visible[0].value;
+    const count = qid("qrReciterCount");
+    if (count) count.textContent = `${visible.length} قارئًا مطابقًا`;
+  }
+
+  function globalAyahNumber() {
+    const surahNo = Number(qid("qrSurah")?.value || 1);
+    const ayahInSurah = Number(qid("qrFrom")?.value || 1);
+    const options = [...(qid("qrSurah")?.options || [])];
+    let total = 0;
+    for (const option of options) {
+      const n = Number(option.value || 0);
+      if (n >= surahNo) break;
+      const count = Number(option.dataset.count || 0);
+      if (!count) return null;
+      total += count;
+    }
+    return total + ayahInSurah;
+  }
+
+  function audioCandidateUrls(reciterId, ayahNumber, preferredBitrate) {
+    const bitrates = [preferredBitrate, 128, 192, 64, 48, 40, 32].filter(Boolean);
+    return [...new Set(bitrates)].map(bitrate => `https://cdn.islamic.network/quran/audio/${bitrate}/${encodeURIComponent(reciterId)}/${ayahNumber}.mp3`);
+  }
+
+  function styleMiniAudio(audio) {
+    audio.controls = true;
+    audio.preload = "auto";
+    audio.playsInline = true;
+    audio.style.setProperty("display", "block", "important");
+    audio.style.setProperty("width", "100%", "important");
+    audio.style.setProperty("height", "44px", "important");
+    audio.style.setProperty("margin", "9px 0 3px", "important");
+    audio.style.setProperty("border-radius", "12px", "important");
+  }
+
+  function installReliableReciterPreview() {
+    const btn = qid("qrReciterPreview");
+    const select = qid("qrReciter");
+    const audio = qid("qrMiniAudio");
+    if (!btn || !select || !audio || btn.dataset.audioFix === "2") return;
+    btn.dataset.audioFix = "2";
+    styleMiniAudio(audio);
+
+    btn.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      mergeVerifiedReciters();
+      const reciterId = select.value;
+      const ayahNumber = globalAyahNumber();
+      if (!reciterId || !ayahNumber) {
+        setQuranStatus("انتظر تحميل السور والقراء ثم حاول مرة أخرى.", "err");
+        return;
+      }
+
+      const verified = RECITER_MAP.get(reciterId);
+      const optionRate = Number(select.selectedOptions?.[0]?.dataset.bitrate || 0);
+      const urls = audioCandidateUrls(reciterId, ayahNumber, optionRate || verified?.bitrate || 128);
+      let index = 0;
+      let settled = false;
+
+      const reciterName = verified?.name || select.selectedOptions?.[0]?.textContent?.split("—")?.[0]?.trim() || reciterId;
+      btn.disabled = true;
+      btn.textContent = "⏳ جاري فتح الصوت...";
+      setQuranStatus(`جاري تشغيل معاينة ${reciterName}...`);
+
+      const finishUi = () => {
+        btn.disabled = false;
+        btn.textContent = "▶ سماع القارئ على أول آية";
+      };
+
+      const tryCurrent = () => {
+        if (index >= urls.length) {
+          finishUi();
+          setQuranStatus("تعذر تشغيل هذا القارئ الآن. جرّب قارئًا آخر.", "err");
+          return;
+        }
+        audio.src = urls[index++];
+        audio.load();
+        const playPromise = audio.play();
+        if (playPromise?.catch) {
+          playPromise.catch(error => {
+            if (error?.name === "NotAllowedError") {
+              finishUi();
+              setQuranStatus("الصوت جاهز. اضغط زر التشغيل داخل مشغل الصوت مرة واحدة.", "ok");
+            }
+          });
+        }
+      };
+
+      audio.onerror = () => {
+        if (settled) return;
+        tryCurrent();
+      };
+      audio.onplaying = () => {
+        settled = true;
+        finishUi();
+        setQuranStatus(`يعمل الآن صوت ${reciterName} ✅`, "ok");
+      };
+      audio.oncanplay = () => {
+        if (!settled) setQuranStatus(`تم تحميل صوت ${reciterName} — جاري التشغيل...`);
+      };
+      tryCurrent();
+    }, true);
+  }
+
+  function installReciterRecovery() {
+    const merge = () => {
+      mergeVerifiedReciters();
+      installReliableReciterPreview();
+    };
+    merge();
+    setTimeout(merge, 700);
+    setTimeout(merge, 1800);
+    setTimeout(merge, 4000);
+
+    qid("qrReciterSearch")?.addEventListener("input", event => {
+      setTimeout(() => filterVerifiedReciters(event.target.value), 0);
+    }, true);
+    qid("qrReciter")?.addEventListener("change", () => {
+      const audio = qid("qrMiniAudio");
+      if (audio) {
+        try { audio.pause(); } catch {}
+        audio.removeAttribute("src");
+        audio.load();
+      }
+    });
+  }
+
   function install(studio) {
-    if (studio.dataset.integrationFixes === "1") return;
-    studio.dataset.integrationFixes = "1";
+    if (studio.dataset.integrationFixes === "2") return;
+    studio.dataset.integrationFixes = "2";
 
     document.querySelectorAll(".qr-bg").forEach(btn => btn.addEventListener("click", () => {
       applyDemoBackground(btn.dataset.bg);
@@ -117,6 +311,7 @@
 
     qid("qrOpenEditor")?.addEventListener("click", hideEmptyPreview);
     installExportScaleGuard();
+    installReciterRecovery();
     applyDemoBackground(document.querySelector(".qr-bg.active")?.dataset.bg || "emerald");
   }
 
