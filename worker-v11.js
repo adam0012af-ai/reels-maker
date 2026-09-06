@@ -60,14 +60,21 @@ async function aspectAwareStoryboard(request, env, ctx) {
   return json(data, response.status);
 }
 
-async function injectV11(response) {
+async function injectPremiumSystem(response) {
   const type = response.headers.get("content-type") || "";
   if (!type.includes("text/html")) return response;
   let html = await response.text();
-  html = html.replace(/story-format-runtime-v1\.js\?v=\d+/g, "story-format-runtime-v1.js?v=1");
-  if (!html.includes("story-format-runtime-v1.js")) {
-    html = html.replace("</body>", '<script src="story-format-runtime-v1.js?v=1"></script></body>');
+
+  html = html.replace(/premium-design-system-v1\.css\?v=\d+/g, "premium-design-system-v1.css?v=2");
+  html = html.replace(/premium-layout-v1\.js\?v=\d+/g, "premium-layout-v1.js?v=2");
+
+  if (!html.includes("premium-design-system-v1.css")) {
+    html = html.replace("</head>", '<link rel="stylesheet" href="premium-design-system-v1.css?v=2"></head>');
   }
+  if (!html.includes("premium-layout-v1.js")) {
+    html = html.replace("</body>", '<script src="premium-layout-v1.js?v=2"></script></body>');
+  }
+
   const headers = new Headers(response.headers);
   headers.delete("content-length");
   headers.set("cache-control", "no-store");
@@ -81,6 +88,6 @@ export default {
       return aspectAwareStoryboard(request, env, ctx);
     }
     const response = await baseWorker.fetch(request, env, ctx);
-    return injectV11(response);
+    return injectPremiumSystem(response);
   }
 };
