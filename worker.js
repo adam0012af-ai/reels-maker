@@ -107,7 +107,15 @@ async function handleTts(request, env) {
   const url = `${ELEVENLABS_TTS}/${encodeURIComponent(voiceId)}?output_format=mp3_44100_128`;
   try {
     const upstream = await fetch(url, { method: "POST", headers: { "xi-api-key": env.ELEVENLABS_API_KEY, "content-type": "application/json", Accept: "audio/mpeg" }, body: JSON.stringify({ text, model_id: env.ELEVENLABS_MODEL || "eleven_multilingual_v2" }) });
-    if (!upstream.ok) return json({ error: (await upstream.text()).slice(0, 500) || "ElevenLabs request failed." }, upstream.status);
+    if (!upstream.ok) {
+      const raw = await upstream.text();
+      let message = raw;
+      try {
+        const parsed = JSON.parse(raw);
+        message = parsed?.detail?.message || parsed?.detail?.status || parsed?.detail || parsed?.error || raw;
+      } catch {}
+      return json({ error: String(message || "ElevenLabs request failed.").slice(0, 700), status: upstream.status }, upstream.status);
+    }
     return new Response(upstream.body, { status: 200, headers: { "content-type": upstream.headers.get("content-type") || "audio/mpeg", "cache-control": "no-store" } });
   } catch { return json({ error: "Unable to reach ElevenLabs." }, 502); }
 }
@@ -128,6 +136,7 @@ async function handleMedia(request) {
 
 const VOICE_UI = `<script>
 (() => {
+  const TEST_VOICE_ID = 'wxweiHvoC2r2jFM7mS8b';
   const boot = async () => {
     const box = document.querySelector('.tts-box');
     const btn = document.getElementById('ttsGenerateBtn');
@@ -140,23 +149,38 @@ const VOICE_UI = `<script>
       const r = await fetch('/api/voices'); const data = await r.json(); if (!r.ok) throw new Error(data.error || 'voices');
       select.innerHTML = '';
       for (const v of data.voices || []) { const o = document.createElement('option'); o.value = v.voice_id; const l = v.labels || {}; o.textContent = v.name + (l.gender ? ' • ' + l.gender : '') + (l.accent ? ' • ' + l.accent : ''); select.appendChild(o); }
-      if (!select.options.length) select.innerHTML = '<option value="">لا توجد أصوات متاحة</option>';
-      meta.textContent = select.options.length + ' صوت متاح — اختر أي صوت قبل الإنشاء.';
-    } catch { select.innerHTML = '<option value="">تعذر تحميل الأصوات</option>'; meta.textContent = 'تأكد من ELEVENLABS_API_KEY ثم أعد المحاولة.'; }
+      let testOption = Array.from(select.options).find(o => o.value === TEST_VOICE_ID);
+      if (!testOption) {
+        testOption = document.createElement('option');
+        testOption.value = TEST_VOICE_ID;
+        testOption.textContent = 'Haytham — Voice ID test';
+        select.insertBefore(testOption, select.firstChild);
+      }
+      select.value = TEST_VOICE_ID;
+      meta.textContent = 'تم اختيار Voice ID التجريبي تلقائيًا. لو رفضه الحساب سيظهر سبب ElevenLabs الحقيقي أسفل الزر.';
+    } catch {
+      select.innerHTML = '<option value="' + TEST_VOICE_ID + '">Haytham — Voice ID test</option>';
+      meta.textContent = 'تعذر تحميل القائمة، لكن Voice ID التجريبي جاهز للاختبار.';
+    }
     btn.addEventListener('click', async e => {
       const voiceId = select.value; if (!voiceId) return;
       e.stopImmediatePropagation(); e.preventDefault();
       const textBox = document.getElementById('ttsText'); let text = (textBox?.value || '').trim();
       if (!text) { const selected = document.querySelector('#textContent'); text = (selected?.value || '').trim(); }
       if (!text) return;
-      btn.disabled = true; const status = document.getElementById('ttsStatus'); if (status) status.textContent = 'جاري إنشاء التعليق بالصوت المختار...';
+      btn.disabled = true; const status = document.getElementById('ttsStatus'); if (status) status.textContent = 'جاري اختبار الصوت المختار...';
       try {
         const r = await fetch('/api/tts', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({text, voiceId}) });
-        if (!r.ok) throw new Error('tts'); const blob = await r.blob();
+        if (!r.ok) {
+          const data = await r.json().catch(() => ({}));
+          throw new Error(data.error || ('HTTP ' + r.status));
+        }
+        const blob = await r.blob();
         if (typeof loadAudioBlob === 'function') loadAudioBlob(blob, select.options[select.selectedIndex]?.textContent + '.mp3');
-        if (status) status.textContent = 'تم إنشاء التعليق بالصوت المختار وإضافته للمشروع.';
-      } catch { if (status) status.textContent = 'تعذر إنشاء الصوت. راجع مفتاح ElevenLabs أو رصيد الحساب.'; }
-      finally { btn.disabled = false; }
+        if (status) status.textContent = 'نجح الصوت ✅ وتمت إضافته للمشروع.';
+      } catch (err) {
+        if (status) status.textContent = 'ElevenLabs: ' + String(err.message || err).slice(0, 500);
+      } finally { btn.disabled = false; }
     }, true);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
