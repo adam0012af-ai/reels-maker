@@ -24,3 +24,7 @@ Deploy requested: 2026-09-07.
 Deploy unified studio layout v4.
 Changes: dark/light toggle moved to sidebar header; old navigation buttons removed; 28px overlay gap removed; image-studio secondary sidebar converted to horizontal internal tools; Quran and image studio receive gold-mode styling; editor proportions tightened.
 Deploy requested: 2026-09-07.
+
+Deploy persistent route state v1.
+Changes: refresh restores the same active section; URL hash tracks home/quran/video/images/audio/text/stickers/layers/settings; projects route remains preserved.
+Deploy requested: 2026-09-07.
