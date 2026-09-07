@@ -6,6 +6,31 @@
   <meta name="theme-color" content="#080a0f">
   <meta name="description" content="Reels Maker - محرر ريلز احترافي مع استوديو القرآن، الذكاء الاصطناعي، الفيديو، الصور، النصوص، الصوت وتصدير HD و4K.">
   <title>Reels Maker AI Studio</title>
+  <script>
+    (() => {
+      const KEY = "reels-shell-active-route-v1";
+      const VALID = new Set(["home","quran","video","images","audio","text","stickers","layers","settings"]);
+      let hash = "";
+      try { hash = decodeURIComponent((location.hash || "").replace(/^#/, "").split("?")[0]); } catch {}
+      let saved = "";
+      try { saved = localStorage.getItem(KEY) || ""; } catch {}
+      const route = VALID.has(hash) ? hash : (VALID.has(saved) ? saved : "home");
+      window.__RM_BOOT_ROUTE__ = route;
+      document.documentElement.dataset.rmBootRoute = route;
+      if (route !== "home") {
+        document.documentElement.classList.add("rm-route-booting");
+        const style = document.createElement("style");
+        style.id = "rmRouteBootStyle";
+        style.textContent = "html.rm-route-booting body{visibility:hidden!important}html.rm-route-booting #transparentHome,html.rm-route-booting #rmProjectsV2{visibility:hidden!important}";
+        document.head.appendChild(style);
+        setTimeout(() => {
+          if (!document.documentElement.classList.contains("rm-route-booting")) return;
+          document.documentElement.classList.remove("rm-route-booting");
+          document.getElementById("rmRouteBootStyle")?.remove();
+        }, 5000);
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Bebas+Neue&family=Cairo:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -143,5 +168,6 @@
 <script src="quran-studio.js?v=1"></script>
 <script src="quran-studio-fixes.js?v=2"></script>
 <script src="image-studio-v1.js?v=1"></script>
+<script src="route-state-v1.js?v=3"></script>
 </body>
 </html>
