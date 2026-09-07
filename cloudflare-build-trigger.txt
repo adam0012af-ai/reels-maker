@@ -20,3 +20,7 @@ Deploy requested: 2026-09-07.
 Deploy UI polish pass.
 Changes: full-height sidebar, remove READY and footer actions, professional editor layout, polished text and text-to-speech panels, improved timeline/canvas styling, full gold-mode parity, developer credit.
 Deploy requested: 2026-09-07.
+
+Deploy unified studio layout v4.
+Changes: dark/light toggle moved to sidebar header; old navigation buttons removed; 28px overlay gap removed; image-studio secondary sidebar converted to horizontal internal tools; Quran and image studio receive gold-mode styling; editor proportions tightened.
+Deploy requested: 2026-09-07.
