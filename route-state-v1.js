@@ -7,6 +7,7 @@
   const KEY = "reels-shell-active-route-v1";
   const VALID = new Set(["home","quran","video","images","audio","text","stickers","layers","settings"]);
   let restoring = false;
+  let currentRoute = "home";
 
   const hashRoute = () => {
     const raw = decodeURIComponent((location.hash || "").replace(/^#/, "").split("?")[0]);
@@ -23,6 +24,18 @@
     const key = document.querySelector("#rmShellSidebar [data-rm-tool].active")?.dataset?.rmTool;
     return VALID.has(key) ? key : "";
   };
+
+  function syncSidebar(route = currentRoute) {
+    if (!VALID.has(route)) route = "home";
+    currentRoute = route;
+    document.documentElement.dataset.rmActiveRoute = route;
+    document.querySelectorAll("#rmShellSidebar [data-rm-tool]").forEach(button => {
+      const active = button.dataset.rmTool === route;
+      button.classList.toggle("active", active);
+      if (active) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
+  }
 
   function cleanLegacySectionButtons(root = document) {
     root.querySelectorAll?.("button").forEach(button => {
@@ -42,7 +55,8 @@
     });
   }
 
-  function finishBoot() {
+  function finishBoot(route = currentRoute) {
+    syncSidebar(route);
     document.documentElement.classList.remove("rm-route-booting");
     document.documentElement.removeAttribute("data-rm-boot-route");
     document.getElementById("rmRouteBootStyle")?.remove();
@@ -60,6 +74,8 @@
 
   function save(route, syncHash = true) {
     if (!VALID.has(route)) return;
+    currentRoute = route;
+    syncSidebar(route);
     try { localStorage.setItem(KEY, route); } catch {}
     if (!syncHash) return;
     const target = `#${route}`;
@@ -78,26 +94,32 @@
   }
 
   function waitUntilReady(route, tries = 0) {
+    syncSidebar(route);
     cleanLegacySectionButtons();
     if (route !== "home") closeProjects();
     if (routeReady(route)) {
       save(route, true);
-      return finishBoot();
+      return finishBoot(route);
     }
-    if (tries >= 100) return finishBoot();
+    if (tries >= 100) return finishBoot(route);
     setTimeout(() => waitUntilReady(route, tries + 1), 40);
   }
 
   function openRoute(route, tries = 0) {
     if (!VALID.has(route)) route = "home";
+    currentRoute = route;
+    syncSidebar(route);
+
     const button = document.querySelector(`#rmShellSidebar [data-rm-tool="${route}"]`);
     if (!button) {
       if (tries < 100) return setTimeout(() => openRoute(route, tries + 1), 40);
-      return finishBoot();
+      return finishBoot(route);
     }
 
     restoring = true;
+    syncSidebar(route);
     button.click();
+    syncSidebar(route);
     cleanLegacySectionButtons();
 
     if (route === "quran") {
@@ -105,6 +127,7 @@
       const suppressProjects = () => {
         closeProjects();
         save("quran", true);
+        syncSidebar("quran");
         if (++rounds < 24 && !routeReady("quran")) setTimeout(suppressProjects, 50);
       };
       setTimeout(suppressProjects, 0);
@@ -123,12 +146,18 @@
     // No hash = homepage. #quran = Quran. #audio = text-to-speech, etc.
     let route = hashRoute() || "home";
     if (!VALID.has(route)) route = "home";
+    currentRoute = route;
+    syncSidebar(route);
     openRoute(route);
   }
 
   document.addEventListener("click", event => {
     const shellTool = event.target.closest?.("#rmShellSidebar [data-rm-tool]");
-    if (shellTool) return save(shellTool.dataset.rmTool, true);
+    if (shellTool) {
+      const route = shellTool.dataset.rmTool;
+      syncSidebar(route);
+      return save(route, true);
+    }
 
     const homeTool = event.target.closest?.("[data-home-tool]");
     if (homeTool && VALID.has(homeTool.dataset.homeTool)) return save(homeTool.dataset.homeTool, true);
@@ -150,21 +179,32 @@
 
   window.addEventListener("hashchange", () => {
     if (restoring) return;
-    const route = hashRoute();
-    if (!route) return;
+    const route = hashRoute() || "home";
+    currentRoute = route;
+    syncSidebar(route);
     const active = activeShellRoute();
     if (active !== route) openRoute(route);
     else save(route, false);
   });
 
+  window.addEventListener("pageshow", () => {
+    const route = hashRoute() || currentRoute || "home";
+    syncSidebar(route);
+  });
+
   const install = () => {
     cleanLegacySectionButtons();
     const observer = new MutationObserver(records => {
+      let shellChanged = false;
       for (const record of records) {
         record.addedNodes.forEach(node => {
-          if (node.nodeType === 1) cleanLegacySectionButtons(node);
+          if (node.nodeType === 1) {
+            cleanLegacySectionButtons(node);
+            if (node.id === "rmShellSidebar" || node.querySelector?.("#rmShellSidebar")) shellChanged = true;
+          }
         });
       }
+      if (shellChanged || document.getElementById("rmShellSidebar")) syncSidebar(currentRoute);
     });
     observer.observe(document.body, { childList: true, subtree: true });
     restore();
