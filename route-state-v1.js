@@ -1,6 +1,9 @@
 "use strict";
 
 (() => {
+  if (window.__RM_ROUTE_STATE_INSTALLED__) return;
+  window.__RM_ROUTE_STATE_INSTALLED__ = true;
+
   const KEY = "reels-shell-active-route-v1";
   const VALID = new Set(["home","quran","video","images","audio","text","stickers","layers","settings"]);
   let restoring = false;
@@ -8,13 +11,6 @@
   const hashRoute = () => {
     const raw = decodeURIComponent((location.hash || "").replace(/^#/, "").split("?")[0]);
     return VALID.has(raw) ? raw : "";
-  };
-
-  const savedRoute = () => {
-    try {
-      const value = localStorage.getItem(KEY) || "";
-      return VALID.has(value) ? value : "";
-    } catch { return ""; }
   };
 
   const editorRoute = () => {
@@ -32,9 +28,16 @@
     root.querySelectorAll?.("button").forEach(button => {
       if (button.closest("#rmShellSidebar")) return;
       const text = (button.textContent || "").replace(/\s+/g, " ").trim();
-      if (/الأقسام/.test(text) || /^القسم(?:\s|$)/.test(text)) {
+      if (
+        /الأقسام/.test(text) ||
+        /^القسم(?:\s|$)/.test(text) ||
+        /^مشروع جديد$/.test(text) ||
+        /ريل القرآن/.test(text) ||
+        /تصدير وتحميل الريل/.test(text)
+      ) {
         button.style.setProperty("display", "none", "important");
         button.setAttribute("aria-hidden", "true");
+        button.tabIndex = -1;
       }
     });
   }
@@ -77,40 +80,48 @@
   function waitUntilReady(route, tries = 0) {
     cleanLegacySectionButtons();
     if (route !== "home") closeProjects();
-    if (routeReady(route)) return finishBoot();
-    if (tries >= 80) return finishBoot();
-    setTimeout(() => waitUntilReady(route, tries + 1), 50);
+    if (routeReady(route)) {
+      save(route, true);
+      return finishBoot();
+    }
+    if (tries >= 100) return finishBoot();
+    setTimeout(() => waitUntilReady(route, tries + 1), 40);
   }
 
   function openRoute(route, tries = 0) {
     if (!VALID.has(route)) route = "home";
     const button = document.querySelector(`#rmShellSidebar [data-rm-tool="${route}"]`);
     if (!button) {
-      if (tries < 80) return setTimeout(() => openRoute(route, tries + 1), 50);
+      if (tries < 100) return setTimeout(() => openRoute(route, tries + 1), 40);
       return finishBoot();
     }
 
     restoring = true;
     button.click();
-    save(route, true);
     cleanLegacySectionButtons();
 
     if (route === "quran") {
       let rounds = 0;
       const suppressProjects = () => {
         closeProjects();
-        if (++rounds < 18 && !routeReady("quran")) setTimeout(suppressProjects, 60);
+        save("quran", true);
+        if (++rounds < 24 && !routeReady("quran")) setTimeout(suppressProjects, 50);
       };
       setTimeout(suppressProjects, 0);
     } else if (route !== "home") {
       closeProjects();
+      save(route, true);
+    } else {
+      save("home", true);
     }
 
     waitUntilReady(route);
   }
 
   function restore() {
-    let route = window.__RM_BOOT_ROUTE__ || hashRoute() || savedRoute() || "home";
+    // The URL is the source of truth on refresh. No saved-route redirect.
+    // No hash means the real homepage; #quran means Quran; #audio means audio, etc.
+    let route = window.__RM_BOOT_ROUTE__ || hashRoute() || "home";
     if (!VALID.has(route)) route = "home";
     openRoute(route);
   }
