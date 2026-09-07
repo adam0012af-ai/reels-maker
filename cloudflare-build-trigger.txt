@@ -48,3 +48,7 @@ Deploy requested: 2026-09-07.
 Deploy unified single-router v5.
 Changes: one authoritative router owns sidebar clicks, URL, editor body and active state together; prevents intermediate homepage/image/Quran flashes; refresh restores the exact route; legacy navigation buttons are removed dynamically.
 Deploy requested: 2026-09-07.
+
+Deploy cache-busted router boot v7.
+Changes: block the legacy router before keyboard-fix can inject it; current URL alone selects refresh route; bump keyboard-fix, shell CSS/JS and route-state asset versions to force fresh browser files; remove stale cached navigation conflicts seen in screen recording.
+Deploy requested: 2026-09-07.
