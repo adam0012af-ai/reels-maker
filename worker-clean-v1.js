@@ -14,6 +14,9 @@ function stripLegacy(html) {
       .replace(new RegExp(`<script[^>]+src=["'][^"']*${escaped}(?:\\?[^"']*)?["'][^>]*><\\/script>`, "gi"), "")
       .replace(new RegExp(`<link[^>]+href=["'][^"']*${escaped}(?:\\?[^"']*)?["'][^>]*>`, "gi"), "");
   }
+
+  /* Remove the old inline route boot that lived in index.html. */
+  html = html.replace(/<script>\s*\(\(\)\s*=>\s*\{[\s\S]*?__RM_ROUTE_STATE_INSTALLED__[\s\S]*?<\/script>/i, "");
   return html;
 }
 
