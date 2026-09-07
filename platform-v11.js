@@ -31,13 +31,27 @@
     return ROUTES.has(value) ? value : "dashboard";
   }
 
-  function ensureV10Css() {
-    if ($("#platformV10Css")) return;
+  function ensureCss(id, href) {
+    if ($(`#${id}`)) return;
     const link = document.createElement("link");
-    link.id = "platformV10Css";
+    link.id = id;
     link.rel = "stylesheet";
-    link.href = "platform-v10.css?v=11";
+    link.href = href;
     document.head.appendChild(link);
+  }
+
+  function ensureScript(id, src) {
+    if ($(`#${id}`)) return;
+    const script = document.createElement("script");
+    script.id = id;
+    script.src = src;
+    script.defer = true;
+    document.body.appendChild(script);
+  }
+
+  function ensureProjectLibraryAssets() {
+    ensureCss("projectLibraryCss", "project-library-v1.css?v=11");
+    ensureScript("projectLibraryJs", "project-library-v1.js?v=11");
   }
 
   function ensureBootCover() {
@@ -46,6 +60,56 @@
     cover.id = "modernBootCover";
     cover.innerHTML = '<div class="boot-mark">R</div>';
     document.body.prepend(cover);
+  }
+
+  function ensureProjectsUi() {
+    const projectBlock = $$('.nav-block').find(block => (block.querySelector('.nav-caption')?.textContent || '').includes('المشروع'));
+    if (projectBlock && !projectBlock.querySelector('[data-route="projects"]')) {
+      const btn = document.createElement('button');
+      btn.className = 'nav-link';
+      btn.dataset.route = 'projects';
+      btn.type = 'button';
+      btn.innerHTML = '<span class="nav-icon">▦</span><span>مشاريعي</span>';
+      const settings = projectBlock.querySelector('[data-route="settings"]');
+      projectBlock.insertBefore(btn, settings || null);
+    }
+
+    const serviceGrid = $('.service-grid');
+    if (serviceGrid && !serviceGrid.querySelector('[data-route="projects"]')) {
+      const card = document.createElement('button');
+      card.className = 'service-card';
+      card.dataset.tone = 'blue';
+      card.dataset.route = 'projects';
+      card.type = 'button';
+      card.innerHTML = '<div class="service-top"><span class="service-icon">▦</span><span class="service-tag">PROJECTS</span></div><h3>مشاريعي السابقة</h3><p>كل فيديو تم تصديره يُحفظ تلقائيًا على هذا الجهاز للتنزيل أو المشاركة لاحقًا.</p>';
+      serviceGrid.appendChild(card);
+    }
+
+    const quickStack = $('.quick-stack');
+    if (quickStack && !quickStack.querySelector('[data-route="projects"]')) {
+      const btn = document.createElement('button');
+      btn.className = 'quick-action quick-card';
+      btn.dataset.route = 'projects';
+      btn.type = 'button';
+      btn.innerHTML = '<b>▦ مشاريعي السابقة</b><span>الفيديوهات التي صدّرتها</span>';
+      quickStack.appendChild(btn);
+    }
+
+    const workspace = $('.workspace');
+    if (workspace && !$('#projectsPage')) {
+      const page = document.createElement('section');
+      page.id = 'projectsPage';
+      page.className = 'projects-page hidden';
+      page.innerHTML = `
+        <div class="projects-page-head">
+          <div><h1>مشاريعي السابقة</h1><p>الفيديوهات التي تصدّرها من المحرر أو استوديو ريلز القرآن تُحفظ هنا على هذا الجهاز.</p></div>
+          <div class="projects-head-actions"><span id="projectsCount" class="projects-count">0 فيديو</span><button id="clearProjectsBtn" class="projects-clear" type="button">حذف الكل</button></div>
+        </div>
+        <div class="projects-info"><i>✓</i><div><b>حفظ محلي تلقائي</b><br>لا يتم رفع الفيديوهات إلى حساب خارجي من هذه المكتبة. يتم الاحتفاظ بها داخل تخزين المتصفح على هذا الجهاز.</div></div>
+        <div id="projectsGrid" class="projects-grid"><div class="projects-empty"><div class="projects-empty-inner"><div class="projects-empty-icon">▱</div><h2>جاري فتح مكتبة المشاريع...</h2></div></div></div>
+        <div class="project-storage-note">قد يحذف المتصفح البيانات المحلية إذا تم مسح بيانات الموقع أو التخزين.</div>`;
+      workspace.appendChild(page);
+    }
   }
 
   function killLegacy() {
@@ -75,11 +139,7 @@
     const block = document.createElement("div");
     block.id = "sideProjectBlock";
     block.className = "side-project-block";
-    block.innerHTML = `
-      <div class="nav-caption"><i></i>إدارة المشروع</div>
-      <button class="side-project-action" data-project-action="reset" type="button"><span class="nav-icon">＋</span><span>مشروع جديد</span></button>
-      <button class="side-project-action primary" data-project-action="export" type="button"><span class="nav-icon">⬇</span><span>تصدير وتحميل الريل</span></button>
-    `;
+    block.innerHTML = '<div class="nav-caption"><i></i>إدارة المشروع</div><button class="side-project-action" data-project-action="reset" type="button"><span class="nav-icon">＋</span><span>مشروع جديد</span></button><button class="side-project-action primary" data-project-action="export" type="button"><span class="nav-icon">⬇</span><span>تصدير وتحميل الريل</span></button>';
     controls.insertBefore(block, foot || null);
   }
 
@@ -189,6 +249,7 @@
   function apply(raw, shouldScroll = true) {
     killLegacy();
     restorePanels();
+    ensureProjectsUi();
     const next = normalize(raw);
     currentRoute = next;
     document.body.dataset.route = next;
@@ -228,27 +289,17 @@
   }
 
   function projectAction(action) {
-    if (action === "reset") {
-      $("#resetBtn")?.click();
-      scrollTopHard();
-      return;
-    }
+    if (action === "reset") { $("#resetBtn")?.click(); scrollTopHard(); return; }
     if (action === "export") $("#exportBtn")?.click();
   }
 
   function handleNavigationEvent(event) {
     const target = event.target instanceof Element ? event.target : event.target?.parentElement;
     if (!target) return;
-    if (target.closest("#menuBtn")) {
-      event.preventDefault(); event.stopImmediatePropagation(); openSidebar(); return;
-    }
-    if (target.closest("#sidebarClose,#sidebarBackdrop")) {
-      event.preventDefault(); event.stopImmediatePropagation(); closeSidebar(); return;
-    }
+    if (target.closest("#menuBtn")) { event.preventDefault(); event.stopImmediatePropagation(); openSidebar(); return; }
+    if (target.closest("#sidebarClose,#sidebarBackdrop")) { event.preventDefault(); event.stopImmediatePropagation(); closeSidebar(); return; }
     const action = target.closest("[data-project-action]");
-    if (action) {
-      event.preventDefault(); event.stopImmediatePropagation(); projectAction(action.dataset.projectAction); return;
-    }
+    if (action) { event.preventDefault(); event.stopImmediatePropagation(); projectAction(action.dataset.projectAction); return; }
     const nav = target.closest("[data-route],[data-tool],[data-open-quran],[data-page]");
     if (!nav) return;
     const next = routeFromElement(nav);
@@ -271,9 +322,7 @@
     const input = $("#globalSearch");
     if (!input || input.dataset.p11 === "1") return;
     input.dataset.p11 = "1";
-    input.addEventListener("focus", () => {
-      if (currentRoute !== "dashboard") go("dashboard");
-    });
+    input.addEventListener("focus", () => { if (currentRoute !== "dashboard") go("dashboard"); });
     input.addEventListener("input", () => {
       const q = input.value.trim().toLowerCase();
       $$(".service-card,.quick-card,.activity-row").forEach(card => {
@@ -296,9 +345,7 @@
       for (const record of records) {
         for (const node of record.addedNodes) {
           if (!(node instanceof Element)) continue;
-          if (node.matches?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop,#mobileSheetBackdrop") || node.querySelector?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop,#mobileSheetBackdrop")) {
-            foundLegacy = true; break;
-          }
+          if (node.matches?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop,#mobileSheetBackdrop") || node.querySelector?.("#homeShell,.home-shell,.creator-drawer,.creator-drawer-backdrop,.creator-backdrop,#mobileSheetBackdrop")) { foundLegacy = true; break; }
         }
         if (foundLegacy) break;
       }
@@ -332,10 +379,12 @@
   }
 
   function init() {
-    ensureV10Css();
+    ensureCss("platformV10Css", "platform-v10.css?v=11");
+    ensureProjectLibraryAssets();
     ensureBootCover();
     killLegacy();
     restorePanels();
+    ensureProjectsUi();
     ensureSidebarProjectActions();
     bindNavigation();
     bindSearch();
@@ -354,12 +403,12 @@
   function afterLegacyInit() {
     killLegacy();
     restorePanels();
+    ensureProjectsUi();
     if (currentRoute === "quran") waitForQuran();
     apply(currentRoute, false);
     finalizeReady();
   }
 
-  ensureV10Css();
   ensureBootCover();
   init();
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", afterLegacyInit, { once: true });
