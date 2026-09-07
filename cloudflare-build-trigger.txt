@@ -84,3 +84,7 @@ Deploy requested: 2026-09-07.
 ROLLBACK CLEAN RUNTIME.
 Changes: production restored to worker-v15 after clean runtime disabled functional injected tools and left black/empty surfaces. No other production files changed.
 Deploy requested: 2026-09-07.
+
+Deploy mobile audio/settings no-gap fix.
+Changes: audio/settings bypass legacy Mobile Sheet; no preview/workspace gap; tools render from top of page; page background stays continuous with current dark/gold theme; asset versions bumped to v2.
+Deploy requested: 2026-09-07.
