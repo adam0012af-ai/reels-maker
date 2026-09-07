@@ -5,14 +5,23 @@ async function injectMobilePolish(response) {
   if (!type.includes("text/html")) return response;
 
   let html = await response.text();
+
   html = html.replace(/mobile-polish-v1\.css\?v=\d+/g, "mobile-polish-v1.css?v=1");
   html = html.replace(/mobile-polish-v1\.js\?v=\d+/g, "mobile-polish-v1.js?v=1");
+  html = html.replace(/mobile-menu-v2\.css\?v=\d+/g, "mobile-menu-v2.css?v=2");
+  html = html.replace(/mobile-menu-v2\.js\?v=\d+/g, "mobile-menu-v2.js?v=2");
 
   if (!html.includes("mobile-polish-v1.css")) {
     html = html.replace("</head>", '<link rel="stylesheet" href="mobile-polish-v1.css?v=1"></head>');
   }
+  if (!html.includes("mobile-menu-v2.css")) {
+    html = html.replace("</head>", '<link rel="stylesheet" href="mobile-menu-v2.css?v=2"></head>');
+  }
   if (!html.includes("mobile-polish-v1.js")) {
     html = html.replace("</body>", '<script src="mobile-polish-v1.js?v=1"></script></body>');
+  }
+  if (!html.includes("mobile-menu-v2.js")) {
+    html = html.replace("</body>", '<script src="mobile-menu-v2.js?v=2"></script></body>');
   }
 
   const headers = new Headers(response.headers);
