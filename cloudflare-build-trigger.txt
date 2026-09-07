@@ -62,5 +62,9 @@ Changes: reduce mobile menu width to 76-78% with 300px maximum; auto-close drawe
 Deploy requested: 2026-09-07.
 
 Deploy mobile editor v3.
-Changes: hide phone preview/timeline on audio and settings; keep visual preview for video/text/stickers/layers; unify dark and gold mobile colors, cards, fields, headings and buttons; desktop remains untouched.
+Changes: hide preview workspace for audio/settings; unify mobile dark/gold colors; remove white/black clash in editor tool pages.
+Deploy requested: 2026-09-07.
+
+Deploy worker v14 mobile player + router boot.
+Changes: remove legacy premium routers from served HTML; suppress old editor flash at initial home load; refresh uses current URL only; normal clean reel player for editor visual routes; Quran remains the only phone preview with compact controls; desktop remains untouched.
 Deploy requested: 2026-09-07.
