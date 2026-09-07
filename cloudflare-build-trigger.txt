@@ -53,6 +53,10 @@ Deploy cache-busted router boot v7.
 Changes: block the legacy router before keyboard-fix can inject it; current URL alone selects refresh route; bump keyboard-fix, shell CSS/JS and route-state asset versions to force fresh browser files; remove stale cached navigation conflicts seen in screen recording.
 Deploy requested: 2026-09-07.
 
-Deploy mobile-first polish v13.
-Changes: mobile-only layout pass; restore Quran vertical touch scrolling; remove legacy creator menu; compact new mobile sidebar; remove editor empty 100vh gap; fix gold-mode mobile headings; make image studio tabs/content fit phone width; leave desktop layout untouched.
+Deploy mobile-only layout v13.
+Changes: native mobile scrolling for Quran and image studios; remove duplicate mobile navigation; compact editor preview/timeline/tools stack; fix gold-mode readability; preserve desktop layout untouched.
+Deploy requested: 2026-09-07.
+
+Deploy mobile drawer v2.
+Changes: reduce mobile menu width to 76-78% with 300px maximum; auto-close drawer immediately after selecting any section; desktop remains untouched.
 Deploy requested: 2026-09-07.
