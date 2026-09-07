@@ -21,7 +21,7 @@
   function ruler(d){const r=$("modernRuler");if(!r)return;d=d>0?d:30;const step=d<=30?5:d<=90?10:15,a=[];for(let x=0;x<=d+.001;x+=step)a.push(`<span style="left:${Math.min(100,x/d*100)}%"><i></i><em>${fmt(x)}</em></span>`);r.innerHTML=a.join("")}
   let last=-1;function loop(){const ui=window.ReelsModernStudio,v=ui.coreVideo(),s=ui.coreState(),d=v&&isFinite(v.duration)?v.duration:0,c=v&&isFinite(v.currentTime)?v.currentTime:0,tc=s?.layers?.filter(x=>x.type==="text").length||0,sc=s?.layers?.filter(x=>x.type==="sticker").length||0,sfx=s?.sfxEvents?.length||0,ha=!!$("sourceAudio")?.src||sfx>0;
     $("modernTimelineSummary").textContent=d?`${fmt(c)} / ${fmt(d)} • ${tc+sc} layers`:"No media loaded";$("modernVideoClip").hidden=!d;$("modernTextClip").hidden=!tc;$("modernTextClip").textContent=tc?`${tc} Text / Captions`:"Text & Captions";$("modernAudioClip").hidden=!ha;$("modernAudioClip").textContent=sfx?`Audio + ${sfx} SFX`:"Audio Track";
-    const ph=$("modernPlayhead");if(ph)ph.style.left=`calc(108px + (100% - 108px) * ${d?Math.min(1,c/d):0})`;if(Math.abs(last-d)>.25){last=d;ruler(d)}requestAnimationFrame(loop)}
+    const ph=$("modernPlayhead");if(ph)ph.style.setProperty("--playhead-p",d?Math.min(1,c/d):0);if(Math.abs(last-d)>.25){last=d;ruler(d)}requestAnimationFrame(loop)}
   function init(){if(inited)return;inited=true;build();loop()}
   document.addEventListener("reels-modern-shell-ready",init,{once:true});wait();
 })();
