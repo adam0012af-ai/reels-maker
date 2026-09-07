@@ -16,3 +16,7 @@ Deploy requested: 2026-09-07.
 Deploy navigation isolation fix.
 Changes: reserve desktop workspace beside sidebar; close Quran/projects/images before switching sections; prevent overlay stacking.
 Deploy requested: 2026-09-07.
+
+Deploy UI polish pass.
+Changes: full-height sidebar, remove READY and footer actions, professional editor layout, polished text and text-to-speech panels, improved timeline/canvas styling, full gold-mode parity, developer credit.
+Deploy requested: 2026-09-07.
