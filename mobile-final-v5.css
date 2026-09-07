@@ -26,60 +26,90 @@
     width:33px!important;height:33px!important;flex-basis:33px!important;
   }
 
-  /* No-preview tools start immediately; no empty workspace or black gap. */
+  /* Audio/settings are tool-only routes on mobile: no preview and no legacy sheet. */
   body.rm-shell-v2.rm-mobile-no-preview .workspace{display:none!important}
-  body.rm-shell-v2.rm-mobile-no-preview .controls{
-    display:block!important;min-height:100dvh!important;padding-top:12px!important;
-  }
 
-  /* Hard route fix for Audio/Settings on mobile: bypass legacy Mobile Sheet entirely. */
+  body[data-rm-mobile-route="audio"],
+  body[data-rm-mobile-route="settings"]{
+    background:#070b12!important;
+    color:#f4f7fb!important;
+  }
   body[data-rm-mobile-route="audio"] .workspace,
-  body[data-rm-mobile-route="settings"] .workspace,
+  body[data-rm-mobile-route="settings"] .workspace{
+    display:none!important;
+  }
   body[data-rm-mobile-route="audio"] #mobileSheet,
   body[data-rm-mobile-route="settings"] #mobileSheet{
     display:none!important;
+    height:0!important;
+    min-height:0!important;
+    max-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
   }
   body[data-rm-mobile-route="audio"] .app,
   body[data-rm-mobile-route="settings"] .app{
     display:block!important;
     width:100%!important;
-    min-height:100dvh!important;
+    height:auto!important;
+    min-height:0!important;
     margin:0!important;
     padding:0!important;
+    overflow:visible!important;
     background:#070b12!important;
   }
   body[data-rm-mobile-route="audio"] .controls,
   body[data-rm-mobile-route="settings"] .controls{
     position:relative!important;
     inset:auto!important;
+    transform:none!important;
+    transition:none!important;
     display:block!important;
     width:100%!important;
+    min-width:0!important;
     max-width:none!important;
     height:auto!important;
     min-height:100dvh!important;
     margin:0!important;
-    padding:12px 10px calc(28px + env(safe-area-inset-bottom))!important;
+    padding:72px 10px calc(28px + env(safe-area-inset-bottom))!important;
+    overflow:visible!important;
+    background:#070b12!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  body[data-rm-mobile-route="audio"] .panels,
+  body[data-rm-mobile-route="settings"] .panels{
+    display:block!important;
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
     overflow:visible!important;
     background:#070b12!important;
   }
-  body[data-rm-mobile-route="audio"] .panels,
-  body[data-rm-mobile-route="settings"] .panels,
+  body[data-rm-mobile-route="audio"] .panels>.panel,
+  body[data-rm-mobile-route="settings"] .panels>.panel{
+    display:none!important;
+  }
   body[data-rm-mobile-route="audio"] #panel-audio,
   body[data-rm-mobile-route="settings"] #panel-settings{
+    display:block!important;
     position:relative!important;
     inset:auto!important;
     width:100%!important;
     height:auto!important;
     min-height:0!important;
     margin:0!important;
-    padding-top:0!important;
+    padding:0!important;
     overflow:visible!important;
     background:#070b12!important;
   }
-  body[data-rm-mobile-route="audio"] #panel-audio,
-  body[data-rm-mobile-route="settings"] #panel-settings{
-    display:block!important;
-  }
+
   html[data-rm-theme="gold"] body[data-rm-mobile-route="audio"],
   html[data-rm-theme="gold"] body[data-rm-mobile-route="settings"],
   html[data-rm-theme="gold"] body[data-rm-mobile-route="audio"] .app,
