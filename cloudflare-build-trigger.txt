@@ -44,3 +44,7 @@ Deploy requested: 2026-09-07.
 Deploy sidebar-route sync v4.1.
 Changes: sidebar active item is forced to match the current route during boot, refresh, dynamic sidebar creation, hash changes and pageshow; legacy navigation buttons remain suppressed.
 Deploy requested: 2026-09-07.
+
+Deploy unified single-router v5.
+Changes: one authoritative router owns sidebar clicks, URL, editor body and active state together; prevents intermediate homepage/image/Quran flashes; refresh restores the exact route; legacy navigation buttons are removed dynamically.
+Deploy requested: 2026-09-07.
