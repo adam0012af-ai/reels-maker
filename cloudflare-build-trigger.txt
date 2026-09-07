@@ -40,3 +40,7 @@ Deploy requested: 2026-09-07.
 Deploy route-native refresh v4.
 Changes: current URL is the sole refresh source of truth; no saved-route redirect; duplicate route-state initialization guarded; legacy sections/project/export navigation buttons suppressed across dynamically created studio surfaces.
 Deploy requested: 2026-09-07.
+
+Deploy sidebar-route sync v4.1.
+Changes: sidebar active item is forced to match the current route during boot, refresh, dynamic sidebar creation, hash changes and pageshow; legacy navigation buttons remain suppressed.
+Deploy requested: 2026-09-07.
