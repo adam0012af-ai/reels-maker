@@ -1,0 +1,59 @@
+/* Mobile drawer sizing only. Desktop is intentionally untouched. */
+@media (max-width:1000px){
+  body.rm-shell-v2 .rm-shell-sidebar{
+    display:flex!important;
+    width:min(78vw,300px)!important;
+    min-width:0!important;
+    max-width:300px!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    top:0!important;
+    right:0!important;
+    bottom:0!important;
+    left:auto!important;
+    transform:translate3d(105%,0,0)!important;
+    transition:transform .22s ease!important;
+    box-shadow:-18px 0 50px rgba(0,0,0,.32)!important;
+  }
+
+  body.rm-shell-v2.rm-mobile-open .rm-shell-sidebar,
+  body.rm-mobile-open.rm-shell-v2 .rm-shell-sidebar{
+    transform:translate3d(0,0,0)!important;
+  }
+
+  body.rm-shell-v2 .rm-mobile-overlay{
+    position:fixed!important;
+    inset:0!important;
+    z-index:2147483290!important;
+    background:rgba(2,5,10,.48)!important;
+    backdrop-filter:blur(2px)!important;
+    opacity:0!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    transition:opacity .2s ease,visibility .2s ease!important;
+  }
+
+  body.rm-shell-v2.rm-mobile-open .rm-mobile-overlay,
+  body.rm-mobile-open.rm-shell-v2 .rm-mobile-overlay{
+    display:block!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+
+  body.rm-shell-v2 .rm-mobile-close{
+    display:grid!important;
+    place-items:center!important;
+    flex:0 0 34px!important;
+    width:34px!important;
+    height:34px!important;
+    border-radius:10px!important;
+  }
+}
+
+@media (max-width:420px){
+  body.rm-shell-v2 .rm-shell-sidebar{
+    width:76vw!important;
+    max-width:285px!important;
+  }
+}
