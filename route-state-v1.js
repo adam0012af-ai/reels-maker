@@ -119,9 +119,9 @@
   }
 
   function restore() {
-    // The URL is the source of truth on refresh. No saved-route redirect.
-    // No hash means the real homepage; #quran means Quran; #audio means audio, etc.
-    let route = window.__RM_BOOT_ROUTE__ || hashRoute() || "home";
+    // Refresh is route-native: the current URL alone decides the first screen.
+    // No hash = homepage. #quran = Quran. #audio = text-to-speech, etc.
+    let route = hashRoute() || "home";
     if (!VALID.has(route)) route = "home";
     openRoute(route);
   }
