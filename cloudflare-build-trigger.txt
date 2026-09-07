@@ -76,3 +76,7 @@ Deploy requested: 2026-09-07.
 Deploy CLEAN RUNTIME v1.
 Changes: production now serves raw frontend assets directly, no legacy UI injection chain; APIs still delegate to worker-v12; one app-router-v1 owns route/body/sidebar; old mobile sheet is neutralized; consolidated mobile-clean-v1 layout; video and text-to-speech remain first-class sidebar sections.
 Deploy requested: 2026-09-07.
+
+Redeploy CLEAN RUNTIME v1.1.
+Changes: also strip the old inline route boot from index before first paint so only the clean boot/router can execute.
+Deploy requested: 2026-09-07.
