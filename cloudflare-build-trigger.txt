@@ -72,3 +72,7 @@ Deploy requested: 2026-09-07.
 Deploy worker v15 exact-route mobile refresh.
 Changes: replace route-state-v1/route-boot-v8 with route-native-v9; force body, sidebar and URL to the same route on refresh; reduce standard mobile reel preview; compact Quran controls/backgrounds/share UI; preserve Quran as the only phone mockup.
 Deploy requested: 2026-09-07.
+
+Deploy CLEAN RUNTIME v1.
+Changes: production now serves raw frontend assets directly, no legacy UI injection chain; APIs still delegate to worker-v12; one app-router-v1 owns route/body/sidebar; old mobile sheet is neutralized; consolidated mobile-clean-v1 layout; video and text-to-speech remain first-class sidebar sections.
+Deploy requested: 2026-09-07.
