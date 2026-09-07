@@ -8,3 +8,7 @@ Redeploy requested: 2026-09-07.
 Deploy persistent desktop sidebar + mobile hamburger navigation.
 Homepage cleanup: duplicate service cards/status hidden.
 Deploy requested: 2026-09-07.
+
+Deploy unified shell v2.
+Changes: text-to-speech naming, video editor moved into sidebar, image studio added, provider names hidden, stronger homepage, gold/white mode, legacy home/menu files removed.
+Deploy requested: 2026-09-07.
