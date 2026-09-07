@@ -60,3 +60,7 @@ Deploy requested: 2026-09-07.
 Deploy mobile drawer v2.
 Changes: reduce mobile menu width to 76-78% with 300px maximum; auto-close drawer immediately after selecting any section; desktop remains untouched.
 Deploy requested: 2026-09-07.
+
+Deploy mobile editor v3.
+Changes: hide phone preview/timeline on audio and settings; keep visual preview for video/text/stickers/layers; unify dark and gold mobile colors, cards, fields, headings and buttons; desktop remains untouched.
+Deploy requested: 2026-09-07.
