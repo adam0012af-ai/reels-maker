@@ -43,8 +43,9 @@ function injectStableBoot(html){
 }
 
 function injectStableAssets(html){
-  html=html.replace("</head>",'<link rel="stylesheet" href="mobile-stable-v10.css?v=2"></head>');
-  html=html.replace("</body>",'<script src="route-native-v10.js?v=2"></script></body>');
+  html=html.replace("</head>",'<link rel="stylesheet" href="mobile-stable-v10.css?v=2"><style id="rmMobileFlowV102">@media(max-width:1000px){body.rm-shell-v2.rm-mobile-player .workspace{flex:0 0 auto!important;min-height:0!important;height:auto!important}body.rm-shell-v2.rm-mobile-player .stage-wrap{flex:0 0 auto!important;min-height:0!important;height:auto!important}body.rm-shell-v2.rm-mobile-player .transport{flex:0 0 48px!important}body.rm-shell-v2.rm-mobile-player .controls{flex:0 0 auto!important;margin-top:0!important}}</style></head>');
+  const guard=`<script id="rmBootRouteGuard">(()=>{const getRoute=()=>{let r='';try{r=decodeURIComponent((location.hash||'').replace(/^#\\/?/,'').split('?')[0])}catch(e){}return r||'home'};const hideWrongHome=()=>{if(getRoute()==='home')return;const h=document.getElementById('transparentHome');const hs=document.getElementById('homeShell');[h,hs].forEach(x=>{if(!x)return;x.classList.remove('open');x.setAttribute?.('aria-hidden','true')});document.body?.classList.remove('th-home-open','home-mode');if(document.body)document.body.style.overflow=''};const mo=new MutationObserver(hideWrongHome);mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','aria-hidden']});hideWrongHome();requestAnimationFrame(()=>{hideWrongHome();requestAnimationFrame(hideWrongHome)});setTimeout(hideWrongHome,80);setTimeout(hideWrongHome,180);setTimeout(hideWrongHome,400);setTimeout(()=>mo.disconnect(),5000)})();</script>`;
+  html=html.replace("</body>",'<script src="route-native-v10.js?v=2"></script>'+guard+'</body>');
   return html;
 }
 
@@ -62,7 +63,7 @@ async function patchCoreScript(response){
   headers.delete("content-length");
   headers.set("content-type","application/javascript; charset=utf-8");
   headers.set("cache-control","no-store, no-cache, must-revalidate");
-  headers.set("x-rm-mobile-runtime","v10.1");
+  headers.set("x-rm-mobile-runtime","v10.2");
   return new Response(js,{status:response.status,statusText:response.statusText,headers});
 }
 
@@ -80,7 +81,7 @@ async function injectV15(response){
   headers.set("cache-control","no-store, no-cache, must-revalidate");
   headers.set("pragma","no-cache");
   headers.set("expires","0");
-  headers.set("x-rm-runtime","stable-v10.1");
+  headers.set("x-rm-runtime","stable-v10.2");
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
