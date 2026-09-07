@@ -1,0 +1,146 @@
+/* Transparent premium home dashboard — presentation only; editor remains the working core. */
+:root{
+  --th-bg:#070a10;
+  --th-glass:rgba(15,20,30,.48);
+  --th-glass-strong:rgba(17,23,35,.68);
+  --th-line:rgba(255,255,255,.11);
+  --th-text:#f7f9ff;
+  --th-muted:#9aa6bb;
+  --th-blue:#67b7ff;
+  --th-violet:#9c84ff;
+  --th-green:#5fe0aa;
+  --th-pink:#ff86bc;
+  --th-orange:#ffb86b;
+}
+
+#transparentHome{
+  position:fixed;
+  inset:0;
+  z-index:2147481000;
+  overflow:auto;
+  color:var(--th-text);
+  font-family:"Cairo","Tajawal",system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 12% 18%,rgba(103,183,255,.17),transparent 32%),
+    radial-gradient(circle at 88% 14%,rgba(156,132,255,.16),transparent 30%),
+    radial-gradient(circle at 55% 92%,rgba(95,224,170,.10),transparent 34%),
+    linear-gradient(145deg,#070910 0%,#0a0d14 48%,#080b12 100%);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .22s ease,visibility .22s ease;
+}
+#transparentHome.open{opacity:1;visibility:visible;pointer-events:auto}
+#transparentHome::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.22;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:linear-gradient(to bottom,black,transparent 86%);
+}
+
+.th-shell{width:min(1440px,calc(100% - 42px));margin:0 auto;padding:26px 0 52px;position:relative}
+.th-topbar{
+  min-height:74px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:13px 16px;
+  border:1px solid var(--th-line);
+  background:rgba(9,13,20,.34);
+  backdrop-filter:blur(22px) saturate(130%);
+  -webkit-backdrop-filter:blur(22px) saturate(130%);
+  border-radius:22px;
+}
+.th-brand{display:flex;align-items:center;gap:12px;min-width:0}
+.th-logo{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-weight:900;font-size:18px;border:1px solid rgba(255,255,255,.18);background:linear-gradient(135deg,rgba(103,183,255,.28),rgba(156,132,255,.25));box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.th-brand-copy{min-width:0}.th-brand-copy b{display:block;font-size:16px}.th-brand-copy span{display:block;font-size:11px;color:var(--th-muted);margin-top:2px}
+.th-top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.th-pill,.th-main-btn,.th-card{
+  border:1px solid var(--th-line);
+  color:var(--th-text);
+  background:rgba(255,255,255,.045);
+  backdrop-filter:blur(18px) saturate(125%);
+  -webkit-backdrop-filter:blur(18px) saturate(125%);
+}
+.th-pill{min-height:42px;padding:0 14px;border-radius:13px;font:700 12px "Cairo";display:inline-flex;align-items:center;gap:7px}
+.th-pill i{width:8px;height:8px;border-radius:50%;background:var(--th-green);box-shadow:0 0 14px rgba(95,224,170,.55)}
+
+.th-hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:18px;margin-top:18px}
+.th-hero-main,.th-quick{
+  border:1px solid var(--th-line);
+  background:rgba(11,16,24,.38);
+  backdrop-filter:blur(25px) saturate(130%);
+  -webkit-backdrop-filter:blur(25px) saturate(130%);
+  border-radius:26px;
+  min-width:0;
+}
+.th-hero-main{padding:34px}
+.th-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid rgba(103,183,255,.2);background:rgba(103,183,255,.08);border-radius:999px;color:#cfe9ff;font-size:11px;font-weight:800}
+.th-hero h1{margin:18px 0 10px;font-size:clamp(28px,4.8vw,58px);line-height:1.18;letter-spacing:-.025em}
+.th-hero p{margin:0;color:var(--th-muted);font-size:14px;line-height:2;max-width:760px}
+.th-hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.th-main-btn{min-height:48px;padding:0 18px;border-radius:15px;font:800 13px "Cairo";cursor:pointer}
+.th-main-btn.primary{background:linear-gradient(135deg,rgba(103,183,255,.26),rgba(156,132,255,.23));border-color:rgba(139,174,255,.35)}
+.th-main-btn:hover,.th-card:hover{border-color:rgba(255,255,255,.23);background:rgba(255,255,255,.075)}
+
+.th-quick{padding:20px;display:flex;flex-direction:column;justify-content:space-between}
+.th-quick-head b{font-size:14px}.th-quick-head span{display:block;color:var(--th-muted);font-size:11px;margin-top:4px}
+.th-mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.th-mini-stat{padding:15px;border:1px solid var(--th-line);border-radius:16px;background:rgba(255,255,255,.035)}
+.th-mini-stat strong{font-size:22px;display:block}.th-mini-stat span{font-size:10px;color:var(--th-muted);display:block;margin-top:3px}
+.th-ready{margin-top:12px;padding:12px 13px;border:1px solid rgba(95,224,170,.16);background:rgba(95,224,170,.055);border-radius:15px;color:#c8f7e3;font-size:11px;line-height:1.8}
+
+.th-section{margin-top:22px}
+.th-section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:12px;padding:0 4px}
+.th-section-head h2{margin:0;font-size:19px}.th-section-head p{margin:4px 0 0;color:var(--th-muted);font-size:11px}.th-section-head span{color:var(--th-muted);font-size:10px}
+.th-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.th-card{min-height:178px;border-radius:21px;padding:19px;text-align:right;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;transition:transform .18s ease,border-color .18s ease,background .18s ease;min-width:0}
+.th-card:hover{transform:translateY(-2px)}
+.th-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.th-icon{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;font-size:19px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055)}
+.th-tag{font-size:9px;font-weight:900;letter-spacing:.08em;color:var(--th-muted);padding:5px 8px;border-radius:999px;border:1px solid var(--th-line)}
+.th-card h3{margin:19px 0 5px;font-size:15px}.th-card p{margin:0;color:var(--th-muted);font-size:11px;line-height:1.8;min-height:40px}.th-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px;color:#dbe7f8;font-size:10px}.th-arrow{font-size:17px;opacity:.75}
+.th-card[data-tone="green"] .th-icon{background:rgba(95,224,170,.09);color:#98efd0}
+.th-card[data-tone="blue"] .th-icon{background:rgba(103,183,255,.09);color:#9bd3ff}
+.th-card[data-tone="pink"] .th-icon{background:rgba(255,134,188,.09);color:#ffb3d4}
+.th-card[data-tone="violet"] .th-icon{background:rgba(156,132,255,.10);color:#c5b7ff}
+.th-card[data-tone="orange"] .th-icon{background:rgba(255,184,107,.09);color:#ffd09c}
+
+#transparentHomeBack{
+  position:fixed;
+  left:18px;
+  bottom:18px;
+  z-index:2147480000;
+  min-height:46px;
+  padding:0 16px;
+  border-radius:15px;
+  border:1px solid var(--th-line);
+  background:rgba(10,14,22,.58);
+  color:#fff;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  font:800 12px "Cairo";
+  cursor:pointer;
+  box-shadow:0 14px 38px rgba(0,0,0,.22);
+}
+#transparentHomeBack[hidden]{display:none!important}
+
+body.th-home-open{overflow:hidden!important}
+body.th-home-open > .app{filter:saturate(.72) brightness(.53);transform:scale(.994);transition:filter .22s ease,transform .22s ease}
+
+@media(max-width:1000px){.th-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.th-hero{grid-template-columns:1fr}.th-quick{min-height:auto}}
+@media(max-width:640px){
+  .th-shell{width:min(100% - 22px,1440px);padding:12px 0 34px}
+  .th-topbar{border-radius:18px;min-height:62px;padding:9px 10px}
+  .th-logo{width:42px;height:42px;border-radius:14px}
+  .th-brand-copy span{display:none}.th-pill{min-height:38px;padding:0 10px}.th-pill span{display:none}
+  .th-hero-main,.th-quick{border-radius:21px}.th-hero-main{padding:22px 18px}.th-hero h1{font-size:31px}.th-hero p{font-size:12px;line-height:1.9}
+  .th-grid{grid-template-columns:1fr;gap:10px}.th-card{min-height:148px;padding:16px;border-radius:18px}.th-card h3{margin-top:15px}.th-card p{min-height:0}
+  .th-section-head span{display:none}#transparentHomeBack{left:12px;bottom:12px;min-height:44px;padding:0 13px}
+}
+@media(prefers-reduced-motion:reduce){#transparentHome,.th-card,body.th-home-open > .app{transition:none!important}}
