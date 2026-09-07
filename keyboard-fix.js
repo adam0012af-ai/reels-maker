@@ -257,7 +257,6 @@
     document.body.appendChild(home);
     document.body.appendChild(back);
     document.body.classList.add("th-home-open");
-
     home.addEventListener("click", e => {
       const button = e.target.closest("[data-home-tool]");
       if (!button) return;
@@ -295,4 +294,11 @@
     const mo = new MutationObserver(() => { if (enhanceGemini()) mo.disconnect(); });
     mo.observe(document.body, { childList: true, subtree: true });
   });
+})();
+
+(() => {
+  const script = document.createElement("script");
+  script.src = "route-state-v1.js?v=1";
+  script.async = false;
+  document.head.appendChild(script);
 })();
