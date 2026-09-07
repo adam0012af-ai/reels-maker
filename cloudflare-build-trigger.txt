@@ -68,3 +68,7 @@ Deploy requested: 2026-09-07.
 Deploy worker v14 mobile player + router boot.
 Changes: remove legacy premium routers from served HTML; suppress old editor flash at initial home load; refresh uses current URL only; normal clean reel player for editor visual routes; Quran remains the only phone preview with compact controls; desktop remains untouched.
 Deploy requested: 2026-09-07.
+
+Deploy worker v15 exact-route mobile refresh.
+Changes: replace route-state-v1/route-boot-v8 with route-native-v9; force body, sidebar and URL to the same route on refresh; reduce standard mobile reel preview; compact Quran controls/backgrounds/share UI; preserve Quran as the only phone mockup.
+Deploy requested: 2026-09-07.
