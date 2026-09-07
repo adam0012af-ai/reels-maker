@@ -38,7 +38,7 @@ Changes: route-state loaded directly from index; refresh restores active section
 Deploy requested: 2026-09-07.
 
 Deploy route-native refresh v4.
-Changes: current URL is the sole refresh source of truth; no saved-route redirect; duplicate route-state initialization guarded; legacy sections/project/export navigation buttons suppressed across dynamically created studio surfaces.
+Changes: current URL is the sole refresh source of truth; no saved-route redirect; duplicate route-state initialization guarded; legacy navigation buttons suppressed across dynamically created studio surfaces.
 Deploy requested: 2026-09-07.
 
 Deploy sidebar-route sync v4.1.
@@ -95,4 +95,8 @@ Deploy requested: 2026-09-07.
 
 Deploy MOBILE STABILIZATION V10.
 Changes: branded first-paint boot prevents legacy editor flash; route-native-v10 waits for the requested surface before reveal; refresh restores exact hash route; old v3/v4 route scripts are removed from served HTML; core script mobile-sheet calls are disabled only for the modern mobile runtime; one continuous mobile layout for preview/tool routes and audio/settings; consolidated mobile-stable-v10 styling; backup branch created before changes.
+Deploy requested: 2026-09-07.
+
+Deploy MOBILE STABILIZATION V10.1.
+Changes: force UTF-8 via HTTP Content-Type; inject boot after meta charset; cache-bust route-native-v10; do not reveal any route until the new shell is built; home specifically waits for rm-home-v2/data-shell-v2 readiness before boot removal, preventing legacy editor paint.
 Deploy requested: 2026-09-07.
