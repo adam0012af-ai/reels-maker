@@ -20,6 +20,17 @@
     return VALID.has(key) ? key : "";
   };
 
+  function cleanLegacySectionButtons(root = document) {
+    root.querySelectorAll?.("button").forEach(button => {
+      if (button.closest("#rmShellSidebar")) return;
+      const text = (button.textContent || "").replace(/\s+/g, " ").trim();
+      if (/الأقسام/.test(text) || /^القسم(?:\s|$)/.test(text)) {
+        button.style.setProperty("display", "none", "important");
+        button.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+
   function save(route, syncHash = true) {
     if (!VALID.has(route)) return;
     try { localStorage.setItem(KEY, route); } catch {}
@@ -36,13 +47,17 @@
     if (button) {
       button.click();
       save(route, true);
+      cleanLegacySectionButtons();
       return;
     }
     if (tries < 60) setTimeout(() => openRoute(route, tries + 1), 100);
   }
 
   function restore() {
-    if (location.hash === "#projects") return;
+    if (location.hash === "#projects") {
+      cleanLegacySectionButtons();
+      return;
+    }
     let route = hashRoute();
     if (!route) {
       try { route = localStorage.getItem(KEY) || "home"; } catch { route = "home"; }
@@ -82,9 +97,22 @@
     else save(route, false);
   });
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => setTimeout(restore, 140), { once: true });
-  } else {
+  const install = () => {
+    cleanLegacySectionButtons();
+    const observer = new MutationObserver(records => {
+      for (const record of records) {
+        record.addedNodes.forEach(node => {
+          if (node.nodeType === 1) cleanLegacySectionButtons(node);
+        });
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
     setTimeout(restore, 140);
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", install, { once: true });
+  } else {
+    install();
   }
 })();
