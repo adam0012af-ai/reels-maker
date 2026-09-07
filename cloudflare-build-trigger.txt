@@ -36,3 +36,7 @@ Deploy requested: 2026-09-07.
 Deploy route boot v3.
 Changes: route-state loaded directly from index; refresh restores active section before paint; homepage/projects flash suppressed; Quran refresh closes projects overlay and returns to Quran studio.
 Deploy requested: 2026-09-07.
+
+Deploy route-native refresh v4.
+Changes: current URL is the sole refresh source of truth; no saved-route redirect; duplicate route-state initialization guarded; legacy sections/project/export navigation buttons suppressed across dynamically created studio surfaces.
+Deploy requested: 2026-09-07.
