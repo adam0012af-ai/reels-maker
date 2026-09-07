@@ -12,3 +12,7 @@ Deploy requested: 2026-09-07.
 Deploy unified shell v2.
 Changes: text-to-speech naming, video editor moved into sidebar, image studio added, provider names hidden, stronger homepage, gold/white mode, legacy home/menu files removed.
 Deploy requested: 2026-09-07.
+
+Deploy navigation isolation fix.
+Changes: reserve desktop workspace beside sidebar; close Quran/projects/images before switching sections; prevent overlay stacking.
+Deploy requested: 2026-09-07.
