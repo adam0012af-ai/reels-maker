@@ -43,6 +43,10 @@
 .studio-playhead::before { content: ""; position: absolute; top: 0; left: -4px; width: 9px; height: 9px; border-radius: 2px 2px 6px 6px; background: #ff5d7d; }
 .studio-playhead i { position: absolute; inset: 0; box-shadow: 0 0 8px rgba(255,93,125,.55); }
 
+/* Icon-only primary tool rail */
+body.modern-studio .studio-rail-btn em { display: none !important; }
+body.modern-studio .studio-rail-btn { min-height: 54px; }
+
 /* Quran overlay aligned with new shell */
 body.modern-studio .qr-studio { z-index: 5000 !important; }
 body.modern-studio .qr-head { background: rgba(15,15,21,.94) !important; backdrop-filter: blur(18px); border-bottom-color: var(--studio-border-soft) !important; }
