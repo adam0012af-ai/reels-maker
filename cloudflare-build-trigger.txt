@@ -4,3 +4,7 @@ Triggered after reconnect on 2026-09-06.
 Redeploy stable editor baseline after rollback.
 Stable baseline commit: e3dfc1ac1b7db08585ebdcdb23b7f10aa17aab3d
 Redeploy requested: 2026-09-07.
+
+Deploy persistent desktop sidebar + mobile hamburger navigation.
+Homepage cleanup: duplicate service cards/status hidden.
+Deploy requested: 2026-09-07.
