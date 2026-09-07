@@ -89,13 +89,14 @@
 
   function buildHeader(){
     const top=qs(".workspace>.topbar"); if(!top||top.dataset.modern)return; top.dataset.modern="1";
-    const reset=$("resetBtn"), exp=$("exportBtn"); reset?.remove(); exp?.remove();
+    const reset=$("resetBtn"), exp=$("exportBtn"), quranLaunch=$("quranStudioLaunch"); reset?.remove(); exp?.remove(); quranLaunch?.remove();
     top.innerHTML=`<div class="studio-head-left"><div class="studio-head-logo">R</div><div class="studio-head-brand"><b>Reels Maker AI</b><span>PRO AI</span></div></div>
       <div class="studio-head-center"><button id="modernUndo" class="studio-history-btn" disabled title="Undo">↶</button><label class="studio-project-title-wrap"><input id="studioProjectTitle" maxlength="80" aria-label="Project title"></label><button id="modernRedo" class="studio-history-btn" disabled title="Redo">↷</button></div>
       <div class="studio-head-right"><label id="modernStatus" class="studio-status"><i></i><em>READY</em></label><div id="modernActionHost" class="studio-head-actions actions"></div></div>`;
     const host=$("modernActionHost");
     if(reset){ reset.textContent="New"; reset.classList.add("studio-new-btn"); host.appendChild(reset); }
     if(exp){ exp.textContent="Export Reel (HD)"; exp.classList.add("studio-export-btn"); host.appendChild(exp); }
+    if(quranLaunch) host.appendChild(quranLaunch);
     const title=$("studioProjectTitle"); title.value=localStorage.getItem("reels-project-title")||"Untitled Reel";
     title.oninput=()=>localStorage.setItem("reels-project-title",title.value.trim()||"Untitled Reel");
   }
