@@ -92,3 +92,7 @@ Deploy requested: 2026-09-07.
 Deploy mobile audio/settings structural fix v3.
 Changes: expose native panels in tool-only routes; disable legacy drawer transform; hide legacy mobile sheet; remove empty viewport gap; unify continuous route background.
 Deploy requested: 2026-09-07.
+
+Deploy MOBILE STABILIZATION V10.
+Changes: branded first-paint boot prevents legacy editor flash; route-native-v10 waits for the requested surface before reveal; refresh restores exact hash route; old v3/v4 route scripts are removed from served HTML; core script mobile-sheet calls are disabled only for the modern mobile runtime; one continuous mobile layout for preview/tool routes and audio/settings; consolidated mobile-stable-v10 styling; backup branch created before changes.
+Deploy requested: 2026-09-07.
