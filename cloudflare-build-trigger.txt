@@ -88,3 +88,7 @@ Deploy requested: 2026-09-07.
 Deploy mobile audio/settings no-gap fix.
 Changes: audio/settings bypass legacy Mobile Sheet; no preview/workspace gap; tools render from top of page; page background stays continuous with current dark/gold theme; asset versions bumped to v2.
 Deploy requested: 2026-09-07.
+
+Deploy mobile audio/settings structural fix v3.
+Changes: expose native panels in tool-only routes; disable legacy drawer transform; hide legacy mobile sheet; remove empty viewport gap; unify continuous route background.
+Deploy requested: 2026-09-07.
