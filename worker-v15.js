@@ -12,11 +12,11 @@ async function injectV15(response){
 
   let html=stripOldRouteScripts(await response.text());
 
-  html=html.replace(/mobile-final-v5\.css\?v=\d+/g,"mobile-final-v5.css?v=2");
+  html=html.replace(/mobile-final-v5\.css\?v=\d+/g,"mobile-final-v5.css?v=3");
   html=html.replace(/route-native-v9\.js\?v=\d+/g,"route-native-v9.js?v=2");
 
   if(!html.includes("mobile-final-v5.css")){
-    html=html.replace("</head>",'<link rel="stylesheet" href="mobile-final-v5.css?v=2"></head>');
+    html=html.replace("</head>",'<link rel="stylesheet" href="mobile-final-v5.css?v=3"></head>');
   }
   if(!html.includes("route-native-v9.js")){
     html=html.replace("</body>",'<script src="route-native-v9.js?v=2"></script></body>');
