@@ -1,0 +1,113 @@
+/* Mobile editor V4 — normal reel player everywhere except Quran phone preview. Desktop untouched. */
+@media (max-width:1000px){
+  /* Route surfaces */
+  body.rm-shell-v2.rm-mobile-player .workspace{display:flex!important;flex-direction:column!important;width:100%!important;height:auto!important;min-height:0!important;overflow:visible!important}
+  body.rm-shell-v2.rm-mobile-player .stage-wrap{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:auto!important;min-height:0!important;padding:12px 10px 10px!important;overflow:visible!important}
+  body.rm-shell-v2.rm-mobile-player .stage{width:min(84vw,390px)!important;height:auto!important;max-width:390px!important;max-height:none!important;aspect-ratio:9/16!important;margin:0 auto!important;border-radius:14px!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 16px 42px rgba(0,0,0,.28)!important;background:#05080d!important;outline:none!important}
+  body.rm-shell-v2.rm-mobile-player .stage-wrap .stage:before,body.rm-shell-v2.rm-mobile-player .stage-wrap .stage:after{display:none!important}
+  body.rm-shell-v2.rm-mobile-player .transport{width:100%!important;height:50px!important;min-height:50px!important;padding:0 10px!important;gap:7px!important;border-top:1px solid rgba(255,255,255,.07)!important;background:#080d14!important}
+  body.rm-shell-v2.rm-mobile-player .transport .round{width:34px!important;height:34px!important;flex-basis:34px!important}
+  body.rm-shell-v2.rm-mobile-player .transport span{font-size:7px!important}
+
+  /* Audio/settings are pure tool pages: no preview/player/timeline at all. */
+  body.rm-shell-v2.rm-mobile-no-preview .workspace{display:none!important}
+  body.rm-shell-v2.rm-mobile-no-preview .controls{display:block!important;width:100%!important;min-height:100dvh!important;height:auto!important;padding:14px 12px calc(26px + env(safe-area-inset-bottom))!important;overflow:visible!important}
+
+  /* One continuous dark palette. */
+  html:not([data-rm-theme="gold"]) body.rm-shell-v2,
+  html[data-rm-theme="dark"] body.rm-shell-v2,
+  html:not([data-rm-theme="gold"]) body.rm-shell-v2 .app,
+  html[data-rm-theme="dark"] body.rm-shell-v2 .app,
+  html:not([data-rm-theme="gold"]) body.rm-shell-v2 .workspace,
+  html[data-rm-theme="dark"] body.rm-shell-v2 .workspace,
+  html:not([data-rm-theme="gold"]) body.rm-shell-v2 .controls,
+  html[data-rm-theme="dark"] body.rm-shell-v2 .controls{background:#070b12!important;color:#f4f7fb!important}
+  html:not([data-rm-theme="gold"]) body.rm-shell-v2 .stage-wrap,
+  html[data-rm-theme="dark"] body.rm-shell-v2 .stage-wrap{background:radial-gradient(circle at 50% 12%,rgba(104,118,255,.10),transparent 34%),#070b12!important}
+
+  /* One continuous warm/light palette. */
+  html[data-rm-theme="gold"] body.rm-shell-v2,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .app,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .workspace,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .controls,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .stage-wrap{background:#f3ede2!important;color:#2a2115!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2.rm-mobile-player .stage{border-color:rgba(95,70,28,.18)!important;box-shadow:0 14px 36px rgba(73,50,14,.14)!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2.rm-mobile-player .transport{background:#fffaf1!important;border-top-color:rgba(115,83,29,.12)!important;color:#443722!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2 .panel-title,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .ai-box,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .tts-box,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .sfx-box,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .editor,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .audio-card,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .status,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .mini-notice,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .notice,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .upload{background:#fffdf8!important;color:#2f2518!important;border-color:rgba(139,102,38,.15)!important;box-shadow:0 8px 22px rgba(87,61,17,.04)!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2 .panel-title h2,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .tts-box>b,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .sfx-box>b,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .ai-box>b{color:#2c2216!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2 .panel-title p,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .field>span,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .field small,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .tts-box small,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .sfx-box small,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .powered{color:#786b58!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2 .field input[type=text],
+  html[data-rm-theme="gold"] body.rm-shell-v2 .field input[type=password],
+  html[data-rm-theme="gold"] body.rm-shell-v2 .field input[type=search],
+  html[data-rm-theme="gold"] body.rm-shell-v2 .field textarea,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .field select,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .inline>input,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .tts-box textarea,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .tts-box select{background:#fff!important;color:#2b2217!important;border-color:rgba(125,91,34,.20)!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2 .source-switch button,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .chips button,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .sfx-grid button,
+  html[data-rm-theme="gold"] body.rm-shell-v2 .btn:not(.primary):not(.ai):not(.danger){background:#fffaf1!important;color:#54452f!important;border-color:rgba(139,102,38,.16)!important}
+  html[data-rm-theme="gold"] body.rm-shell-v2 .source-switch button.active{background:#2f271c!important;color:#fff!important;border-color:#2f271c!important}
+
+  /* Quran is the only phone-style studio. Make controls denser and calmer. */
+  body.rm-shell-v2 .qr-head{min-height:54px!important;padding:7px 58px 7px 8px!important;gap:7px!important}
+  body.rm-shell-v2 .qr-head-logo{width:32px!important;height:32px!important;flex-basis:32px!important;border-radius:9px!important;font-size:15px!important}
+  body.rm-shell-v2 .qr-head-title b{font-size:11px!important}
+  body.rm-shell-v2 .qr-head-title span{font-size:6.8px!important}
+  body.rm-shell-v2 .qr-head button{width:34px!important;height:34px!important;border-radius:9px!important;font-size:15px!important}
+  body.rm-shell-v2 .qr-settings{padding:8px 8px 3px!important}
+  body.rm-shell-v2 .qr-section{padding:9px!important;margin-bottom:7px!important;border-radius:12px!important}
+  body.rm-shell-v2 .qr-section-title{margin-bottom:7px!important}
+  body.rm-shell-v2 .qr-section-title b{font-size:10px!important}
+  body.rm-shell-v2 .qr-section-title small{font-size:6.7px!important}
+  body.rm-shell-v2 .qr-field{margin-bottom:7px!important}
+  body.rm-shell-v2 .qr-field>span{font-size:7.5px!important;margin-bottom:4px!important}
+  body.rm-shell-v2 .qr-field select,
+  body.rm-shell-v2 .qr-field input[type=text],
+  body.rm-shell-v2 .qr-field input[type=search],
+  body.rm-shell-v2 .qr-field input[type=number]{min-height:39px!important;font-size:9px!important;border-radius:9px!important;padding:6px 8px!important}
+  body.rm-shell-v2 .qr-btn{min-height:36px!important;padding:6px 9px!important;border-radius:9px!important;font-size:8.5px!important}
+  body.rm-shell-v2 .qr-chip{min-height:30px!important;padding:5px 8px!important;font-size:7px!important}
+  body.rm-shell-v2 .qr-actions{grid-template-columns:1fr 1fr!important;gap:6px!important}
+  body.rm-shell-v2 .qr-build{grid-column:1/-1!important;min-height:42px!important;font-size:10px!important}
+  body.rm-shell-v2 .qr-upload-row{gap:6px!important}
+  body.rm-shell-v2 .qr-upload{min-height:37px!important;font-size:7.5px!important}
+  body.rm-shell-v2 .qr-bg-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+  body.rm-shell-v2 .qr-bg{aspect-ratio:9/12!important;border-radius:8px!important}
+  body.rm-shell-v2 .qr-bg span{font-size:5.8px!important;padding:2px!important}
+  body.rm-shell-v2 .qr-stock-search{gap:5px!important}
+  body.rm-shell-v2 .qr-stock-results{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}
+  body.rm-shell-v2 .qr-preview-col{padding:9px 8px 22px!important;gap:9px!important}
+  body.rm-shell-v2 .qr-phone{width:min(72vw,300px)!important;border-radius:22px!important;padding:6px!important}
+  body.rm-shell-v2 .qr-phone-stage{border-radius:17px!important}
+  body.rm-shell-v2 .qr-demo-text{font-size:21px!important;line-height:1.75!important}
+  body.rm-shell-v2 .qr-preview-tools{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;gap:6px!important;margin-top:7px!important}
+  body.rm-shell-v2 .qr-preview-tools .qr-btn{width:100%!important;min-width:0!important;min-height:36px!important}
+  body.rm-shell-v2 .qr-share{display:grid!important;grid-template-columns:repeat(3,1fr)!important;width:100%!important;gap:5px!important}
+  body.rm-shell-v2 .qr-share button{width:100%!important;min-width:0!important;height:33px!important;font-size:7px!important;padding:0 5px!important}
+  body.rm-shell-v2 .qr-ready-note{font-size:7.5px!important;line-height:1.65!important;margin:5px auto!important}
+}
+
+@media (max-width:420px){
+  body.rm-shell-v2.rm-mobile-player .stage{width:min(82vw,340px)!important}
+  body.rm-shell-v2 .qr-bg-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  body.rm-shell-v2 .qr-share{grid-template-columns:repeat(3,1fr)!important}
+}
