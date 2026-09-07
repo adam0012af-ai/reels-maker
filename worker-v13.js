@@ -6,22 +6,30 @@ async function injectMobilePolish(response) {
 
   let html = await response.text();
 
-  html = html.replace(/mobile-polish-v1\.css\?v=\d+/g, "mobile-polish-v1.css?v=1");
-  html = html.replace(/mobile-polish-v1\.js\?v=\d+/g, "mobile-polish-v1.js?v=1");
-  html = html.replace(/mobile-menu-v2\.css\?v=\d+/g, "mobile-menu-v2.css?v=2");
-  html = html.replace(/mobile-menu-v2\.js\?v=\d+/g, "mobile-menu-v2.js?v=2");
+  html = html.replace(/mobile-polish-v1\.css\?v=\d+/g, "mobile-polish-v1.css?v=2");
+  html = html.replace(/mobile-polish-v1\.js\?v=\d+/g, "mobile-polish-v1.js?v=2");
+  html = html.replace(/mobile-menu-v2\.css\?v=\d+/g, "mobile-menu-v2.css?v=3");
+  html = html.replace(/mobile-menu-v2\.js\?v=\d+/g, "mobile-menu-v2.js?v=3");
+  html = html.replace(/mobile-editor-v3\.css\?v=\d+/g, "mobile-editor-v3.css?v=3");
+  html = html.replace(/mobile-editor-v3\.js\?v=\d+/g, "mobile-editor-v3.js?v=3");
 
   if (!html.includes("mobile-polish-v1.css")) {
-    html = html.replace("</head>", '<link rel="stylesheet" href="mobile-polish-v1.css?v=1"></head>');
+    html = html.replace("</head>", '<link rel="stylesheet" href="mobile-polish-v1.css?v=2"></head>');
   }
   if (!html.includes("mobile-menu-v2.css")) {
-    html = html.replace("</head>", '<link rel="stylesheet" href="mobile-menu-v2.css?v=2"></head>');
+    html = html.replace("</head>", '<link rel="stylesheet" href="mobile-menu-v2.css?v=3"></head>');
+  }
+  if (!html.includes("mobile-editor-v3.css")) {
+    html = html.replace("</head>", '<link rel="stylesheet" href="mobile-editor-v3.css?v=3"></head>');
   }
   if (!html.includes("mobile-polish-v1.js")) {
-    html = html.replace("</body>", '<script src="mobile-polish-v1.js?v=1"></script></body>');
+    html = html.replace("</body>", '<script src="mobile-polish-v1.js?v=2"></script></body>');
   }
   if (!html.includes("mobile-menu-v2.js")) {
-    html = html.replace("</body>", '<script src="mobile-menu-v2.js?v=2"></script></body>');
+    html = html.replace("</body>", '<script src="mobile-menu-v2.js?v=3"></script></body>');
+  }
+  if (!html.includes("mobile-editor-v3.js")) {
+    html = html.replace("</body>", '<script src="mobile-editor-v3.js?v=3"></script></body>');
   }
 
   const headers = new Headers(response.headers);
