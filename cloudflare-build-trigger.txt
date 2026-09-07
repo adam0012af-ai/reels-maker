@@ -80,3 +80,7 @@ Deploy requested: 2026-09-07.
 Redeploy CLEAN RUNTIME v1.1.
 Changes: also strip the old inline route boot from index before first paint so only the clean boot/router can execute.
 Deploy requested: 2026-09-07.
+
+ROLLBACK CLEAN RUNTIME.
+Changes: production restored to worker-v15 after clean runtime disabled functional injected tools and left black/empty surfaces. No other production files changed.
+Deploy requested: 2026-09-07.
