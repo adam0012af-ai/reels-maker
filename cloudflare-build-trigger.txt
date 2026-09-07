@@ -28,3 +28,7 @@ Deploy requested: 2026-09-07.
 Deploy persistent route state v1.
 Changes: refresh restores the same active section; URL hash tracks home/quran/video/images/audio/text/stickers/layers/settings; projects route remains preserved.
 Deploy requested: 2026-09-07.
+
+Deploy route polish v1.1.
+Changes: hide remaining legacy sections buttons and preserve active section after refresh/close transitions.
+Deploy requested: 2026-09-07.
