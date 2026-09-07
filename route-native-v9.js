@@ -80,7 +80,22 @@
     document.body.classList.toggle("rm-mobile-player", route==="video" || route==="text" || route==="stickers" || route==="layers");
   }
 
+  function activatePanelDirect(route){
+    const wanted=$("panel-"+route);
+    if (!wanted) return;
+    const desktopPanels=document.querySelector(".panels");
+    if (desktopPanels && wanted.parentElement!==desktopPanels) desktopPanels.appendChild(wanted);
+    $("mobileSheet")?.classList.remove("open");
+    document.querySelectorAll(".panel[id^='panel-']").forEach(p=>p.classList.toggle("active",p===wanted));
+    document.querySelectorAll(".tab[data-tab]").forEach(t=>t.classList.toggle("active",t.dataset.tab===route));
+  }
+
   function activatePanel(route){
+    const directMobile=innerWidth<=1000 && (route==="audio" || route==="settings");
+    if (directMobile){
+      activatePanelDirect(route);
+      return;
+    }
     const tab=document.querySelector(`.tab[data-tab="${route}"]`);
     if (tab) tab.click();
     const wanted=$("panel-"+route);
@@ -92,8 +107,12 @@
 
   function openEditor(route){
     hideHome(); closeQuran(); closeImages(); closeProjects(); closeStory();
-    activatePanel(route);
     setMobileMode(route);
+    activatePanel(route);
+    if (innerWidth<=1000 && (route==="audio" || route==="settings")){
+      requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"auto"}));
+      setTimeout(()=>window.scrollTo(0,0),40);
+    }
   }
 
   function openQuran(tries=0){
