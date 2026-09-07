@@ -32,6 +32,68 @@
     display:block!important;min-height:100dvh!important;padding-top:12px!important;
   }
 
+  /* Hard route fix for Audio/Settings on mobile: bypass legacy Mobile Sheet entirely. */
+  body[data-rm-mobile-route="audio"] .workspace,
+  body[data-rm-mobile-route="settings"] .workspace,
+  body[data-rm-mobile-route="audio"] #mobileSheet,
+  body[data-rm-mobile-route="settings"] #mobileSheet{
+    display:none!important;
+  }
+  body[data-rm-mobile-route="audio"] .app,
+  body[data-rm-mobile-route="settings"] .app{
+    display:block!important;
+    width:100%!important;
+    min-height:100dvh!important;
+    margin:0!important;
+    padding:0!important;
+    background:#070b12!important;
+  }
+  body[data-rm-mobile-route="audio"] .controls,
+  body[data-rm-mobile-route="settings"] .controls{
+    position:relative!important;
+    inset:auto!important;
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:100dvh!important;
+    margin:0!important;
+    padding:12px 10px calc(28px + env(safe-area-inset-bottom))!important;
+    overflow:visible!important;
+    background:#070b12!important;
+  }
+  body[data-rm-mobile-route="audio"] .panels,
+  body[data-rm-mobile-route="settings"] .panels,
+  body[data-rm-mobile-route="audio"] #panel-audio,
+  body[data-rm-mobile-route="settings"] #panel-settings{
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding-top:0!important;
+    overflow:visible!important;
+    background:#070b12!important;
+  }
+  body[data-rm-mobile-route="audio"] #panel-audio,
+  body[data-rm-mobile-route="settings"] #panel-settings{
+    display:block!important;
+  }
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="audio"],
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="settings"],
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="audio"] .app,
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="settings"] .app,
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="audio"] .controls,
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="settings"] .controls,
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="audio"] .panels,
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="settings"] .panels,
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="audio"] #panel-audio,
+  html[data-rm-theme="gold"] body[data-rm-mobile-route="settings"] #panel-settings{
+    background:#f3ede2!important;
+    color:#2a2115!important;
+  }
+
   /* Quran: keep phone preview, reduce visual noise and oversized controls. */
   body.rm-shell-v2 .qr-studio.open .qr-head{
     min-height:54px!important;padding:7px 58px 7px 9px!important;
