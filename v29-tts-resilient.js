@@ -1,6 +1,7 @@
 import {ttsApi as baseTtsApi} from "./v24-media-api.js";
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});
 function retryMsFrom(text,attempt){
   const s=String(text||"");
   const m=s.match(/retry\s+(?:in|after)\s*([0-9.]+)\s*s/i)||s.match(/retryDelay[^0-9]*([0-9.]+)\s*s/i);
@@ -13,15 +14,16 @@ function retriable(status,text){
 }
 
 export async function ttsApiResilient(request,env){
-  let last=null;
+  let lastText='',lastStatus=502;
   for(let attempt=0;attempt<3;attempt++){
     const response=await baseTtsApi(request.clone(),env);
     if(response.ok)return response;
     let text='';
     try{text=await response.clone().text()}catch{}
-    last=response;
-    if(!retriable(response.status,text)||attempt===2)return response;
-    await sleep(retryMsFrom(text,attempt));
+    lastText=text;lastStatus=response.status;
+    const canRetry=retriable(response.status,text);
+    if(!canRetry)return response;
+    if(attempt<2)await sleep(retryMsFrom(text,attempt));
   }
-  return last||new Response(JSON.stringify({error:'TTS failed'}),{status:502,headers:{'content-type':'application/json; charset=utf-8'}});
+  return json({error:'خدمة الصوت وصلت للحد المؤقت الآن. النظام حاول تلقائيًا أكثر من مرة. انتظر قليلًا ثم أعد إنشاء الفيديو، أو اختر صوتًا آخر من القائمة.',code:'TTS_TEMPORARY_QUOTA',details:lastText.slice(0,300)},lastStatus===429?429:503,{"retry-after":"15"});
 }
