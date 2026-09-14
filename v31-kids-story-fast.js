@@ -1,4 +1,6 @@
 const MODELS=["@cf/meta/llama-3.2-3b-instruct","@cf/zai-org/glm-4.7-flash","@cf/google/gemma-4-26b-a4b-it"];
+const POLLI_MODELS=["openai-fast","gemini-fast"];
+const POLLI_CHAT="https://gen.pollinations.ai/v1/chat/completions";
 const json=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const textOf=x=>typeof x==="string"?x:(x?.response||x?.text||x?.result?.response||x?.choices?.[0]?.message?.content||"");
 const clean=s=>String(s||"").replace(/^```(?:json|text)?\s*/i,"").replace(/\s*```$/i,"").trim();
@@ -6,7 +8,33 @@ const wc=t=>String(t||"").trim().split(/\s+/).filter(Boolean).length;
 const norm=s=>String(s||"").replace(/[\u064B-\u065F\u0670]/g,"").replace(/[^\p{L}\p{N}\s]/gu," ").replace(/\s+/g," ").trim().toLowerCase();
 function dedupe(text){const parts=String(text||"").split(/(?<=[.!؟!?؛\n])/u).map(x=>x.trim()).filter(Boolean),seen=[],out=[];for(const p of parts){const n=norm(p);if(!n)continue;if(seen.some(s=>n===s||(n.length>30&&s.length>30&&(n.includes(s)||s.includes(n)))))continue;seen.push(n);out.push(p)}return out.join(" ").replace(/\s+/g," ").trim()}
 async function body(r){try{return await r.json()}catch{return{}}}
-async function askFast(env,prompt,max=1250){let last="";for(const model of MODELS){try{const out=await env.AI.run(model,{messages:[{role:"user",content:prompt}],max_completion_tokens:max,temperature:.58,stream:false});const t=clean(textOf(out));if(t)return{text:t,model}}catch(e){last=String(e?.message||e)}}throw new Error(last||"generation failed")}
+function isQuotaError(s){return /4006|daily free allocation|neurons|quota|allocation/i.test(String(s||""))}
+async function askPollinations(env,prompt,max){
+  if(!env.POLLINATIONS_API_KEY)throw new Error("POLLINATIONS_API_KEY is not configured");
+  let last="";
+  for(const model of POLLI_MODELS){
+    try{
+      const r=await fetch(POLLI_CHAT,{method:"POST",headers:{authorization:`Bearer ${env.POLLINATIONS_API_KEY}`,"content-type":"application/json"},body:JSON.stringify({model,messages:[{role:"user",content:prompt}],temperature:.58,max_tokens:max,stream:false})});
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok){last=String(data?.error?.message||data?.error||`Pollinations ${model} ${r.status}`);continue}
+      const t=clean(textOf(data));if(t)return{text:t,model:`pollinations:${model}`,provider:"pollinations"};
+      last=`Pollinations ${model} returned empty text`;
+    }catch(e){last=String(e?.message||e)}
+  }
+  throw new Error(last||"Pollinations generation failed")
+}
+async function askFast(env,prompt,max=1250){
+  let last="";
+  if(env.AI?.run){
+    for(const model of MODELS){
+      try{
+        const out=await env.AI.run(model,{messages:[{role:"user",content:prompt}],max_completion_tokens:max,temperature:.58,stream:false});const t=clean(textOf(out));if(t)return{text:t,model,provider:"cloudflare"}
+      }catch(e){last=String(e?.message||e);if(isQuotaError(last))break}
+    }
+  }
+  if(env.POLLINATIONS_API_KEY){try{return await askPollinations(env,prompt,max)}catch(e){last=String(e?.message||e)}}
+  throw new Error(last||"لا يوجد مزود كتابة متاح حاليًا")
+}
 function parseScenePlan(raw,count){let data=null;try{data=JSON.parse(clean(raw))}catch{}const arr=Array.isArray(data)?data:(Array.isArray(data?.scenes)?data.scenes:[]);return arr.map((x,i)=>({narration:String(x?.narration||x?.text||"").trim(),prompt:String(x?.prompt||x?.image_prompt||"").trim(),index:i+1})).filter(x=>x.narration&&x.prompt).slice(0,count)}
 
 const TYPES={
@@ -45,7 +73,7 @@ function visualStyle(type){
 }
 
 export async function kidsStoryGenerate(request,env){
-  if(!env.AI?.run)return json({error:"AI binding unavailable"},503);
+  if(!env.AI?.run&&!env.POLLINATIONS_API_KEY)return json({error:"لا يوجد مزود كتابة AI متاح"},503);
   const b=await body(request),idea=String(b.idea||"").trim();
   if(!idea)return json({error:"اكتب فكرة القصة أولًا."},400);
   const duration=[120,180].includes(Number(b.duration))?Number(b.duration):120;
@@ -63,17 +91,17 @@ export async function kidsStoryGenerate(request,env){
     }
     if(words<Math.round(min*.72))return json({error:"خرج نص أقصر من المدة المطلوبة. أعد المحاولة."},502);
     const estimatedSeconds=Math.max(30,Math.round(words/2.15));
-    return json({story,words,duration,estimatedSeconds,category,categoryLabel:TYPES[category]?.ar||"قصة",model:r.model});
+    return json({story,words,duration,estimatedSeconds,category,categoryLabel:TYPES[category]?.ar||"قصة",model:r.model,provider:r.provider});
   }catch(e){return json({error:String(e?.message||e)},502)}
 }
 
 export async function kidsScenePlan(request,env){
-  if(!env.AI?.run)return json({error:"AI binding unavailable"},503);
+  if(!env.AI?.run&&!env.POLLINATIONS_API_KEY)return json({error:"لا يوجد مزود تخطيط مشاهد متاح"},503);
   const b=await body(request),story=String(b.story||"").trim();
   if(!story)return json({error:"story required"},400);
-  const duration=[120,180].includes(Number(b.duration))?Number(b.duration):120,category=validType(String(b.category||"auto"));
-  const count=duration===180?18:12,style=visualStyle(category);
+  const duration=[120,180].includes(Number(b.duration))?Number(b.duration):120,category=validType(String(b.category||"auto")),format=String(b.format||"short")==="youtube"?"youtube":"short";
+  const count=duration===180?18:12,style=visualStyle(category),frame=format==="youtube"?"horizontal 16:9 YouTube widescreen":"vertical 9:16 short-video";
   const religiousGuard=(category==="islamic"||category==="religious")?" إذا ورد نبي أو شخصية مقدسة فلا تُظهر النبي أو تمثله بصريًا؛ استخدم البيئة والرموز واللقطات غير المباشرة باحترام.":"";
-  const prompt=`قسّم القصة التالية إلى ${count} مقطعًا سرديًا متتابعًا يغطي النص بالترتيب. أعد JSON array فقط، وكل عنصر {"narration":"...","prompt":"..."}. narration من نفس القصة دون تكرار أو أحداث جديدة. prompt بالإنجليزية يصف الصورة المطابقة، وثبّت وصف الشخصيات والملابس والألوان عبر المشاهد. في كل prompt اذكر الشخصيات الموجودة في هذا المشهد فقط، وحدد عددها بوضوح. ممنوع تكرار أو استنساخ نفس الشخصية داخل الصورة أو عمل twin/clone/mirror duplicate إلا إذا القصة نفسها تتطلب شخصين مختلفين. غيّر المكان والخلفية وزاوية الكاميرا بما يطابق الحدث بدل إعادة نفس الشارع أو نفس التكوين في كل المشاهد. التصنيف: ${TYPES[category]?.ar||"تلقائي"}. الأسلوب البصري: ${style}, vertical 9:16, no text, no letters, no subtitles, no logos, no watermark.${religiousGuard}\nالقصة:\n${story}`;
-  try{const r=await askFast(env,prompt,3200),scenes=parseScenePlan(r.text,count);if(scenes.length<Math.max(8,count-2))return json({error:`تم تخطيط ${scenes.length} مشاهد فقط`},502);return json({scenes,count:scenes.length,duration,category,categoryLabel:TYPES[category]?.ar||"قصة"})}catch(e){return json({error:String(e?.message||e)},502)}
+  const prompt=`قسّم القصة التالية إلى ${count} مقطعًا سرديًا متتابعًا يغطي النص بالترتيب. أعد JSON array فقط، وكل عنصر {"narration":"...","prompt":"..."}. narration من نفس القصة دون تكرار أو أحداث جديدة. prompt بالإنجليزية يصف الصورة المطابقة، وثبّت وصف الشخصيات والملابس والألوان عبر المشاهد. في كل prompt اذكر الشخصيات الموجودة في هذا المشهد فقط، وحدد عددها بوضوح. ممنوع تكرار أو استنساخ نفس الشخصية داخل الصورة أو عمل twin/clone/mirror duplicate إلا إذا القصة نفسها تتطلب شخصين مختلفين. غيّر المكان والخلفية وزاوية الكاميرا بما يطابق الحدث بدل إعادة نفس الشارع أو نفس التكوين في كل المشاهد. التصنيف: ${TYPES[category]?.ar||"تلقائي"}. المقاس الإجباري لكل صورة: ${frame}. الأسلوب البصري: ${style}, no text, no letters, no subtitles, no logos, no watermark.${religiousGuard}\nالقصة:\n${story}`;
+  try{const r=await askFast(env,prompt,3200),scenes=parseScenePlan(r.text,count);if(scenes.length<Math.max(8,count-2))return json({error:`تم تخطيط ${scenes.length} مشاهد فقط`},502);return json({scenes,count:scenes.length,duration,category,categoryLabel:TYPES[category]?.ar||"قصة",model:r.model,provider:r.provider})}catch(e){return json({error:String(e?.message||e)},502)}
 }
