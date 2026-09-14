@@ -1,11 +1,12 @@
 import {storyGenerate,storyAdjust,storyScenes,aiText} from "./v21-story-api.js";
-import {imageApi,ttsApi,transcribeApi,voicesApi} from "./v24-media-api.js";
+import {imageApi,transcribeApi,voicesApi} from "./v24-media-api.js";
+import {ttsApiResilient} from "./v29-tts-resilient.js";
 import {elevenVoicesApi,elevenTtsApi} from "./v25-elevenlabs-api.js";
 import {kidsStoryGenerate,kidsScenePlan} from "./v27-kids-story-api.js";
 import {youtubeOauthStart,youtubeOauthCallback,youtubeStatus,youtubeDisconnect,youtubeUploadSession} from "./v28-youtube-api.js";
 const json=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 export default{async fetch(request,env){const u=new URL(request.url);
-if(u.pathname==="/api/health")return json({ok:true,build:"v28-youtube-direct-publish",ai:!!env.AI?.run,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
+if(u.pathname==="/api/health")return json({ok:true,build:"v29-tts-retry-youtube",ai:!!env.AI?.run,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
 if(request.method==="GET"&&u.pathname==="/api/voices")return voicesApi();
 if(request.method==="GET"&&u.pathname==="/api/voices/elevenlabs")return elevenVoicesApi(env);
 if(request.method==="POST"&&u.pathname==="/api/story/generate")return storyGenerate(request,env);
@@ -15,7 +16,7 @@ if(request.method==="POST"&&u.pathname==="/api/kids/story")return kidsStoryGener
 if(request.method==="POST"&&u.pathname==="/api/kids/scenes")return kidsScenePlan(request,env);
 if(request.method==="POST"&&u.pathname==="/api/ai/text")return aiText(request,env);
 if(request.method==="POST"&&u.pathname==="/api/image")return imageApi(request,env);
-if(request.method==="POST"&&u.pathname==="/api/tts")return ttsApi(request,env);
+if(request.method==="POST"&&u.pathname==="/api/tts")return ttsApiResilient(request,env);
 if(request.method==="POST"&&u.pathname==="/api/tts/elevenlabs")return elevenTtsApi(request,env);
 if(request.method==="POST"&&u.pathname==="/api/transcribe")return transcribeApi(request,env);
 if(request.method==="GET"&&u.pathname==="/api/youtube/oauth/start")return youtubeOauthStart(request,env);
