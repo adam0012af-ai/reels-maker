@@ -1,0 +1,76 @@
+/* Reels Maker — Mobile First V1 */
+@media (max-width:1000px){
+  :root{--rm-safe-bottom:env(safe-area-inset-bottom,0px);--rm-mobile-head:58px}
+  html,body{width:100%!important;max-width:100%!important;min-height:100%!important;overflow-x:hidden!important;background:#070b12!important}
+  body.rm-shell-v2{padding:0!important;margin:0!important;overscroll-behavior-y:none}
+  body.rm-shell-v2 .app{width:100%!important;max-width:100%!important;min-height:100dvh!important;height:auto!important;padding:0!important;margin:0!important;display:block!important;overflow:visible!important}
+
+  /* Drawer */
+  .rm-mobile-menu{display:grid!important;place-items:center!important;position:fixed!important;z-index:2147483605!important;top:10px!important;right:10px!important;width:42px!important;height:42px!important;border-radius:13px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(12,18,28,.94)!important;color:#fff!important;box-shadow:0 8px 24px rgba(0,0,0,.28)!important;backdrop-filter:blur(14px)}
+  .rm-mobile-overlay{display:block!important;position:fixed!important;z-index:2147483590!important;inset:0!important;background:rgba(0,0,0,.58)!important;opacity:0!important;pointer-events:none!important;transition:.18s ease!important}
+  body.rm-mobile-open .rm-mobile-overlay{opacity:1!important;pointer-events:auto!important}
+  .rm-shell-sidebar{position:fixed!important;z-index:2147483600!important;top:0!important;right:0!important;bottom:0!important;left:auto!important;width:min(86vw,330px)!important;max-width:330px!important;height:100dvh!important;border-left:1px solid rgba(255,255,255,.08)!important;border-radius:0!important;transform:translateX(102%)!important;transition:transform .22s ease!important;box-shadow:-20px 0 60px rgba(0,0,0,.38)!important}
+  body.rm-mobile-open .rm-shell-sidebar{transform:translateX(0)!important}
+  .rm-shell-head{min-height:70px!important;padding:12px 14px!important;gap:10px!important}
+  .rm-shell-logo{width:42px!important;height:42px!important;flex:0 0 42px!important;border-radius:13px!important;font-size:17px!important}
+  .rm-shell-brand b{font-size:13px!important}.rm-shell-brand span{font-size:9px!important}
+  .rm-mobile-close{display:grid!important;place-items:center!important;width:38px!important;height:38px!important;border-radius:12px!important;border:1px solid rgba(255,255,255,.09)!important;background:rgba(255,255,255,.04)!important;color:#fff!important}
+  .rm-shell-caption{padding:10px 14px 6px!important;font-size:9px!important}
+  .rm-shell-nav{padding:4px 9px calc(14px + var(--rm-safe-bottom))!important}
+  .rm-shell-item{min-height:58px!important;grid-template-columns:40px 1fr 14px!important;padding:8px 9px!important;margin-bottom:4px!important;border-radius:14px!important;gap:9px!important}
+  .rm-shell-icon{width:38px!important;height:38px!important;border-radius:11px!important;font-size:16px!important}
+  .rm-shell-copy b{font-size:11px!important}.rm-shell-copy small{font-size:8px!important;line-height:1.45!important}
+  .rm-shell-footer{padding:8px 10px calc(10px + var(--rm-safe-bottom))!important}
+
+  /* Main editor */
+  body.rm-shell-v2 .workspace{width:100%!important;max-width:100%!important;min-height:100dvh!important;height:auto!important;display:flex!important;flex-direction:column!important;background:#070b12!important;overflow:visible!important}
+  body.rm-shell-v2 .topbar{position:sticky!important;top:0!important;z-index:120!important;width:100%!important;min-height:var(--rm-mobile-head)!important;height:var(--rm-mobile-head)!important;padding:0 58px 0 12px!important;background:rgba(8,13,21,.96)!important;border-bottom:1px solid rgba(255,255,255,.07)!important;backdrop-filter:blur(14px)!important}
+  body.rm-shell-v2 .project{min-width:0!important;max-width:100%!important}
+  body.rm-shell-v2 .project b{font-size:11px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  body.rm-shell-v2 .project span{font-size:8px!important}
+  body.rm-shell-v2 .topbar .actions{display:none!important}
+
+  body.rm-shell-v2 .stage-wrap{width:100%!important;min-height:0!important;height:auto!important;padding:10px 12px 8px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;background:radial-gradient(circle at 50% 0,rgba(104,118,255,.08),transparent 34%),#070b12!important}
+  body.rm-shell-v2 .stage{width:min(64vw,285px)!important;height:auto!important;aspect-ratio:9/16!important;max-height:48dvh!important;border-radius:18px!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 18px 45px rgba(0,0,0,.35)!important;margin:0 auto!important}
+
+  body.rm-shell-v2 .transport{position:sticky!important;bottom:0!important;z-index:110!important;width:100%!important;min-height:54px!important;height:auto!important;padding:8px 10px calc(8px + var(--rm-safe-bottom))!important;background:rgba(8,13,21,.97)!important;border-top:1px solid rgba(255,255,255,.07)!important;gap:8px!important;backdrop-filter:blur(14px)!important}
+  body.rm-shell-v2 .transport .btn{min-height:38px!important}
+
+  /* Controls become primary content below preview */
+  body.rm-shell-v2 .controls{position:relative!important;inset:auto!important;width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;padding:10px 12px calc(90px + var(--rm-safe-bottom))!important;margin:0!important;overflow:visible!important;background:#090f17!important;border:0!important;border-top:1px solid rgba(255,255,255,.06)!important;box-shadow:none!important;order:2!important}
+  body.rm-shell-v2 .controls>.brand,body.rm-shell-v2 .controls>.tabs{display:none!important}
+  body.rm-shell-v2 .panels{width:100%!important;max-height:none!important;overflow:visible!important;padding:0!important}
+  body.rm-shell-v2 .panel{display:none!important;width:100%!important;max-width:100%!important}
+  body.rm-shell-v2 .panel.active{display:block!important}
+  body.rm-shell-v2 .panel-title{padding:13px 14px!important;margin:0 0 12px!important;border-radius:14px!important}
+  body.rm-shell-v2 .panel-title h2{font-size:16px!important}
+  body.rm-shell-v2 .panel-title p{font-size:9px!important;line-height:1.65!important}
+  body.rm-shell-v2 .field input,body.rm-shell-v2 .field textarea,body.rm-shell-v2 .field select,body.rm-shell-v2 .inline>input,body.rm-shell-v2 .tts-box textarea,body.rm-shell-v2 .tts-box select{font-size:16px!important;min-height:48px!important;border-radius:13px!important}
+  body.rm-shell-v2 textarea{min-height:104px!important}
+  body.rm-shell-v2 .btn{min-height:44px!important;font-size:10px!important;border-radius:12px!important}
+  body.rm-shell-v2 .upload{min-height:94px!important}
+  body.rm-shell-v2 .results{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+
+  /* Hide legacy mobile sheet/tabs: one navigation system only */
+  body.rm-shell-v2 .mobile-tabs,body.rm-shell-v2 #mobileSheet,body.rm-shell-v2 .mobile-sheet{display:none!important}
+
+  /* Full-screen studios */
+  body.rm-shell-v2 .qr-studio,body.rm-shell-v2 .rmi,body.rm-shell-v2 .rmp2,#rmAutoContent{position:fixed!important;z-index:2147483400!important;inset:0!important;width:100%!important;max-width:100%!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;margin:0!important}
+  body.rm-shell-v2 .qr-studio,body.rm-shell-v2 .rmi{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+
+  /* Auto Content */
+  #rmAutoContent .rm-auto-shell{width:100%!important;height:100dvh!important;max-width:none!important;border-radius:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+  #rmAutoContent .rm-auto-head{position:sticky!important;top:0!important;z-index:5!important;min-height:60px!important;padding:10px 12px!important;flex:0 0 auto!important}
+  #rmAutoContent .rm-auto-title b{font-size:15px!important}#rmAutoContent .rm-auto-title span{font-size:9px!important}
+  #rmAutoContent .rm-auto-close{min-width:64px!important;height:40px!important;border-radius:12px!important}
+  #rmAutoContent .rm-auto-grid{display:block!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding:10px!important;padding-bottom:calc(22px + var(--rm-safe-bottom))!important}
+  #rmAutoContent .rm-auto-card{width:100%!important;max-width:none!important;padding:13px!important;margin:0 0 10px!important;border-radius:16px!important}
+  #rmAutoContent .rm-auto-field textarea,#rmAutoContent .rm-auto-field select{font-size:16px!important;min-height:48px!important}
+  #rmAutoContent .rm-auto-btn{min-height:48px!important;font-size:12px!important;border-radius:13px!important}
+  #rmAutoContent .rm-auto-media{grid-template-columns:1fr!important}
+  #rmAutoContent .rm-auto-media-item{border-radius:14px!important;overflow:hidden!important}
+
+  /* Touch targets + no accidental tiny UI */
+  button,a,[role="button"],input,select,textarea{touch-action:manipulation}
+  button{min-width:36px}
+}
