@@ -1,5 +1,5 @@
 name = "reels-maker"
-main = "worker-mobile-v19-ai-suite.js"
+main = "worker-mobile-v20-menu.js"
 compatibility_date = "2026-09-06"
 
 [ai]
