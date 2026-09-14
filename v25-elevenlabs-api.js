@@ -3,14 +3,29 @@ import {dedupe} from "./v21-story-api.js";
 const API="https://api.elevenlabs.io";
 const json=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const clean=(v,max=6000)=>String(v||"").trim().slice(0,max);
+const blockedVoiceIds=new Set();
 
 function categoryOf(v){return String(v?.category||"").trim().toLowerCase()}
-function isApiSafe(v){
-  const c=categoryOf(v);
-  // ElevenLabs Voice Library/community voices are Professional Voice Clones and
-  // are not available through the API on the Free tier. Keep account/default
-  // voices such as premade/generated/cloned, and hide library/community ones.
-  return !["professional","community","library","shared"].includes(c);
+function tiersOf(v){return Array.isArray(v?.available_for_tiers)?v.available_for_tiers.map(x=>String(x||"").toLowerCase()):[]}
+function isLibraryVoice(v){
+  const s=v?.sharing||{};
+  return !!(
+    s?.enabled_in_library ||
+    s?.public_owner_id ||
+    s?.original_voice_id ||
+    (String(s?.status||"").toLowerCase()==="enabled" && String(s?.category||"").toLowerCase()==="professional")
+  );
+}
+function isFreeApiVoice(v){
+  const id=String(v?.voice_id||"");
+  if(!id||blockedVoiceIds.has(id))return false;
+  if(isLibraryVoice(v))return false;
+  const tiers=tiersOf(v);
+  if(tiers.length && !tiers.includes("free"))return false;
+  // Professional voice clones require a paid plan and are never part of the
+  // free API catalog we expose in Reels Maker.
+  if(categoryOf(v)==="professional")return false;
+  return true;
 }
 function normalizeVoice(v){
   const labels=v?.labels||{};
@@ -25,7 +40,6 @@ function normalizeVoice(v){
     locale:String(ar.locale||v?.locale||"").trim(),
     description:String(v?.description||labels.description||"").trim(),
     category:String(v?.category||""),
-    apiSafe:isApiSafe(v),
     previewUrl:String(ar.preview_url||v?.preview_url||"")
   };
 }
@@ -36,11 +50,28 @@ async function elevenFetch(env,path,init={}){
   headers.set("xi-api-key",env.ELEVENLABS_API_KEY);
   return fetch(`${API}${path}`,{...init,headers});
 }
-async function listVoicesRaw(env){
-  const r=await elevenFetch(env,"/v2/voices?page_size=100&include_total_count=false");
+async function fetchVoiceType(env,type){
+  const r=await elevenFetch(env,`/v2/voices?page_size=100&include_total_count=false&voice_type=${encodeURIComponent(type)}`);
   const data=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(data?.detail?.message||data?.detail||data?.message||`ElevenLabs voices failed (${r.status})`);
   return Array.isArray(data?.voices)?data.voices:[];
+}
+async function listFreeVoicesRaw(env){
+  // "default" = ElevenLabs default voices. "non-community" = the account's
+  // own/workspace voices, excluding Voice Library/community copies.
+  const results=await Promise.allSettled([fetchVoiceType(env,"default"),fetchVoiceType(env,"non-community")]);
+  const all=[];
+  for(const r of results)if(r.status==="fulfilled")all.push(...r.value);
+  if(!all.length){
+    const reason=results.find(r=>r.status==="rejected");
+    if(reason)throw reason.reason;
+  }
+  const seen=new Set();
+  return all.filter(v=>{
+    const id=String(v?.voice_id||"");
+    if(!id||seen.has(id)||!isFreeApiVoice(v))return false;
+    seen.add(id);return true;
+  });
 }
 function freeLibraryError(status,data){
   const s=String(data?.detail?.message||data?.detail||data?.message||"").toLowerCase();
@@ -50,10 +81,9 @@ function freeLibraryError(status,data){
 export async function elevenVoicesApi(env){
   if(!env.ELEVENLABS_API_KEY)return json({error:"ELEVENLABS_API_KEY is not configured"},503);
   try{
-    const raw=await listVoicesRaw(env);
-    const all=raw.map(normalizeVoice).filter(v=>v.id);
-    const voices=all.filter(v=>v.apiSafe);
-    return json({provider:"elevenlabs",voices,count:voices.length,filteredLibraryVoices:all.length-voices.length,hasMore:false,nextPageToken:null});
+    const raw=await listFreeVoicesRaw(env);
+    const voices=raw.map(normalizeVoice).filter(v=>v.id);
+    return json({provider:"elevenlabs",plan:"free",freeOnly:true,voices,count:voices.length,hasMore:false,nextPageToken:null});
   }catch(e){return json({error:String(e?.message||e)},502)}
 }
 
@@ -78,18 +108,26 @@ export async function elevenTtsApi(request,env){
     use_speaker_boost:true
   }};
   try{
+    // Reject stale/old paid-library selections before spending a generation call.
+    const freeVoices=await listFreeVoicesRaw(env);
+    const allowed=new Set(freeVoices.map(v=>String(v?.voice_id||"")));
+    if(!allowed.has(voiceId)){
+      if(!freeVoices.length)return json({error:"لا توجد أصوات ElevenLabs مجانية متاحة عبر API على هذا الحساب الآن."},503);
+      voiceId=String(freeVoices[0].voice_id||"");
+    }
+
     let r=await synthesize(env,voiceId,body),fallbackUsed=false;
     if(!r.ok){
       const data=await r.clone().json().catch(()=>({}));
       if(freeLibraryError(r.status,data)){
-        const raw=await listVoicesRaw(env).catch(()=>[]);
-        const safe=raw.map(normalizeVoice).filter(v=>v.id&&v.apiSafe&&v.id!==voiceId);
-        if(safe.length){voiceId=safe[0].id;r=await synthesize(env,voiceId,body);fallbackUsed=r.ok}
-        if(!r.ok)return json({error:"الصوت المختار من مكتبة ElevenLabs غير متاح عبر API في الخطة المجانية. اختر صوتًا آخر من القائمة المتاحة."},403);
+        blockedVoiceIds.add(voiceId);
+        const safe=(await listFreeVoicesRaw(env).catch(()=>[])).filter(v=>String(v?.voice_id||"")!==voiceId);
+        if(safe.length){voiceId=String(safe[0].voice_id||"");r=await synthesize(env,voiceId,body);fallbackUsed=r.ok}
+        if(!r.ok)return json({error:"هذا الصوت غير متاح ضمن الخطة المجانية وتم حذفه من قائمة الأصوات. اختر صوتًا آخر."},403);
       }else return json({error:data?.detail?.message||data?.detail||data?.message||`ElevenLabs TTS failed (${r.status})`},r.status);
     }
     const h=new Headers({"content-type":r.headers.get("content-type")||"audio/mpeg","cache-control":"no-store","content-disposition":`inline; filename="elevenlabs-${voiceId}.mp3"`,"x-rm-provider":"elevenlabs","x-rm-voice-id":voiceId,"x-rm-model":model});
-    if(fallbackUsed){h.set("x-rm-fallback","1");h.set("x-rm-fallback-reason","elevenlabs-free-library-restriction")}
+    if(fallbackUsed){h.set("x-rm-fallback","1");h.set("x-rm-fallback-reason","free-plan-voice-filter")}
     return new Response(r.body,{status:200,headers:h});
   }catch(e){return json({error:String(e?.message||e)},502)}
 }
