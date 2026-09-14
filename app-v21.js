@@ -1,5 +1,5 @@
 import {initVisualStoryStudio} from './visual-story-v1.js';
-import {initProjectsV38} from './projects-v38.js';
+import {initVisualProjects} from './projects-visual-v1.js';
 import {initImageReferenceGuard} from './image-reference-guard-v37.js';
 import {initImageTool,initWriterTool} from './tools-v21.js';
 
@@ -61,7 +61,7 @@ async function health(){
 
 initImageReferenceGuard();
 quranBridge();
-initProjectsV38();
+initVisualProjects();
 initVisualStoryStudio();
 initNav();
 initImageTool();
