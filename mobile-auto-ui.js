@@ -12,7 +12,7 @@
       <div class="rma-card rma-setup">
         <label>موضوع الفيديو</label><textarea id="rmaTopic" placeholder="مثال: حقائق نفسية غريبة"></textarea>
         <div class="rma-row"><div><label>المنصة</label><select id="rmaPlatform"><option>TikTok</option><option>Instagram Reels</option><option>YouTube Shorts</option></select></div><div><label>المدة</label><select id="rmaDuration"><option value="30">30 ثانية</option><option value="45" selected>45 ثانية</option><option value="60">60 ثانية</option></select></div></div>
-        <label>الأسلوب</label><select id="rmaTone"><option value="Engaging and natural">جذاب وطبيعي</option><option value="Storytelling">قصصي</option><option value="Calm">هادئ</option><option value="Energetic">حماسي</option></select>
+        <label>الأسلوب</label><select id="rmaTone"><option value="Natural" selected>طبيعي</option><option value="Calm">هادئ</option><option value="Energetic">حماسي</option></select>
         <button id="rmaRun" class="rma-run" type="button">إنشاء المحتوى الكامل</button>
         <button id="rmaToEditor" class="rma-run rma-secondary" type="button" disabled>إرسال للمحرر</button>
         <div id="rmaStatus" class="rma-status"></div><div class="rma-note">لن تتم إضافة كتابة على الفيديو أو الصور.</div>
@@ -30,7 +30,8 @@
   function status(t){$("rmaStatus").textContent=t}
   function setText(id,t){$(id).textContent=t||"—"}
   async function gen(task,topic,durationSeconds,platform,tone,extra={}){const r=await fetch("/api/autocontent/generate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({task,topic,durationSeconds,platform,tone,language:"Arabic",...extra})});const j=await r.json();if(!r.ok)throw new Error(j.error||"فشل الإنشاء");return j.text||""}
-  async function makeVoice(script,tone){const vr=await fetch("/api/tts",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:script,voice:"Kore",style:tone.includes("Story")?"story":"egyptian"})});if(!vr.ok)throw new Error("تعذر إنشاء الصوت");const blob=await vr.blob();state.voiceBlob=blob;if(state.voiceUrl)URL.revokeObjectURL(state.voiceUrl);state.voiceUrl=URL.createObjectURL(blob);const a=document.createElement("audio");a.controls=true;a.className="rma-audio";a.src=state.voiceUrl;const host=$("rmaVoice");host.textContent="";host.appendChild(a)}
+  function ttsStyle(tone){if(tone==="Calm")return"calm";if(tone==="Energetic")return"energetic";return"natural"}
+  async function makeVoice(script,tone){const vr=await fetch("/api/tts",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({text:script,voice:"Kore",style:ttsStyle(tone)})});if(!vr.ok)throw new Error("تعذر إنشاء الصوت");const blob=await vr.blob();state.voiceBlob=blob;if(state.voiceUrl)URL.revokeObjectURL(state.voiceUrl);state.voiceUrl=URL.createObjectURL(blob);const a=document.createElement("audio");a.controls=true;a.className="rma-audio";a.src=state.voiceUrl;const host=$("rmaVoice");host.textContent="";host.appendChild(a)}
 
   function cleanQueries(text){return String(text||"").split(/\n+/).map(x=>x.replace(/^[-•\d.\s]+/,"").replace(/["']/g,"").trim()).filter(Boolean).slice(0,3)}
   async function generateAiScene(prompt){try{const r=await fetch("/api/autocontent/image",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt})});if(!r.ok)return null;const type=r.headers.get("content-type")||"";if(!type.startsWith("image/"))return null;const blob=await r.blob();if(blob.size<5000)return null;const url=URL.createObjectURL(blob);state.objectUrls.push(url);return{type:"image",url,query:prompt,source:"ai"}}catch{return null}}
