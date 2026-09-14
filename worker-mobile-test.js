@@ -18,9 +18,15 @@ async function inject(response){
   const type=response.headers.get("content-type")||"";
   if(!type.includes("text/html"))return response;
   let html=await response.text();
-  if(!html.includes("mobile-auto-ui.css"))html=html.replace("</head>",'<link rel="stylesheet" href="mobile-auto-ui.css?v=3"></head>');
-  if(!html.includes("mobile-auto-ui.js"))html=html.replace("</body>",'<script src="mobile-auto-ui.js?v=3"></script></body>');
-  const h=new Headers(response.headers);h.delete("content-length");h.set("content-type","text/html; charset=utf-8");h.set("cache-control","no-store, no-cache, must-revalidate");h.set("x-rm-mobile-auto","test-v3");
+  if(!/name=["']viewport["']/i.test(html)){
+    html=html.replace(/<head([^>]*)>/i,'<head$1><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">');
+  }else{
+    html=html.replace(/<meta[^>]+name=["']viewport["'][^>]*>/i,'<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">');
+  }
+  if(!html.includes("rmMobileViewportFix"))html=html.replace("</head>",'<style id="rmMobileViewportFix">@media(max-width:1000px){html,body{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important}body{font-size:16px!important}.rm-shell-sidebar{width:min(90vw,360px)!important;max-width:360px!important}.rm-shell-item{min-height:60px!important;padding:10px 12px!important}.rm-shell-copy b{font-size:13px!important}.rm-shell-copy small{font-size:9px!important}#rmMobileAuto,.rma-body,.rma-card{max-width:100%!important;box-sizing:border-box!important}.rma-head{padding:12px 14px!important}.rma-head b{font-size:18px!important}.rma-body{padding:12px!important}.rma-card{padding:14px!important;border-radius:16px!important}.rma-card textarea,.rma-card select{font-size:16px!important;width:100%!important;min-height:52px!important}.rma-run{min-height:52px!important;font-size:14px!important}}</style></head>');
+  if(!html.includes("mobile-auto-ui.css"))html=html.replace("</head>",'<link rel="stylesheet" href="mobile-auto-ui.css?v=4"></head>');
+  if(!html.includes("mobile-auto-ui.js"))html=html.replace("</body>",'<script src="mobile-auto-ui.js?v=4"></script></body>');
+  const h=new Headers(response.headers);h.delete("content-length");h.set("content-type","text/html; charset=utf-8");h.set("cache-control","no-store, no-cache, must-revalidate");h.set("x-rm-mobile-auto","test-v4");
   return new Response(html,{status:response.status,statusText:response.statusText,headers:h});
 }
 
