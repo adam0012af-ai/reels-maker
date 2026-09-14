@@ -27,7 +27,7 @@ export async function ttsApi(request,env){
     const part=data?.candidates?.[0]?.content?.parts?.find(p=>p?.inlineData?.data);if(!part?.inlineData?.data)return json({error:"Gemini TTS returned no audio data."},502);
     const raw=decodeBase64(part.inlineData.data),mimeType=String(part.inlineData.mimeType||"audio/L16;codec=pcm;rate=24000");let bytes=raw,mime=mimeType;
     if(!mimeType.toLowerCase().includes("wav")){bytes=pcm16ToWav(raw,24000,1);mime="audio/wav"}
-    return new Response(bytes,{status:200,headers:{"content-type":mime,"cache-control":"no-store","content-disposition":`inline; filename="gemini-${voice}.wav"`,`x-rm-voice`:voice,"x-rm-dialect":dialect}})
+    return new Response(bytes,{status:200,headers:{"content-type":mime,"cache-control":"no-store","content-disposition":`inline; filename="gemini-${voice}.wav"`,"x-rm-voice":voice,"x-rm-dialect":dialect}})
   }catch(e){return json({error:`Unable to reach Gemini TTS: ${String(e?.message||e).slice(0,300)}`},502)}
 }
 
