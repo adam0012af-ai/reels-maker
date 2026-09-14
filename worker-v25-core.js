@@ -5,8 +5,9 @@ import {elevenVoicesApi,elevenTtsApi} from "./v25-elevenlabs-api.js";
 import {kidsStoryGenerate,kidsScenePlan} from "./v31-kids-story-fast.js";
 import {youtubeOauthStart,youtubeOauthCallback,youtubeStatus,youtubeDisconnect,youtubeUploadSession} from "./v28-youtube-api.js";
 const json=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
+async function assetNoCache(request,env){const r=await env.ASSETS.fetch(request);const h=new Headers(r.headers);const p=new URL(request.url).pathname;if(p.endsWith('.js')||p.endsWith('.css')||p==='/'||p.endsWith('.html'))h.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
 export default{async fetch(request,env){const u=new URL(request.url);
-if(u.pathname==="/api/health")return json({ok:true,build:"v31-fast-kids-smart-tts",ai:!!env.AI?.run,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
+if(u.pathname==="/api/health")return json({ok:true,build:"v32-stable-kids-voice-cachefix",ai:!!env.AI?.run,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
 if(request.method==="GET"&&u.pathname==="/api/voices")return voicesApi();
 if(request.method==="GET"&&u.pathname==="/api/voices/elevenlabs")return elevenVoicesApi(env);
 if(request.method==="POST"&&u.pathname==="/api/story/generate")return storyGenerate(request,env);
@@ -24,4 +25,4 @@ if(request.method==="GET"&&u.pathname==="/api/youtube/oauth/callback")return you
 if(request.method==="GET"&&u.pathname==="/api/youtube/status")return youtubeStatus(request,env);
 if(request.method==="POST"&&u.pathname==="/api/youtube/disconnect")return youtubeDisconnect(request,env);
 if(request.method==="POST"&&u.pathname==="/api/youtube/upload-session")return youtubeUploadSession(request,env);
-return env.ASSETS.fetch(request)}};
+return assetNoCache(request,env)}};
