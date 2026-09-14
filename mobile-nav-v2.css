@@ -1,0 +1,29 @@
+/* Reels Maker — mobile navigation v2 */
+@media (max-width:1000px){
+  .rm-shell-sidebar{width:min(88vw,340px)!important;max-width:340px!important;background:linear-gradient(180deg,#0b1119,#070b11 58%,#06090e)!important}
+  .rm-shell-nav{display:flex!important;flex-direction:column!important;gap:3px!important;padding:8px 9px calc(18px + env(safe-area-inset-bottom,0px))!important}
+  .rm-shell-item{min-height:56px!important;margin:0!important;border-radius:14px!important}
+  .rm-shell-item[data-rm-tool="automation"]{order:-90;background:linear-gradient(135deg,rgba(101,116,255,.19),rgba(141,99,245,.10))!important;border-color:rgba(128,143,255,.25)!important}
+  .rm-shell-item[data-rm-tool="home"]{order:-100}
+  .rm-shell-item[data-rm-tool="video"]{order:-80}
+  .rm-shell-item[data-rm-tool="images"]{order:-70}
+  .rm-shell-item[data-rm-tool="audio"]{order:-60}
+  .rm-shell-item[data-rm-tool="quran"]{order:-50}
+  .rm-shell-item[data-rm-tool="text"]{order:-40}
+  .rm-shell-item[data-rm-tool="stickers"]{order:-30}
+  .rm-shell-item[data-rm-tool="layers"]{order:-20}
+  .rm-shell-item[data-rm-tool="settings"]{order:100;margin-top:8px!important;border-top:1px solid rgba(255,255,255,.06)!important}
+  .rm-shell-item[data-rm-tool="automation"] .rm-shell-icon{background:linear-gradient(135deg,#6674ef,#8e63f4)!important;color:#fff!important;box-shadow:0 8px 20px rgba(102,116,239,.22)!important}
+
+  #rmMobileBack{display:none;position:fixed;z-index:2147483604;top:10px;left:10px;width:42px;height:42px;border:1px solid rgba(255,255,255,.10);border-radius:13px;background:rgba(12,18,28,.94);color:#fff;font-size:20px;line-height:1;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.24);backdrop-filter:blur(14px)}
+  body[data-rm-mobile-route]:not([data-rm-mobile-route="home"]) #rmMobileBack{display:grid}
+
+  body[data-rm-mobile-route="audio"] .stage-wrap,
+  body[data-rm-mobile-route="settings"] .stage-wrap{display:none!important}
+  body[data-rm-mobile-route="audio"] .controls,
+  body[data-rm-mobile-route="settings"] .controls{padding-top:14px!important}
+
+  .rm-shell-copy small{display:none!important}
+  .rm-shell-item{grid-template-columns:40px 1fr 16px!important}
+  .rm-shell-copy b{font-size:12px!important}
+}
