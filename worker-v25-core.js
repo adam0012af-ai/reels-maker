@@ -1,5 +1,6 @@
 import {storyGenerate,storyAdjust,storyScenes,aiText} from "./v21-story-api.js";
-import {imageApi,transcribeApi,voicesApi} from "./v24-media-api.js";
+import {transcribeApi,voicesApi} from "./v24-media-api.js";
+import {imageApiV38} from "./v38-image-api.js";
 import {ttsApiSmart} from "./v30-smart-tts.js";
 import {elevenVoicesApi,elevenTtsApi} from "./v25-elevenlabs-api.js";
 import {kidsStoryGenerate,kidsScenePlan} from "./v31-kids-story-fast.js";
@@ -7,7 +8,7 @@ import {youtubeOauthStart,youtubeOauthCallback,youtubeStatus,youtubeDisconnect,y
 const json=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 async function assetNoCache(request,env){const r=await env.ASSETS.fetch(request);const h=new Headers(r.headers);const p=new URL(request.url).pathname;if(p.endsWith('.js')||p.endsWith('.css')||p==='/'||p.endsWith('.html'))h.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
 export default{async fetch(request,env){const u=new URL(request.url);
-if(u.pathname==="/api/health")return json({ok:true,build:"v37-story-duration-scene-continuity",ai:!!env.AI?.run,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
+if(u.pathname==="/api/health")return json({ok:true,build:"v38-youtube-publishing-projects",ai:!!env.AI?.run,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
 if(request.method==="GET"&&u.pathname==="/api/voices")return voicesApi();
 if(request.method==="GET"&&u.pathname==="/api/voices/elevenlabs")return elevenVoicesApi(env);
 if(request.method==="POST"&&u.pathname==="/api/story/generate")return storyGenerate(request,env);
@@ -16,7 +17,7 @@ if(request.method==="POST"&&u.pathname==="/api/story/scenes")return storyScenes(
 if(request.method==="POST"&&u.pathname==="/api/kids/story")return kidsStoryGenerate(request,env);
 if(request.method==="POST"&&u.pathname==="/api/kids/scenes")return kidsScenePlan(request,env);
 if(request.method==="POST"&&u.pathname==="/api/ai/text")return aiText(request,env);
-if(request.method==="POST"&&u.pathname==="/api/image")return imageApi(request,env);
+if(request.method==="POST"&&u.pathname==="/api/image")return imageApiV38(request,env);
 if(request.method==="POST"&&u.pathname==="/api/tts")return ttsApiSmart(request,env);
 if(request.method==="POST"&&u.pathname==="/api/tts/elevenlabs")return elevenTtsApi(request,env);
 if(request.method==="POST"&&u.pathname==="/api/transcribe")return transcribeApi(request,env);
