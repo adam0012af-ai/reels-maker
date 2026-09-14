@@ -1,0 +1,29 @@
+import baseWorker from "./worker-mobile-v14.js";
+import {generateV15} from "./auto-api-v15.js";
+
+const IMAGE_MODEL="@cf/bytedance/stable-diffusion-xl-lightning";
+const GEMINI_BASE="https://generativelanguage.googleapis.com/v1beta/models";
+const json=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
+async function safeJson(r){try{return await r.json()}catch{return{}}}
+function decodeBase64(data){const clean=String(data||"").replace(/\s/g,"");const binary=atob(clean),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes}
+function pcm16ToWav(pcm,sampleRate=24000,channels=1){const n=pcm.byteLength,b=new ArrayBuffer(44+n),v=new DataView(b),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};w(0,"RIFF");v.setUint32(4,36+n,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,channels,true);v.setUint32(24,sampleRate,true);v.setUint32(28,sampleRate*channels*2,true);v.setUint16(32,channels*2,true);v.setUint16(34,16,true);w(36,"data");v.setUint32(40,n,true);new Uint8Array(b,44).set(pcm);return new Uint8Array(b)}
+
+async function storyImage(request,env){
+ if(!env.AI?.run)return json({error:"AI binding unavailable"},503);
+ const b=await safeJson(request),scene=String(b.prompt||"").trim();if(!scene)return json({error:"prompt required"},400);
+ const prompt=`High-end cinematic 3D animated family film scene, vertical 9:16, warm expressive rounded characters, polished feature-animation look, soft volumetric lighting, rich colors, believable child-friendly environment, natural emotional expressions, consistent character design. Story scene: ${scene}. No text, no letters, no captions, no logo, no watermark, no split screen, no collage.`;
+ try{const out=await env.AI.run(IMAGE_MODEL,{prompt,negative_prompt:"text, letters, caption, subtitles, logo, watermark, photorealistic, live action, scary, horror, gore, distorted face, deformed hands, extra fingers, duplicate people, low detail, blurry, black image, empty image",width:768,height:1344,num_steps:8,guidance:8});return new Response(out,{headers:{"content-type":"image/jpeg","cache-control":"no-store","x-rm-story-image":"v15"}})}catch(e){return json({error:String(e?.message||e)},502)}
+}
+
+async function storyTts(request,env){
+ if(!env.GEMINI_API_KEY)return json({error:"GEMINI_API_KEY is not configured."},503);
+ const b=await safeJson(request),text=String(b.text||"").trim().slice(0,5000),voice=String(b.voice||"Sulafat").trim(),delivery=String(b.delivery||"Natural");if(!text)return json({error:"Missing text."},400);
+ const tone=delivery==="Calm"?"Warm, calm and confident, but fully awake and emotionally present. Do not sound sleepy.":delivery==="Energetic"?"Lively, engaging and energetic without shouting or rushing.":"Natural, warm and engaging with balanced energy.";
+ const instruction=`You are a highly skilled native Arabic children's-story narrator. Speak in clear, polished Arabic with precise articulation of every word and natural human emotion. Pronounce consonants and vowels carefully, avoid swallowing word endings, avoid robotic rhythm, avoid exaggerated acting, and avoid sounding sleepy. Use realistic pauses from punctuation, vary emphasis according to meaning, soften tender moments, add gentle suspense where appropriate, and make dialogue feel alive while keeping one consistent narrator voice. ${tone} Read only the story below. Do not announce a title, script, scene, or technical instruction.`;
+ const model=env.GEMINI_TTS_MODEL||"gemini-2.5-flash-preview-tts",url=`${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent`;
+ try{const upstream=await fetch(url,{method:"POST",headers:{"x-goog-api-key":env.GEMINI_API_KEY,"content-type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:`${instruction}\n\n${text}`}]}],generationConfig:{responseModalities:["AUDIO"],speechConfig:{languageCode:"ar-XA",voiceConfig:{prebuiltVoiceConfig:{voiceName:voice}}}}})});const data=await upstream.json().catch(()=>({}));if(!upstream.ok)return json({error:data?.error?.message||`Gemini TTS failed (${upstream.status})`},upstream.status);const part=data?.candidates?.[0]?.content?.parts?.find(p=>p?.inlineData?.data);if(!part?.inlineData?.data)return json({error:"Gemini TTS returned no audio"},502);const raw=decodeBase64(part.inlineData.data),mime0=String(part.inlineData.mimeType||"audio/L16;codec=pcm;rate=24000");let bytes=raw,mime=mime0;if(!mime0.toLowerCase().includes("wav")){bytes=pcm16ToWav(raw,24000,1);mime="audio/wav"}return new Response(bytes,{headers:{"content-type":mime,"cache-control":"no-store","content-disposition":`inline; filename="story-${voice}.wav"`,"x-rm-story-tts":"v15"}})}catch(e){return json({error:String(e?.message||e)},502)}
+}
+
+async function patchHtml(response){const type=response.headers.get("content-type")||"";if(!type.includes("text/html"))return response;let html=await response.text();html=html.replace(/mobile-auto-ui-v14\.js\?v=1/g,"mobile-auto-ui-v15.js?v=1").replace(/mobile-auto-ui\.css\?v=14/g,"mobile-auto-ui.css?v=15");const h=new Headers(response.headers);h.delete("content-length");h.set("content-type","text/html; charset=utf-8");h.set("cache-control","no-store, no-cache, must-revalidate");h.set("x-rm-mobile-auto","story-v15");return new Response(html,{status:response.status,statusText:response.statusText,headers:h})}
+
+export default{async fetch(request,env,ctx){const url=new URL(request.url);if(url.pathname==="/api/autocontent/generate"&&request.method==="POST")return generateV15(request,env);if(url.pathname==="/api/autocontent/image"&&request.method==="POST")return storyImage(request,env);if(url.pathname==="/api/tts"&&request.method==="POST")return storyTts(request,env);return patchHtml(await baseWorker.fetch(request,env,ctx))}};
