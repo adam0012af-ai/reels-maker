@@ -39,9 +39,11 @@ async function injectAutomation(response){
   const type=response.headers.get("content-type")||"";
   if(!type.includes("text/html"))return response;
   let html=await response.text();
-  if(!html.includes("automation-studio-v1.css"))html=html.replace("</head>",'<link rel="stylesheet" href="automation-studio-v1.css?v=1"></head>');
-  if(!html.includes("automation-studio-v1.js"))html=html.replace("</body>",'<script src="automation-studio-v1.js?v=1"></script></body>');
-  const headers=new Headers(response.headers);headers.delete("content-length");headers.set("content-type","text/html; charset=utf-8");headers.set("cache-control","no-store, no-cache, must-revalidate");headers.set("x-rm-autocontent","v1");
+  if(!html.includes("automation-studio-v1.css"))html=html.replace("</head>",'<link rel="stylesheet" href="automation-studio-v1.css?v=2"></head>');
+  if(!html.includes("automation-studio-v1.js"))html=html.replace("</body>",'<script src="automation-studio-v1.js?v=2"></script></body>');
+  if(!html.includes("automation-bridge-v1.js"))html=html.replace("</body>",'<script src="automation-bridge-v1.js?v=1"></script></body>');
+  if(!html.includes("navigation-v2.js"))html=html.replace("</body>",'<script src="navigation-v2.js?v=1"></script></body>');
+  const headers=new Headers(response.headers);headers.delete("content-length");headers.set("content-type","text/html; charset=utf-8");headers.set("cache-control","no-store, no-cache, must-revalidate");headers.set("x-rm-autocontent","v2");
   return new Response(html,{status:response.status,statusText:response.statusText,headers});
 }
 
