@@ -1,0 +1,31 @@
+{
+  "version": "19",
+  "updated": "2026-09-14",
+  "projects": [
+    {"name":"Transformers.js","category":"browser-ai","repo":"https://github.com/huggingface/transformers.js","license":"Apache-2.0","runtime":"Browser / WebGPU / WASM","status":"integrated","notes":"Local NLP, vision, audio and multimodal pipelines."},
+    {"name":"WebLLM","category":"local-llm","repo":"https://github.com/mlc-ai/web-llm","license":"Apache-2.0","runtime":"Browser / WebGPU","status":"integrated","notes":"Local chat and code models with no server once weights are cached."},
+    {"name":"llama.cpp","category":"local-llm","repo":"https://github.com/ggml-org/llama.cpp","license":"MIT","runtime":"Desktop / server / WASM ports","status":"catalog","notes":"GGUF local LLM runtime; useful for future local backend."},
+    {"name":"ONNX Runtime Web","category":"browser-ai","repo":"https://github.com/microsoft/onnxruntime","license":"MIT","runtime":"Browser / WebGPU / WASM","status":"dependency","notes":"Foundation runtime for many on-device models."},
+    {"name":"MediaPipe","category":"vision","repo":"https://github.com/google-ai-edge/mediapipe","license":"Apache-2.0","runtime":"Browser / mobile","status":"integrated","notes":"Face, hand, pose, object and image tasks on device."},
+    {"name":"Tesseract.js","category":"ocr","repo":"https://github.com/naptha/tesseract.js","license":"Apache-2.0","runtime":"Browser / WASM","status":"integrated","notes":"OCR for Arabic, English and many languages."},
+    {"name":"UpscalerJS","category":"image","repo":"https://github.com/thekevinscott/UpscalerJS","license":"MIT","runtime":"Browser / TensorFlow.js","status":"integrated","notes":"Image upscaling, enhancement and denoising in browser."},
+    {"name":"IMG.LY Background Removal","category":"image","repo":"https://github.com/imgly/background-removal-js","license":"AGPL-3.0","runtime":"Browser / ONNX","status":"integrated","notes":"On-device background removal; AGPL obligations apply."},
+    {"name":"Whisper","category":"audio","repo":"https://github.com/openai/whisper","license":"MIT","runtime":"Workers AI / local","status":"integrated","notes":"Speech recognition and transcription."},
+    {"name":"FLUX.1 Schnell","category":"image-generation","repo":"https://github.com/black-forest-labs/flux","license":"Apache-2.0 for Schnell","runtime":"Workers AI / GPU","status":"integrated","notes":"Fast image generation fallback."},
+    {"name":"StoryDiffusion","category":"story-image","repo":"https://github.com/HVision-NKU/StoryDiffusion","license":"Apache-2.0","runtime":"GPU backend","status":"connector-ready","notes":"Consistent characters across sequential story images and video."},
+    {"name":"Qwen-Image","category":"image-generation","repo":"https://github.com/QwenLM/Qwen-Image","license":"Check current model card","runtime":"GPU backend","status":"connector-ready","notes":"High quality image generation and editing."},
+    {"name":"SAM 2","category":"vision","repo":"https://github.com/facebookresearch/sam2","license":"Apache-2.0","runtime":"GPU / local backend","status":"catalog","notes":"Image and video segmentation."},
+    {"name":"GroundingDINO","category":"vision","repo":"https://github.com/IDEA-Research/GroundingDINO","license":"Apache-2.0","runtime":"GPU backend","status":"catalog","notes":"Open-set text-guided object detection."},
+    {"name":"ComfyUI","category":"workflow","repo":"https://github.com/comfy-org/ComfyUI","license":"GPL-3.0","runtime":"GPU backend","status":"connector-ready","notes":"Node-based image/video AI workflows; can host multiple models behind one API."},
+    {"name":"Wan2.2","category":"video-generation","repo":"https://github.com/Wan-Video/Wan2.2","license":"Apache-2.0","runtime":"GPU backend","status":"connector-ready","notes":"Text-to-video and image-to-video."},
+    {"name":"LTX-Video","category":"video-generation","repo":"https://github.com/Lightricks/LTX-Video","license":"Apache-2.0","runtime":"GPU backend","status":"connector-ready","notes":"Open video generation; current family also includes synchronized audio-video work."},
+    {"name":"CogVideoX","category":"video-generation","repo":"https://github.com/zai-org/CogVideo","license":"Custom model license","runtime":"GPU backend","status":"catalog","notes":"Commercial usage requires following the current CogVideoX model license/registration terms."},
+    {"name":"MuseTalk","category":"avatar","repo":"https://github.com/TMElyralab/MuseTalk","license":"MIT code; check dependencies","runtime":"GPU backend","status":"connector-ready","notes":"Real-time lip synchronization / talking portrait pipeline."},
+    {"name":"LivePortrait","category":"avatar","repo":"https://github.com/KlingAIResearch/LivePortrait","license":"MIT code; InsightFace dependency has non-commercial terms","runtime":"GPU backend","status":"catalog","notes":"Portrait animation; replace restricted InsightFace detection models for clean commercial deployment."},
+    {"name":"Chatterbox","category":"tts","repo":"https://github.com/resemble-ai/chatterbox","license":"MIT","runtime":"GPU / local backend","status":"connector-ready","notes":"Multilingual TTS and voice cloning; Arabic supported by multilingual model."},
+    {"name":"VoiceStudio","category":"tts","repo":"https://github.com/debpalash/VoiceStudio","license":"AGPL-3.0","runtime":"Local / Docker / GPU","status":"connector-ready","notes":"Multi-engine voice studio with Arabic, cloning and OpenAI-compatible API."},
+    {"name":"Demucs","category":"audio","repo":"https://github.com/facebookresearch/demucs","license":"MIT","runtime":"Local / GPU / CPU","status":"catalog","notes":"Music source separation into stems; upstream repo archived but still usable."},
+    {"name":"AudioCraft / MusicGen","category":"music","repo":"https://github.com/facebookresearch/audiocraft","license":"MIT code; released MusicGen weights are CC-BY-NC-4.0","runtime":"GPU backend","status":"experimental","notes":"Text-to-music and audio generation; released weights are not suitable for unrestricted commercial use."},
+    {"name":"ffmpeg.wasm","category":"media","repo":"https://github.com/ffmpegwasm/ffmpeg.wasm","license":"MIT","runtime":"Browser / WASM","status":"catalog","notes":"Local browser video/audio conversion and processing."}
+  ]
+}
