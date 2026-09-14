@@ -56,9 +56,13 @@ export async function kidsStoryGenerate(request,env){
   const rule=requested==="auto"?"طبّق قواعد التصنيف الذي تختاره بدقة.":TYPES[requested].rule;
   const prompt=`أنت مؤلف قصص عربية محترف. حوّل الوصف القصير إلى قصة كاملة جاهزة للتعليق الصوتي.\nالفكرة: ${idea}\nالجمهور: ${audienceText(age)}\nأسلوب السرد: ${toneText(tone)}\nالمدة المستهدفة: ${Math.round(duration/60)} دقيقة.\nالتصنيفات المتاحة: ${typeList}.\n${fixed}\n${rule}\nاكتب تقريبًا ${target} كلمة، ولا تقل عن ${min} ولا تتجاوز ${max}. ابدأ بخطاف سريع، ثم أحداث مترابطة واضحة، ثم حل ونهاية مرضية. حافظ على أسماء الشخصيات وصفاتها. اجعل الجمل طبيعية ومسموعة. ممنوع التكرار والحشو والعناوين والترقيم والتعليمات التقنية. لا تذكر اسم المنصة.\nأعد JSON فقط بهذا الشكل: {"category":"category_key","story":"نص الراوي الكامل"}`;
   try{
-    const r=await askFast(env,prompt,duration===180?1600:1200),parsed=parseStoryResult(r.text,requested),story=dedupe(parsed.story),category=validType(parsed.category);
-    if(wc(story)<120)return json({error:"خرج نص قصير جدًا، أعد المحاولة."},502);
-    const words=wc(story),estimatedSeconds=Math.max(30,Math.round(words/2.15));
+    let r=await askFast(env,prompt,duration===180?1600:1200),parsed=parseStoryResult(r.text,requested),story=dedupe(parsed.story),category=validType(parsed.category),words=wc(story);
+    if(words<min){
+      const expand=`أعد كتابة القصة التالية بنفس الأحداث والشخصيات والتصنيف، لكن وسّعها طبيعيًا لتكون بين ${min} و${max} كلمة، بدون حشو أو تكرار، وبنفس أسلوب التعليق الصوتي. لا تضف عناوين أو ترقيم. أعد نص القصة فقط.\n\n${story}`;
+      const ex=await askFast(env,expand,duration===180?1550:1150);const longer=dedupe(ex.text);if(wc(longer)>words){story=longer;words=wc(story);r=ex}
+    }
+    if(words<Math.round(min*.72))return json({error:"خرج نص أقصر من المدة المطلوبة. أعد المحاولة."},502);
+    const estimatedSeconds=Math.max(30,Math.round(words/2.15));
     return json({story,words,duration,estimatedSeconds,category,categoryLabel:TYPES[category]?.ar||"قصة",model:r.model});
   }catch(e){return json({error:String(e?.message||e)},502)}
 }
@@ -70,6 +74,6 @@ export async function kidsScenePlan(request,env){
   const duration=[120,180].includes(Number(b.duration))?Number(b.duration):120,category=validType(String(b.category||"auto"));
   const count=duration===180?18:12,style=visualStyle(category);
   const religiousGuard=(category==="islamic"||category==="religious")?" إذا ورد نبي أو شخصية مقدسة فلا تُظهر النبي أو تمثله بصريًا؛ استخدم البيئة والرموز واللقطات غير المباشرة باحترام.":"";
-  const prompt=`قسّم القصة التالية إلى ${count} مقطعًا سرديًا متتابعًا يغطي النص بالترتيب. أعد JSON array فقط، وكل عنصر {"narration":"...","prompt":"..."}. narration من نفس القصة دون تكرار أو أحداث جديدة. prompt بالإنجليزية يصف الصورة المطابقة، وثبّت وصف الشخصيات والملابس والألوان عبر المشاهد. التصنيف: ${TYPES[category]?.ar||"تلقائي"}. الأسلوب البصري: ${style}, vertical 9:16, no text, no letters, no subtitles, no logos, no watermark.${religiousGuard}\nالقصة:\n${story}`;
+  const prompt=`قسّم القصة التالية إلى ${count} مقطعًا سرديًا متتابعًا يغطي النص بالترتيب. أعد JSON array فقط، وكل عنصر {"narration":"...","prompt":"..."}. narration من نفس القصة دون تكرار أو أحداث جديدة. prompt بالإنجليزية يصف الصورة المطابقة، وثبّت وصف الشخصيات والملابس والألوان عبر المشاهد. في كل prompt اذكر الشخصيات الموجودة في هذا المشهد فقط، وحدد عددها بوضوح. ممنوع تكرار أو استنساخ نفس الشخصية داخل الصورة أو عمل twin/clone/mirror duplicate إلا إذا القصة نفسها تتطلب شخصين مختلفين. غيّر المكان والخلفية وزاوية الكاميرا بما يطابق الحدث بدل إعادة نفس الشارع أو نفس التكوين في كل المشاهد. التصنيف: ${TYPES[category]?.ar||"تلقائي"}. الأسلوب البصري: ${style}, vertical 9:16, no text, no letters, no subtitles, no logos, no watermark.${religiousGuard}\nالقصة:\n${story}`;
   try{const r=await askFast(env,prompt,3200),scenes=parseScenePlan(r.text,count);if(scenes.length<Math.max(8,count-2))return json({error:`تم تخطيط ${scenes.length} مشاهد فقط`},502);return json({scenes,count:scenes.length,duration,category,categoryLabel:TYPES[category]?.ar||"قصة"})}catch(e){return json({error:String(e?.message||e)},502)}
 }
