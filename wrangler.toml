@@ -1,5 +1,5 @@
 name = "reels-maker"
-main = "worker-mobile-v17-aihub.js"
+main = "worker-mobile-v18-fixes.js"
 compatibility_date = "2026-09-06"
 
 [ai]
