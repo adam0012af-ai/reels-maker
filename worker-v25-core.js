@@ -3,12 +3,12 @@ import {transcribeApi,voicesApi} from "./v24-media-api.js";
 import {imageApiV38} from "./v38-image-api.js";
 import {ttsApiSmart} from "./v30-smart-tts.js";
 import {elevenVoicesApi,elevenTtsApi} from "./v25-elevenlabs-api.js";
-import {kidsStoryGenerate,kidsScenePlan} from "./v41-kids-story-resilient.js";
+import {kidsStoryGenerate,kidsScenePlan} from "./v43-story-direct.js";
 import {youtubeOauthStart,youtubeOauthCallback,youtubeStatus,youtubeDisconnect,youtubeUploadSession} from "./v28-youtube-api.js";
 const json=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 async function assetNoCache(request,env){const r=await env.ASSETS.fetch(request);const h=new Headers(r.headers);const p=new URL(request.url).pathname;if(p.endsWith('.js')||p.endsWith('.css')||p==='/'||p.endsWith('.html'))h.set('cache-control','no-store, no-cache, must-revalidate, max-age=0');return new Response(r.body,{status:r.status,statusText:r.statusText,headers:h})}
 export default{async fetch(request,env){const u=new URL(request.url);
-if(u.pathname==="/api/health")return json({ok:true,build:"v42-story-content-validation",ai:!!env.AI?.run,pollinations:!!env.POLLINATIONS_API_KEY,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
+if(u.pathname==="/api/health")return json({ok:true,build:"v43-direct-pollinations-story",ai:!!env.AI?.run,pollinations:!!env.POLLINATIONS_API_KEY,geminiTts:!!env.GEMINI_API_KEY,elevenlabs:!!env.ELEVENLABS_API_KEY,tts:!!(env.GEMINI_API_KEY||env.ELEVENLABS_API_KEY),youtube:!!(env.YOUTUBE_CLIENT_ID&&env.YOUTUBE_CLIENT_SECRET)});
 if(request.method==="GET"&&u.pathname==="/api/voices")return voicesApi();
 if(request.method==="GET"&&u.pathname==="/api/voices/elevenlabs")return elevenVoicesApi(env);
 if(request.method==="POST"&&u.pathname==="/api/story/generate")return storyGenerate(request,env);
