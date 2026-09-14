@@ -2,6 +2,7 @@ import {initStoryStudio,initVoiceStudio} from './story-v26.js';
 import {initKidsStory} from './kids-story-v27.js';
 import {initKidsFastUi} from './kids-ui-v31.js';
 import {initKidsStableVoice} from './kids-stability-v32.js';
+import {initKidsRenderGuard} from './kids-render-guard-v35.js';
 import {initYoutubePublish} from './youtube-publish-v28.js';
 import {initImageTool,initWriterTool,initTranscribeTool} from './tools-v21.js';
 
@@ -11,4 +12,4 @@ function go(route,push=true){if(!pages[route])route='home';document.querySelecto
 function initNav(){document.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));$('menuBtn')?.addEventListener('click',()=>document.body.classList.add('menu-open'));$('scrim')?.addEventListener('click',()=>document.body.classList.remove('menu-open'));window.addEventListener('popstate',()=>go((location.hash||'#home').slice(1),false));go((location.hash||'#home').slice(1),false)}
 function quranBridge(){const host=document.querySelector('.quran-copy');if(!host||host.querySelector('.quran-launch-host'))return;const bar=document.createElement('div');bar.className='topbar quran-launch-host';bar.style.cssText='position:static;height:auto;padding:0;background:transparent;border:0;backdrop-filter:none;margin-top:16px';bar.innerHTML='<div class="actions"></div>';host.appendChild(bar)}
 async function health(){try{const r=await fetch('/api/health',{cache:'no-store'}),j=await r.json();$('healthPill').textContent=j.ok?'AI جاهز':'AI غير جاهز';$('settingsAi').textContent=j.ai?'جاهز':'غير متاح';$('settingsTts').textContent=j.tts?'جاهز':'غير متاح'}catch{$('healthPill').textContent='حالة غير معروفة';$('settingsAi').textContent='غير معروف';$('settingsTts').textContent='غير معروف'}}
-quranBridge();initYoutubePublish();initKidsStory();initKidsFastUi();initKidsStableVoice();initNav();initStoryStudio();initVoiceStudio();initImageTool();initWriterTool();initTranscribeTool();health();
+quranBridge();initYoutubePublish();initKidsStory();initKidsFastUi();initKidsStableVoice();initKidsRenderGuard();initNav();initStoryStudio();initVoiceStudio();initImageTool();initWriterTool();initTranscribeTool();health();
