@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/app-v21.css?v=1">
+  <link rel="stylesheet" href="/app-v21-core.css?v=1">
+  <link rel="stylesheet" href="/app-v21-pages.css?v=1">
   <link rel="stylesheet" href="/quran-studio.css?v=1">
 </head>
 <body>
@@ -28,82 +29,30 @@
       </nav>
       <div class="side-note"><i></i><span>Light AI Mode</span><small>بدون GPU خارجي</small></div>
     </aside>
-
     <div id="scrim" class="scrim"></div>
-
     <main class="main">
       <header class="topbar">
         <button id="menuBtn" class="icon-btn menu-btn" aria-label="فتح القائمة">☰</button>
         <div class="page-meta"><b id="pageTitle">الرئيسية</b><span id="pageSub">كل أدوات الذكاء الاصطناعي في مكان واحد</span></div>
         <div class="top-actions"><span id="healthPill" class="health-pill">AI جاهز</span></div>
       </header>
-
       <section class="page active" data-page="home">
-        <div class="hero card">
-          <div class="hero-copy"><span class="eyebrow">REELS MAKER AI</span><h1>حوّل أي فكرة إلى قصة فيديو كاملة بالذكاء الاصطناعي.</h1><p>اكتب الفكرة، اختر الراوي المصري أو الخليجي، وسيجهز النظام القصة والصوت والمشاهد والصور والفيديو النهائي.</p><button class="primary big" data-go="story">ابدأ فيديو قصة جديد</button></div>
-          <div class="hero-orb"><div>AI</div><span>Story Engine</span></div>
-        </div>
+        <div class="hero card"><div class="hero-copy"><span class="eyebrow">REELS MAKER AI</span><h1>حوّل أي فكرة إلى قصة فيديو كاملة بالذكاء الاصطناعي.</h1><p>اكتب الفكرة، اختر الراوي المصري أو الخليجي، وسيجهز النظام القصة والصوت والمشاهد والصور والفيديو النهائي.</p><button class="primary big" data-go="story">ابدأ فيديو قصة جديد</button></div><div class="hero-orb"><div>AI</div><span>Story Engine</span></div></div>
         <div class="stats"><div class="stat"><b>01</b><span>اكتب الفكرة</span></div><div class="stat"><b>02</b><span>اختر الراوي</span></div><div class="stat"><b>03</b><span>ولّد المشاهد</span></div><div class="stat"><b>04</b><span>نزّل الفيديو</span></div></div>
         <div class="section-head"><div><b>أدوات AI</b><span>كل أداة مستقلة وواضحة</span></div></div>
-        <div class="tool-grid">
-          <button class="tool-card featured" data-go="story"><span>✦</span><b>فيديو قصة AI</b><small>المنتج الأساسي</small></button>
-          <button class="tool-card" data-go="voices"><span>◉</span><b>الأصوات</b><small>مصري وخليجي</small></button>
-          <button class="tool-card" data-go="images"><span>◈</span><b>مولد الصور</b><small>FLUX</small></button>
-          <button class="tool-card" data-go="writer"><span>✎</span><b>الكاتب الذكي</b><small>نصوص وقصص</small></button>
-          <button class="tool-card" data-go="transcribe"><span>⌁</span><b>الصوت إلى نص</b><small>Whisper</small></button>
-          <button class="tool-card quran" data-go="quran"><span>☪</span><b>ريلز القرآن</b><small>استوديو مستقل</small></button>
-        </div>
+        <div class="tool-grid"><button class="tool-card featured" data-go="story"><span>✦</span><b>فيديو قصة AI</b><small>المنتج الأساسي</small></button><button class="tool-card" data-go="voices"><span>◉</span><b>الأصوات</b><small>مصري وخليجي</small></button><button class="tool-card" data-go="images"><span>◈</span><b>مولد الصور</b><small>FLUX</small></button><button class="tool-card" data-go="writer"><span>✎</span><b>الكاتب الذكي</b><small>نصوص وقصص</small></button><button class="tool-card" data-go="transcribe"><span>⌁</span><b>الصوت إلى نص</b><small>Whisper</small></button><button class="tool-card quran" data-go="quran"><span>☪</span><b>ريلز القرآن</b><small>استوديو مستقل</small></button></div>
       </section>
-
       <section class="page" data-page="story">
-        <div class="page-head"><div><span class="eyebrow">AI STORY VIDEO</span><h2>إنشاء فيديو قصة</h2><p>اختيار الراوي أولًا، ثم القصة والصوت والصور والريندر النهائي.</p></div><span class="beta">LIGHT AI</span></div>
-        <div class="story-layout">
-          <div class="card form-card">
-            <label>فكرة القصة أو القصة كاملة<textarea id="storyIdea" placeholder="مثال: طفل خجول يجد قطة صغيرة في المدرسة ويتعلم أن يشارك موهبته..."></textarea></label>
-            <div class="form-grid"><label>المدة<select id="storyDuration"><option value="30">30 ثانية</option><option value="45" selected>45 ثانية</option><option value="60">60 ثانية</option></select></label><label>أسلوب السرد<select id="storyTone"><option value="natural">طبيعي قصصي</option><option value="calm">هادئ دافئ</option><option value="dramatic">مشوق</option></select></label></div>
-            <div class="voice-picker"><div class="voice-picker-head"><b>اختر الراوي قبل إنشاء القصة</b><small>اسمع عينة أولًا</small></div><div class="form-grid"><label>اللهجة<select id="storyDialect"><option value="egyptian">🇪🇬 مصري</option><option value="gulf">🇸🇦 خليجي</option></select></label><label>الراوي<select id="storyVoice"></select></label></div><button id="previewVoiceBtn" class="secondary">▶ سماع عينة الراوي</button><audio id="voicePreviewAudio" controls class="audio-player hidden"></audio></div>
-            <button id="generateStoryBtn" class="primary big">✦ إنشاء القصة والفيديو</button>
-            <div id="storyStatus" class="status">جاهز للبدء.</div>
-          </div>
-          <div class="card progress-card">
-            <div class="pipeline"><div class="pipe active" data-step="story"><i>1</i><span>القصة</span></div><div class="pipe" data-step="voice"><i>2</i><span>الصوت</span></div><div class="pipe" data-step="scenes"><i>3</i><span>المشاهد</span></div><div class="pipe" data-step="render"><i>4</i><span>الفيديو</span></div></div>
-            <div id="storyText" class="story-text empty">ستظهر القصة هنا بعد إنشائها.</div>
-            <div id="storyAudioWrap" class="hidden"><audio id="storyAudio" controls class="audio-player"></audio><div id="storyAudioMeta" class="mini-meta"></div></div>
-            <div id="sceneGrid" class="scene-grid"></div>
-            <div id="finalWrap" class="final-wrap hidden"><video id="finalVideo" controls playsinline></video><a id="downloadVideo" class="primary download" download="reels-maker-story.webm">تحميل الفيديو النهائي</a></div>
-          </div>
-        </div>
+        <div class="page-head"><div><span class="eyebrow">AI STORY VIDEO</span><h2>إنشاء فيديو قصة</h2><p>اختيار الراوي أولًا، ثم القصة والصوت والصور والريندر النهائي.</p></div><span class="health-pill">LIGHT AI</span></div>
+        <div class="story-layout"><div class="card form-card"><label>فكرة القصة أو القصة كاملة<textarea id="storyIdea" placeholder="مثال: طفل خجول يجد قطة صغيرة في المدرسة ويتعلم أن يشارك موهبته..."></textarea></label><div class="form-grid"><label>المدة<select id="storyDuration"><option value="30">30 ثانية</option><option value="45" selected>45 ثانية</option><option value="60">60 ثانية</option></select></label><label>أسلوب السرد<select id="storyTone"><option value="natural">طبيعي قصصي</option><option value="calm">هادئ دافئ</option><option value="dramatic">مشوق</option></select></label></div><div class="voice-picker"><div class="voice-picker-head"><b>اختر الراوي قبل إنشاء القصة</b><small>اسمع عينة أولًا</small></div><div class="form-grid"><label>اللهجة<select id="storyDialect"><option value="egyptian">🇪🇬 مصري</option><option value="gulf">🇸🇦 خليجي</option></select></label><label>الراوي<select id="storyVoice"></select></label></div><button id="previewVoiceBtn" class="secondary">▶ سماع عينة الراوي</button><audio id="voicePreviewAudio" controls class="audio-player hidden"></audio></div><button id="generateStoryBtn" class="primary big">✦ إنشاء القصة والفيديو</button><div id="storyStatus" class="status">جاهز للبدء.</div></div>
+          <div class="card progress-card"><div class="pipeline"><div class="pipe active" data-step="story"><i>1</i><span>القصة</span></div><div class="pipe" data-step="voice"><i>2</i><span>الصوت</span></div><div class="pipe" data-step="scenes"><i>3</i><span>المشاهد</span></div><div class="pipe" data-step="render"><i>4</i><span>الفيديو</span></div></div><div id="storyText" class="story-text empty">ستظهر القصة هنا بعد إنشائها.</div><div id="storyAudioWrap" class="hidden"><audio id="storyAudio" controls class="audio-player"></audio><div id="storyAudioMeta" class="mini-meta"></div></div><div id="sceneGrid" class="scene-grid"></div><div id="finalWrap" class="final-wrap hidden"><video id="finalVideo" controls playsinline></video><a id="downloadVideo" class="primary download" download="reels-maker-story.webm">تحميل الفيديو النهائي</a></div></div></div>
       </section>
-
-      <section class="page" data-page="voices">
-        <div class="page-head"><div><span class="eyebrow">VOICE STUDIO</span><h2>استوديو الأصوات</h2><p>جرّب الراوي قبل استخدامه في القصة.</p></div></div>
-        <div class="card form-card narrow"><div class="form-grid"><label>اللهجة<select id="voiceDialect"><option value="egyptian">🇪🇬 مصري</option><option value="gulf">🇸🇦 خليجي</option></select></label><label>الصوت<select id="voiceName"></select></label></div><label>النص<textarea id="voiceText">في ليلة هادئة، خرج يوسف إلى الشرفة، ولم يكن يعرف أن مفاجأة صغيرة تنتظره.</textarea></label><button id="voiceGenerateBtn" class="primary">توليد الصوت</button><div id="voiceStatus" class="status"></div><audio id="voiceAudio" controls class="audio-player hidden"></audio></div>
-      </section>
-
-      <section class="page" data-page="images">
-        <div class="page-head"><div><span class="eyebrow">IMAGE AI</span><h2>مولد الصور</h2><p>توليد صور للقصة أو أي فكرة مع صورة مرجعية اختيارية.</p></div></div>
-        <div class="card form-card narrow"><label>وصف الصورة<textarea id="imagePrompt" placeholder="طفل مصري في حديقة يساعد عصفورًا صغيرًا، 3D cinematic animation..."></textarea></label><label>صورة مرجعية اختيارية<input id="imageRef" type="file" accept="image/*"></label><button id="imageGenerateBtn" class="primary">توليد الصورة</button><div id="imageStatus" class="status"></div><div id="imageResult" class="image-result"></div></div>
-      </section>
-
-      <section class="page" data-page="writer">
-        <div class="page-head"><div><span class="eyebrow">WRITER AI</span><h2>الكاتب الذكي</h2><p>قصص، تلخيص، صياغة، ترجمة وعناوين.</p></div></div>
-        <div class="card form-card narrow"><div class="form-grid"><label>المهمة<select id="writerAction"><option value="story">كتابة قصة</option><option value="rewrite">إعادة صياغة</option><option value="summarize">تلخيص</option><option value="translate">ترجمة</option><option value="titles">عناوين</option><option value="caption">كابشن</option><option value="hashtags">هاشتاجات</option><option value="prompt">Prompt للصور</option><option value="storyboard">Storyboard</option></select></label><label>اللغة<select id="writerLang"><option value="ar">العربية</option><option value="en">English</option></select></label></div><label>النص أو الفكرة<textarea id="writerInput"></textarea></label><button id="writerRunBtn" class="primary">تشغيل AI</button><div id="writerStatus" class="status"></div><div id="writerOutput" class="output">—</div></div>
-      </section>
-
-      <section class="page" data-page="transcribe">
-        <div class="page-head"><div><span class="eyebrow">WHISPER</span><h2>تحويل الصوت إلى نص</h2><p>ارفع ملفًا صوتيًا واستخرج النص.</p></div></div>
-        <div class="card form-card narrow"><label>الملف الصوتي<input id="transcribeFile" type="file" accept="audio/*"></label><div class="form-grid"><label>اللغة<select id="transcribeLang"><option value="ar">عربي</option><option value="en">English</option></select></label></div><button id="transcribeBtn" class="primary">استخراج النص</button><div id="transcribeStatus" class="status"></div><div id="transcribeOutput" class="output">—</div></div>
-      </section>
-
-      <section class="page quran-page" data-page="quran">
-        <div class="page-head"><div><span class="eyebrow">QURAN REELS</span><h2>ريلز القرآن</h2><p>القسم الوحيد الذي يستخدم معاينة الهاتف.</p></div></div>
-        <div class="quran-layout card"><div class="quran-copy"><span class="quran-symbol">☪</span><h3>استوديو ريلز القرآن</h3><p>اختيار السورة والآيات والقارئ والخلفية وتصميم الآية ثم تصدير الفيديو.</p><div class="topbar-legacy"><div class="actions"></div></div></div><div class="phone-mock"><div class="phone-screen"><span>﴿ بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ﴾</span><small>سورة الفاتحة</small></div></div></div>
-      </section>
-
-      <section class="page" data-page="settings">
-        <div class="page-head"><div><span class="eyebrow">SYSTEM</span><h2>الإعدادات</h2><p>حالة خدمات الذكاء الاصطناعي والنسخة.</p></div></div>
-        <div class="card settings-card"><div class="setting-row"><div><b>الإصدار</b><span>Clean Rebuild</span></div><strong>V21</strong></div><div class="setting-row"><div><b>Workers AI</b><span>كتابة وصور وWhisper</span></div><strong id="settingsAi">...</strong></div><div class="setting-row"><div><b>Gemini TTS</b><span>الأصوات العربية</span></div><strong id="settingsTts">...</strong></div><div class="setting-row"><div><b>GPU Backend</b><span>غير مطلوب في النسخة الحالية</span></div><strong>OFF</strong></div></div>
-      </section>
+      <section class="page" data-page="voices"><div class="page-head"><div><span class="eyebrow">VOICE STUDIO</span><h2>استوديو الأصوات</h2><p>جرّب الراوي قبل استخدامه في القصة.</p></div></div><div class="card form-card narrow"><div class="form-grid"><label>اللهجة<select id="voiceDialect"><option value="egyptian">🇪🇬 مصري</option><option value="gulf">🇸🇦 خليجي</option></select></label><label>الصوت<select id="voiceName"></select></label></div><label>النص<textarea id="voiceText">في ليلة هادئة، خرج يوسف إلى الشرفة، ولم يكن يعرف أن مفاجأة صغيرة تنتظره.</textarea></label><button id="voiceGenerateBtn" class="primary">توليد الصوت</button><div id="voiceStatus" class="status"></div><audio id="voiceAudio" controls class="audio-player hidden"></audio></div></section>
+      <section class="page" data-page="images"><div class="page-head"><div><span class="eyebrow">IMAGE AI</span><h2>مولد الصور</h2><p>توليد صور للقصة أو أي فكرة مع صورة مرجعية اختيارية.</p></div></div><div class="card form-card narrow"><label>وصف الصورة<textarea id="imagePrompt" placeholder="طفل مصري في حديقة يساعد عصفورًا صغيرًا، 3D cinematic animation..."></textarea></label><label>صورة مرجعية اختيارية<input id="imageRef" type="file" accept="image/*"></label><button id="imageGenerateBtn" class="primary">توليد الصورة</button><div id="imageStatus" class="status"></div><div id="imageResult" class="image-result"></div></div></section>
+      <section class="page" data-page="writer"><div class="page-head"><div><span class="eyebrow">WRITER AI</span><h2>الكاتب الذكي</h2><p>قصص، تلخيص، صياغة، ترجمة وعناوين.</p></div></div><div class="card form-card narrow"><div class="form-grid"><label>المهمة<select id="writerAction"><option value="story">كتابة قصة</option><option value="rewrite">إعادة صياغة</option><option value="summarize">تلخيص</option><option value="translate">ترجمة</option><option value="titles">عناوين</option><option value="caption">كابشن</option><option value="hashtags">هاشتاجات</option><option value="prompt">Prompt للصور</option><option value="storyboard">Storyboard</option></select></label><label>اللغة<select id="writerLang"><option value="ar">العربية</option><option value="en">English</option></select></label></div><label>النص أو الفكرة<textarea id="writerInput"></textarea></label><button id="writerRunBtn" class="primary">تشغيل AI</button><div id="writerStatus" class="status"></div><div id="writerOutput" class="output">—</div></div></section>
+      <section class="page" data-page="transcribe"><div class="page-head"><div><span class="eyebrow">WHISPER</span><h2>تحويل الصوت إلى نص</h2><p>ارفع ملفًا صوتيًا واستخرج النص.</p></div></div><div class="card form-card narrow"><label>الملف الصوتي<input id="transcribeFile" type="file" accept="audio/*"></label><div class="form-grid"><label>اللغة<select id="transcribeLang"><option value="ar">عربي</option><option value="en">English</option></select></label></div><button id="transcribeBtn" class="primary">استخراج النص</button><div id="transcribeStatus" class="status"></div><div id="transcribeOutput" class="output">—</div></div></section>
+      <section class="page quran-page" data-page="quran"><div class="page-head"><div><span class="eyebrow">QURAN REELS</span><h2>ريلز القرآن</h2><p>القسم الوحيد الذي يستخدم معاينة الهاتف.</p></div></div><div class="quran-layout card"><div class="quran-copy"><span class="quran-symbol">☪</span><h3>استوديو ريلز القرآن</h3><p>اختيار السورة والآيات والقارئ والخلفية وتصميم الآية ثم تصدير الفيديو.</p><div class="topbar-legacy"><div class="actions"></div></div></div><div class="phone-mock"><div class="phone-screen"><span>﴿ بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ﴾</span><small>سورة الفاتحة</small></div></div></div></section>
+      <section class="page" data-page="settings"><div class="page-head"><div><span class="eyebrow">SYSTEM</span><h2>الإعدادات</h2><p>حالة خدمات الذكاء الاصطناعي والنسخة.</p></div></div><div class="card settings-card"><div class="setting-row"><div><b>الإصدار</b><span>Clean Rebuild</span></div><strong>V21</strong></div><div class="setting-row"><div><b>Workers AI</b><span>كتابة وصور وWhisper</span></div><strong id="settingsAi">...</strong></div><div class="setting-row"><div><b>Gemini TTS</b><span>الأصوات العربية</span></div><strong id="settingsTts">...</strong></div><div class="setting-row"><div><b>GPU Backend</b><span>غير مطلوب في النسخة الحالية</span></div><strong>OFF</strong></div></div></section>
     </main>
   </div>
   <script type="module" src="/app-v21.js?v=1"></script>
