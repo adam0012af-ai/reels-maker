@@ -1,0 +1,84 @@
+name: Temp Reel Montage
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-reel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg curl
+
+      - name: Download source media
+        run: |
+          mkdir -p work/clips output
+          curl -L --fail --retry 3 -o work/song.mp3 'https://cdn.creativeclaw.co/u/2eb76212/audio/974df573-c163-4d17-81c1-94d92a4b4265.mp3'
+          curl -L --fail --retry 3 -o work/rain_traffic.mp4 'https://cdn.creativeclaw.co/u/2eb76212/videos/fa51da72-d5cc-4978-be0f-a533733d6109.mp4'
+          curl -L --fail --retry 3 -o work/rain_window.mp4 'https://cdn.creativeclaw.co/u/2eb76212/videos/ca11d0c5-8b6a-4563-8772-7dd8501c394e.mp4'
+          curl -L --fail --retry 3 -o work/vertical_traffic.mp4 'https://cdn.creativeclaw.co/u/2eb76212/videos/24120068-d357-4d5c-90f2-2e6104fdc688.mp4'
+          curl -L --fail --retry 3 -o work/friends_cafe.mp4 'https://cdn.creativeclaw.co/u/2eb76212/videos/53bd9e96-7b18-433b-b33a-a1c78f13e2af.mp4'
+          curl -L --fail --retry 3 -o work/sunrise_city.mp4 'https://cdn.creativeclaw.co/u/2eb76212/videos/904668b0-3061-41e8-ba06-784fd7cdb0c0.mp4'
+          curl -L --fail --retry 3 -o work/sunrise_road.mp4 'https://cdn.creativeclaw.co/u/2eb76212/videos/df967382-e534-4509-9772-3b27c25d81be.mp4'
+
+      - name: Build beat-cut video segments
+        shell: bash
+        run: |
+          set -euo pipefail
+          CLIP=3.90244
+          make_clip() {
+            src="$1"; start="$2"; speed="$3"; sat="$4"; bright="$5"; contrast="$6"; out="$7"
+            ffmpeg -y -hide_banner -loglevel error \
+              -stream_loop -1 -ss "$start" -i "$src" -t 6 -an \
+              -vf "scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280,fps=30,setsar=1,setpts=${speed}*PTS,eq=saturation=${sat}:brightness=${bright}:contrast=${contrast},trim=duration=${CLIP},setpts=PTS-STARTPTS" \
+              -c:v libx264 -preset medium -crf 21 -pix_fmt yuv420p "$out"
+          }
+
+          make_clip work/rain_window.mp4      0.0 1.08 0.78 -0.045 1.10 work/clips/01.mp4
+          make_clip work/rain_traffic.mp4     1.0 0.94 0.82 -0.040 1.12 work/clips/02.mp4
+          make_clip work/vertical_traffic.mp4 0.0 0.90 0.88 -0.035 1.10 work/clips/03.mp4
+          make_clip work/rain_window.mp4      3.0 1.00 0.80 -0.040 1.11 work/clips/04.mp4
+          make_clip work/rain_traffic.mp4     4.0 0.88 0.86 -0.030 1.10 work/clips/05.mp4
+          make_clip work/friends_cafe.mp4     0.0 1.02 0.96 -0.005 1.05 work/clips/06.mp4
+          make_clip work/friends_cafe.mp4     3.5 0.94 1.02  0.000 1.05 work/clips/07.mp4
+          make_clip work/vertical_traffic.mp4 4.0 0.90 0.94 -0.020 1.08 work/clips/08.mp4
+          make_clip work/sunrise_city.mp4     0.0 1.05 1.02  0.000 1.06 work/clips/09.mp4
+          make_clip work/sunrise_road.mp4     0.0 1.00 1.04  0.005 1.05 work/clips/10.mp4
+          make_clip work/sunrise_city.mp4     3.5 0.96 1.06  0.008 1.05 work/clips/11.mp4
+          make_clip work/sunrise_road.mp4     3.0 0.92 1.08  0.010 1.05 work/clips/12.mp4
+          make_clip work/sunrise_road.mp4     6.0 1.06 1.10  0.012 1.04 work/clips/13.mp4
+
+          : > work/concat.txt
+          for f in work/clips/*.mp4; do echo "file '$PWD/$f'" >> work/concat.txt; done
+          ffmpeg -y -hide_banner -loglevel error -f concat -safe 0 -i work/concat.txt -an -c copy work/video_concat.mp4
+
+      - name: Cut song and master reel
+        run: |
+          ffmpeg -y -hide_banner -loglevel error -ss 252.8 -t 50 -i work/song.mp3 \
+            -af "afade=t=in:st=0:d=0.08,afade=t=out:st=49.25:d=0.75" \
+            -c:a aac -b:a 192k work/audio_50.m4a
+
+          ffmpeg -y -hide_banner -loglevel error \
+            -i work/video_concat.mp4 -i work/audio_50.m4a -t 50 \
+            -map 0:v:0 -map 1:a:0 \
+            -c:v libx264 -preset medium -b:v 2800k -maxrate 3200k -bufsize 6400k \
+            -c:a aac -b:a 160k -pix_fmt yuv420p -movflags +faststart \
+            output/leila_nay_rababa_reel_50s_720x1280.mp4
+
+          ffmpeg -y -hide_banner -loglevel error \
+            -i output/leila_nay_rababa_reel_50s_720x1280.mp4 \
+            -vf "scale=540:960" -c:v libx264 -preset medium -b:v 1050k -maxrate 1250k -bufsize 2500k \
+            -c:a aac -b:a 128k -pix_fmt yuv420p -movflags +faststart \
+            output/leila_nay_rababa_reel_50s_PREVIEW_540x960.mp4
+
+      - name: Upload reel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: leila-nay-rababa-reel-50s
+          path: output/*.mp4
+          retention-days: 7
